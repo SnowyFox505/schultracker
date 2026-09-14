@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import ColorPicker from '../components/ColorPicker'
+import { GridIcon, TaskIcon, ClockIcon, NoteIcon } from '../components/navIcons'
 import { SUBJECT_COLORS, colorFor } from '../lib/constants'
 
 const TOTAL_STEPS = 3
@@ -253,33 +254,130 @@ function ProgressBar({ step, total }) {
   )
 }
 
+const INTRO_WORDMARK = 'Fangen wir an.'
+const INTRO_STEPS = [
+  { Icon: GridIcon, label: 'Stundenplan' },
+  { Icon: TaskIcon, label: 'Hausaufgaben' },
+  { Icon: ClockIcon, label: 'Tests' },
+  { Icon: NoteIcon, label: 'Notizen' },
+]
+const INTRO_DURATION = 9.5
+
 function OnboardingIntro({ onDone }) {
   useEffect(() => {
-    const t = setTimeout(onDone, 1500)
+    const t = setTimeout(onDone, INTRO_DURATION * 1000)
     return () => clearTimeout(t)
   }, [onDone])
 
   return (
     <motion.div
-      className="gradient-warm fixed inset-0 z-[90] flex flex-col items-center justify-center overflow-hidden"
+      className="gradient-warm fixed inset-0 z-[90] flex flex-col items-center justify-center overflow-hidden px-6"
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
+      exit={{ opacity: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }}
     >
       <motion.div
-        className="absolute h-64 w-64 rounded-full bg-[var(--color-accent)]/25 blur-[90px]"
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1.2, opacity: 0.8 }}
-        transition={{ duration: 1.5, ease: 'easeOut' }}
+        className="absolute h-72 w-72 rounded-full bg-[var(--color-accent)]/25 blur-[100px]"
+        initial={{ scale: 0.4, opacity: 0 }}
+        animate={{ scale: [0.4, 1.15, 1.3], opacity: [0, 0.85, 0.55] }}
+        transition={{ duration: INTRO_DURATION, times: [0, 0.3, 1], ease: 'easeOut' }}
       />
-      <motion.p
-        initial={{ opacity: 0, y: 14, scale: 0.94 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-        className="relative font-[var(--font-display)] text-3xl font-extrabold md:text-4xl"
+
+      <IntroSparks />
+
+      <motion.div
+        className="relative flex flex-wrap justify-center font-[var(--font-display)] text-3xl font-extrabold md:text-5xl"
+        initial="hidden"
+        animate="show"
+        variants={{
+          hidden: {},
+          show: { transition: { staggerChildren: 0.045, delayChildren: 0.1 } },
+        }}
+        style={{ perspective: 400 }}
       >
-        Fangen wir an.
+        {INTRO_WORDMARK.split('').map((ch, i) => (
+          <motion.span
+            key={i}
+            variants={{
+              hidden: { y: 30, opacity: 0, rotateX: -60 },
+              show: { y: 0, opacity: 1, rotateX: 0, transition: { type: 'spring', stiffness: 300, damping: 22 } },
+            }}
+            className="inline-block bg-gradient-to-br from-white to-[var(--color-accent-2)] bg-clip-text text-transparent"
+          >
+            {ch === ' ' ? ' ' : ch}
+          </motion.span>
+        ))}
+      </motion.div>
+
+      <motion.div
+        className="relative mt-4 h-[2px] w-40 bg-gradient-to-r from-transparent via-[var(--color-accent)] to-transparent"
+        initial={{ scaleX: 0, opacity: 0 }}
+        animate={{ scaleX: 1, opacity: 1 }}
+        transition={{ delay: 0.9, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      />
+
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.3, duration: 0.5 }}
+        className="relative mt-5 max-w-xs text-center text-[var(--color-ink-dim)]"
+      >
+        Wir richten in ein paar Schritten alles ein, was du brauchst.
       </motion.p>
+
+      <motion.div
+        className="relative mt-10 flex gap-4"
+        initial="hidden"
+        animate="show"
+        variants={{ show: { transition: { staggerChildren: 0.5, delayChildren: 2.2 } } }}
+      >
+        {INTRO_STEPS.map(({ Icon, label }, i) => (
+          <motion.div
+            key={label}
+            className="flex flex-col items-center gap-2"
+            variants={{
+              hidden: { opacity: 0, y: 20, scale: 0.7 },
+              show: {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                transition: { type: 'spring', stiffness: 280, damping: 20 },
+              },
+            }}
+          >
+            <motion.div
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-accent)]"
+              animate={{ scale: [1, 1.08, 1] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut', delay: 2.4 + i * 0.5 }}
+            >
+              <Icon />
+            </motion.div>
+            <span className="text-[11px] font-medium text-[var(--color-ink-faint)]">{label}</span>
+          </motion.div>
+        ))}
+      </motion.div>
     </motion.div>
+  )
+}
+
+function IntroSparks() {
+  const specks = Array.from({ length: 12 })
+  return (
+    <div className="pointer-events-none absolute inset-0">
+      {specks.map((_, i) => {
+        const left = 8 + ((i * 31) % 84)
+        const delay = 0.8 + (i % 6) * 0.5
+        return (
+          <motion.span
+            key={i}
+            className="absolute h-1 w-1 rounded-full bg-[var(--color-accent-2)]"
+            style={{ left: `${left}%`, top: '55%' }}
+            initial={{ opacity: 0, y: 0 }}
+            animate={{ opacity: [0, 0.7, 0], y: -140 }}
+            transition={{ delay, duration: 3.4, repeat: Infinity, repeatDelay: 2.6, ease: 'easeOut' }}
+          />
+        )
+      })}
+    </div>
   )
 }
 

@@ -81,6 +81,12 @@ export function AuthProvider({ children }) {
     await updateUserProfile({ customColors: [...existing, color] })
   }
 
+  async function removeCustomColor(id) {
+    if (!user) return
+    const existing = profile?.customColors || []
+    await updateUserProfile({ customColors: existing.filter((c) => c.id !== id) })
+  }
+
   const value = {
     user,
     profile,
@@ -91,6 +97,7 @@ export function AuthProvider({ children }) {
     completeOnboarding,
     updateUserProfile,
     addCustomColor,
+    removeCustomColor,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

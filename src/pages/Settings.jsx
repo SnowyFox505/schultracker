@@ -11,7 +11,7 @@ import Sheet from '../components/Sheet'
 import ColorPicker from '../components/ColorPicker'
 
 export default function Settings() {
-  const { user, profile, logout, updateUserProfile, addCustomColor } = useAuth()
+  const { user, profile, logout, updateUserProfile, addCustomColor, removeCustomColor } = useAuth()
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
 
@@ -111,6 +111,7 @@ export default function Settings() {
                             onChange={(id) => recolorSubject(s.id, id)}
                             customColors={customColors}
                             onAddCustom={addCustomColor}
+                            onRemoveCustom={removeCustomColor}
                           />
                         </motion.div>
                       )}
@@ -136,7 +137,17 @@ export default function Settings() {
             </Button>
           </div>
           <div className="mt-3 px-1">
-            <ColorPicker value={newColor} onChange={setNewColor} customColors={customColors} onAddCustom={addCustomColor} size="sm" />
+            <ColorPicker
+              value={newColor}
+              onChange={setNewColor}
+              customColors={customColors}
+              onAddCustom={addCustomColor}
+              onRemoveCustom={removeCustomColor}
+              size="sm"
+            />
+            {customColors.length > 0 && (
+              <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Eigene Farbe lang drücken zum Löschen.</p>
+            )}
           </div>
         </Card>
       </section>

@@ -10,7 +10,7 @@ import { SUBJECT_COLORS, colorFor } from '../lib/constants'
 const TOTAL_STEPS = 3
 
 export default function Onboarding() {
-  const { profile, completeOnboarding, addCustomColor } = useAuth()
+  const { profile, completeOnboarding, addCustomColor, removeCustomColor } = useAuth()
   const navigate = useNavigate()
   const customColors = profile?.customColors || []
   const [step, setStep] = useState(0)
@@ -126,7 +126,11 @@ export default function Onboarding() {
                     onChange={setSelectedColor}
                     customColors={customColors}
                     onAddCustom={addCustomColor}
+                    onRemoveCustom={removeCustomColor}
                   />
+                  {customColors.length > 0 && (
+                    <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Eigene Farbe lang drücken zum Löschen.</p>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-2">

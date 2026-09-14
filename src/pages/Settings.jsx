@@ -185,6 +185,8 @@ export default function Settings() {
         </Card>
       </section>
 
+      <p className="mt-10 text-center text-xs text-[var(--color-ink-faint)]">Developer: Leopold N.</p>
+
       <Sheet open={deleteOpen} onClose={() => !deleting && setDeleteOpen(false)} title="Account wirklich löschen?">
         <p className="mb-5 text-sm text-[var(--color-ink-dim)]">
           Das kann nicht rückgängig gemacht werden. Gib dein Passwort ein, um endgültig zu löschen.

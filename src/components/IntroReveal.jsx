@@ -102,6 +102,15 @@ export default function IntroReveal({ name, subjects = [], customColors = [], on
         Bereit, {name?.trim().split(' ')[0] || 'los'} zulegen.
       </motion.p>
 
+      <motion.p
+        className="relative mt-2 text-xs text-[var(--color-ink-faint)]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 1, 1, 0] }}
+        transition={{ delay: 2.9, duration: 2.6, times: [0, 0.2, 0.8, 1] }}
+      >
+        Made by Leopold
+      </motion.p>
+
       <motion.div
         className="absolute bottom-14 h-px w-24 bg-gradient-to-r from-transparent via-[var(--color-ink-faint)] to-transparent"
         initial={{ opacity: 0, scaleX: 0 }}

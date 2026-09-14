@@ -4,7 +4,7 @@ import { NAV_ITEMS } from '../lib/navItems'
 
 export default function BottomNav() {
   return (
-    <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--color-border)] bg-[var(--color-base)]/90 backdrop-blur-xl md:hidden">
+    <nav className="safe-bottom shrink-0 border-t border-[var(--color-border)] bg-[var(--color-base)]/90 backdrop-blur-xl md:hidden">
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-2 py-2">
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
           <li key={to} className="flex-1">

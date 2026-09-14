@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useCollection } from '../lib/useCollection'
+import { useSavedToast } from '../lib/useSavedToast'
 import { colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
+import SavedToast from '../components/SavedToast'
+import EmptyState from '../components/EmptyState'
 import Button from '../components/ui/Button'
 
 export default function Notizen() {
@@ -14,6 +17,7 @@ export default function Notizen() {
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
   const [subject, setSubject] = useState('')
+  const [showSaved, triggerSaved] = useSavedToast()
 
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
@@ -25,6 +29,7 @@ export default function Notizen() {
     setText('')
     setSubject('')
     setOpen(false)
+    triggerSaved()
   }
 
   return (
@@ -32,9 +37,7 @@ export default function Notizen() {
     <PageTransition>
       <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Notizen</h1>
 
-      {items.length === 0 && (
-        <p className="mt-10 text-center text-[var(--color-ink-faint)]">Noch keine Notizen. Leg direkt los.</p>
-      )}
+      {items.length === 0 && <EmptyState className="mt-6" text="Noch keine Notizen. Leg direkt los." />}
 
       <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-3 lg:grid-cols-4">
         <AnimatePresence initial={false}>
@@ -74,6 +77,8 @@ export default function Notizen() {
         </AnimatePresence>
       </div>
     </PageTransition>
+
+      <AnimatePresence>{showSaved && <SavedToast text="Notiz gespeichert" />}</AnimatePresence>
 
       <Fab onClick={() => setOpen(true)} label="Notiz hinzufügen" />
 

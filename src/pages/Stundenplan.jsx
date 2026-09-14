@@ -1,10 +1,12 @@
 import { Fragment, useState } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useSchedule } from '../lib/useSchedule'
+import { useSavedToast } from '../lib/useSavedToast'
 import { WEEKDAYS, DEFAULT_PERIODS, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Sheet from '../components/Sheet'
+import SavedToast from '../components/SavedToast'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 
@@ -15,6 +17,7 @@ export default function Stundenplan() {
   const [activeCell, setActiveCell] = useState(null)
   const [subject, setSubject] = useState('')
   const [room, setRoom] = useState('')
+  const [showSaved, triggerSaved] = useSavedToast()
 
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
@@ -40,12 +43,14 @@ export default function Stundenplan() {
         room: room.trim(),
         color: subjMeta?.color || 'orange',
       })
+      triggerSaved()
     }
     setActiveCell(null)
   }
 
   return (
     <PageTransition>
+      <AnimatePresence>{showSaved && <SavedToast text="Stunde gespeichert" />}</AnimatePresence>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-y-2 pr-16 md:pr-0">
         <h1 className="font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Stundenplan</h1>
         <button

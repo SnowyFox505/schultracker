@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useCollection } from '../lib/useCollection'
+import { useSavedToast } from '../lib/useSavedToast'
 import { colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
+import SavedToast from '../components/SavedToast'
+import EmptyState from '../components/EmptyState'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 
@@ -16,6 +19,7 @@ export default function Hausaufgaben() {
   const [subject, setSubject] = useState('')
   const [title, setTitle] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [showSaved, triggerSaved] = useSavedToast()
 
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
@@ -30,6 +34,7 @@ export default function Hausaufgaben() {
     setDueDate('')
     setSubject('')
     setOpen(false)
+    triggerSaved()
   }
 
   return (
@@ -37,9 +42,7 @@ export default function Hausaufgaben() {
     <PageTransition>
       <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Hausaufgaben</h1>
 
-      {items.length === 0 && (
-        <p className="mt-10 text-center text-[var(--color-ink-faint)]">Noch keine Hausaufgaben eingetragen.</p>
-      )}
+      {items.length === 0 && <EmptyState className="mt-6" text="Noch keine Hausaufgaben eingetragen." />}
 
       <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
         <AnimatePresence initial={false}>
@@ -62,6 +65,8 @@ export default function Hausaufgaben() {
         </>
       )}
     </PageTransition>
+
+      <AnimatePresence>{showSaved && <SavedToast text="Hausaufgabe gespeichert" />}</AnimatePresence>
 
       <Fab onClick={() => setOpen(true)} label="Hausaufgabe hinzufügen" />
 
@@ -105,19 +110,42 @@ function HomeworkRow({ hw, done, onToggle, onDelete }) {
       exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
       className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
     >
-      <button
+      <motion.button
         onClick={onToggle}
         aria-label="Erledigt umschalten"
+        whileTap={{ scale: 0.85 }}
+        animate={done ? { scale: [1, 1.18, 1] } : { scale: 1 }}
+        transition={{ duration: 0.32, ease: 'easeOut' }}
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
           done ? 'border-[var(--color-accent)] bg-[var(--color-accent)]' : 'border-[var(--color-border)]'
         }`}
       >
-        {done && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3" strokeLinecap="round">
-            <polyline points="4,12 9,17 20,6" />
-          </svg>
-        )}
-      </button>
+        <AnimatePresence>
+          {done && (
+            <motion.svg
+              key="check"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="black"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.polyline
+                points="4,12 9,17 20,6"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.28, ease: 'easeOut' }}
+              />
+            </motion.svg>
+          )}
+        </AnimatePresence>
+      </motion.button>
       <div className="min-w-0 flex-1">
         {hw.subject && <p className="text-xs font-semibold text-[var(--color-accent)]">{hw.subject}</p>}
         <p className={`truncate text-[15px] ${done ? 'line-through text-[var(--color-ink-faint)]' : ''}`}>{hw.title}</p>

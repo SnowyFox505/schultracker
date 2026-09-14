@@ -120,7 +120,16 @@ function Section({ title, linkTo, children }) {
 
 function EmptyNote({ text }) {
   return (
-    <Card className="!p-4 text-sm text-[var(--color-ink-faint)]">{text}</Card>
+    <Card className="!p-4">
+      <div className="flex items-center gap-2.5">
+        <motion.span
+          className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-ink-faint)]"
+          animate={{ opacity: [0.3, 0.75, 0.3], scale: [1, 1.35, 1] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <span className="text-sm text-[var(--color-ink-faint)]">{text}</span>
+      </div>
+    </Card>
   )
 }
 

@@ -3,12 +3,25 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { SUBJECT_COLORS, makeCustomColor } from '../lib/constants'
 
 const LONG_PRESS_MS = 450
+const PERMANENT_ID = SUBJECT_COLORS[0].id
 
-export default function ColorPicker({ value, onChange, customColors = [], onAddCustom, onRemoveCustom, size = 'md' }) {
+export default function ColorPicker({
+  value,
+  onChange,
+  customColors = [],
+  hiddenColors = [],
+  onAddCustom,
+  onRemoveCustom,
+  onHidePreset,
+  size = 'md',
+}) {
   const dim = size === 'sm' ? 'h-7 w-7' : 'h-8 w-8'
   const [pendingDeleteId, setPendingDeleteId] = useState(null)
   const timerRef = useRef(null)
   const firedRef = useRef(false)
+
+  const visiblePresets = SUBJECT_COLORS.filter((c) => !hiddenColors.includes(c.id))
+  const swatches = [...visiblePresets, ...customColors]
 
   function handlePick(e) {
     const hex = e.target.value
@@ -17,9 +30,9 @@ export default function ColorPicker({ value, onChange, customColors = [], onAddC
     onChange(color.id)
   }
 
-  function startPress(id, isCustom) {
+  function startPress(id, canDelete) {
     if (pendingDeleteId && pendingDeleteId !== id) setPendingDeleteId(null)
-    if (!isCustom) return
+    if (!canDelete) return
     firedRef.current = false
     timerRef.current = setTimeout(() => {
       firedRef.current = true
@@ -42,19 +55,29 @@ export default function ColorPicker({ value, onChange, customColors = [], onAddC
     clearTimeout(timerRef.current)
   }
 
+  function handleDelete(c, isCustom) {
+    if (isCustom) {
+      onRemoveCustom?.(c.id)
+    } else {
+      onHidePreset?.(c.id)
+    }
+    setPendingDeleteId(null)
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-2.5">
-      {[...SUBJECT_COLORS, ...customColors].map((c) => {
+      {swatches.map((c) => {
         const isCustom = customColors.some((cc) => cc.id === c.id)
+        const canDelete = c.id !== PERMANENT_ID
         const showDelete = pendingDeleteId === c.id
         return (
           <motion.button
             key={c.id}
             type="button"
-            onPointerDown={() => startPress(c.id, isCustom)}
+            onPointerDown={() => startPress(c.id, canDelete)}
             onPointerUp={() => endPress(c.id)}
             onPointerLeave={cancelPress}
-            onContextMenu={(e) => isCustom && e.preventDefault()}
+            onContextMenu={(e) => canDelete && e.preventDefault()}
             whileTap={{ scale: 0.85 }}
             animate={{ scale: value === c.id ? 1.15 : 1 }}
             transition={{ type: 'spring', stiffness: 500, damping: 20 }}
@@ -73,8 +96,7 @@ export default function ColorPicker({ value, onChange, customColors = [], onAddC
                   exit={{ opacity: 0, scale: 0.6 }}
                   onClick={(e) => {
                     e.stopPropagation()
-                    onRemoveCustom?.(c.id)
-                    setPendingDeleteId(null)
+                    handleDelete(c, isCustom)
                   }}
                   className="absolute -inset-2 flex items-center justify-center rounded-full bg-black/70"
                 >

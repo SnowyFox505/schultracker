@@ -10,9 +10,10 @@ import { SUBJECT_COLORS, colorFor } from '../lib/constants'
 const TOTAL_STEPS = 3
 
 export default function Onboarding() {
-  const { profile, completeOnboarding, addCustomColor, removeCustomColor } = useAuth()
+  const { profile, completeOnboarding, addCustomColor, removeCustomColor, hidePresetColor } = useAuth()
   const navigate = useNavigate()
   const customColors = profile?.customColors || []
+  const hiddenColors = profile?.hiddenColors || []
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
   const [name, setName] = useState('')
@@ -38,7 +39,7 @@ export default function Onboarding() {
     if (!trimmed) return
     setSubjects((prev) => [...prev, { id: crypto.randomUUID(), name: trimmed, color: selectedColor }])
     setSubjectName('')
-    const palette = [...SUBJECT_COLORS, ...customColors]
+    const palette = [...SUBJECT_COLORS.filter((c) => !hiddenColors.includes(c.id)), ...customColors]
     const usedColors = new Set([...subjects.map((s) => s.color), selectedColor])
     const nextColor = palette.find((c) => !usedColors.has(c.id)) || palette[(subjects.length + 1) % palette.length]
     setSelectedColor(nextColor.id)
@@ -125,12 +126,12 @@ export default function Onboarding() {
                     value={selectedColor}
                     onChange={setSelectedColor}
                     customColors={customColors}
+                    hiddenColors={hiddenColors}
                     onAddCustom={addCustomColor}
                     onRemoveCustom={removeCustomColor}
+                    onHidePreset={hidePresetColor}
                   />
-                  {customColors.length > 0 && (
-                    <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Eigene Farbe lang drücken zum Löschen.</p>
-                  )}
+                  <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Farbe lang drücken zum Löschen (Orange bleibt immer).</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">

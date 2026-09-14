@@ -11,9 +11,10 @@ import Sheet from '../components/Sheet'
 import ColorPicker from '../components/ColorPicker'
 
 export default function Settings() {
-  const { user, profile, logout, updateUserProfile, addCustomColor, removeCustomColor } = useAuth()
+  const { user, profile, logout, updateUserProfile, addCustomColor, removeCustomColor, hidePresetColor } = useAuth()
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
+  const hiddenColors = profile?.hiddenColors || []
 
   const [newName, setNewName] = useState('')
   const [newColor, setNewColor] = useState(SUBJECT_COLORS[0].id)
@@ -31,7 +32,7 @@ export default function Settings() {
       subjects: [...subjects, { id: crypto.randomUUID(), name: trimmed, color: newColor }],
     })
     setNewName('')
-    const palette = [...SUBJECT_COLORS, ...customColors]
+    const palette = [...SUBJECT_COLORS.filter((c) => !hiddenColors.includes(c.id)), ...customColors]
     const usedColors = new Set([...subjects.map((s) => s.color), newColor])
     const nextColor = palette.find((c) => !usedColors.has(c.id)) || palette[0]
     setNewColor(nextColor.id)
@@ -110,8 +111,10 @@ export default function Settings() {
                             value={s.color}
                             onChange={(id) => recolorSubject(s.id, id)}
                             customColors={customColors}
+                            hiddenColors={hiddenColors}
                             onAddCustom={addCustomColor}
                             onRemoveCustom={removeCustomColor}
+                            onHidePreset={hidePresetColor}
                           />
                         </motion.div>
                       )}
@@ -141,13 +144,13 @@ export default function Settings() {
               value={newColor}
               onChange={setNewColor}
               customColors={customColors}
+              hiddenColors={hiddenColors}
               onAddCustom={addCustomColor}
               onRemoveCustom={removeCustomColor}
+              onHidePreset={hidePresetColor}
               size="sm"
             />
-            {customColors.length > 0 && (
-              <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Eigene Farbe lang drücken zum Löschen.</p>
-            )}
+            <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Farbe lang drücken zum Löschen (Orange bleibt immer).</p>
           </div>
         </Card>
       </section>

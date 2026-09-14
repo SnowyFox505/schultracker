@@ -60,7 +60,7 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="gradient-warm relative flex min-h-screen w-full flex-col overflow-hidden px-6 pb-10 pt-10 md:items-center md:px-6">
+    <div className="gradient-warm relative flex min-h-dvh w-full flex-col overflow-hidden px-6 pb-10 pt-10 md:items-center md:px-6">
       <FloatingOrbs />
 
       <div className="relative z-10 flex w-full flex-1 flex-col md:max-w-lg">

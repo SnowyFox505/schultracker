@@ -13,13 +13,13 @@ export default function AppLayout() {
   const { spinning, trigger } = useSpinNavigate('/einstellungen')
 
   return (
-    <div className="gradient-warm min-h-screen w-full md:flex">
+    <div className="gradient-warm min-h-dvh w-full md:flex">
       <SideNav />
       <a
         href="/einstellungen"
         onClick={trigger}
         aria-label="Einstellungen"
-        className="safe-top fixed right-5 top-5 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface)]/80 text-[var(--color-ink-dim)] backdrop-blur-xl md:hidden"
+        className="fixed right-5 top-[calc(env(safe-area-inset-top)+1.25rem)] z-30 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface)]/80 text-[var(--color-ink-dim)] backdrop-blur-xl md:hidden"
       >
         <SettingsIcon spinning={spinning} />
       </a>

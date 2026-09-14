@@ -9,6 +9,7 @@ import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
 import SavedToast from '../components/SavedToast'
 import EmptyState from '../components/EmptyState'
+import SwipeToDelete from '../components/SwipeToDelete'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 
@@ -102,8 +103,9 @@ function TestRow({ test, subjects, customColors, onDelete }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
-      className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
     >
+    <SwipeToDelete onDelete={onDelete}>
+    <div className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
       <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl" style={{ background: color.soft }}>
         <span className="text-[10px] font-semibold uppercase" style={{ color: color.bg }}>
           {monthShort(test.date)}
@@ -132,6 +134,8 @@ function TestRow({ test, subjects, customColors, onDelete }) {
           </svg>
         </button>
       </div>
+    </div>
+    </SwipeToDelete>
     </motion.div>
   )
 }

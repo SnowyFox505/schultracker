@@ -18,9 +18,15 @@ export default function BottomNav() {
                       transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                     />
                   )}
-                  <span className={`relative z-10 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'}`}>
+                  <motion.span
+                    key={isActive ? 'active' : 'inactive'}
+                    initial={isActive ? { scale: 0.6, y: 3 } : false}
+                    animate={{ scale: 1, y: 0 }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+                    className={`relative z-10 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'}`}
+                  >
                     <Icon />
-                  </span>
+                  </motion.span>
                   <span
                     className={`relative z-10 text-[11px] font-medium ${
                       isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-faint)]'

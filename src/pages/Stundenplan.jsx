@@ -85,21 +85,39 @@ export default function Stundenplan() {
                     key={`${day}-${period}`}
                     onClick={() => openCell(day, period)}
                     whileTap={editMode ? { scale: 0.95 } : {}}
+                    animate={{ background: color ? color.soft : 'var(--color-surface)' }}
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
                     className={`touch-manipulation flex min-h-[56px] flex-col items-center justify-center rounded-xl border p-1 text-center md:min-h-[72px] md:rounded-2xl ${
                       editMode ? 'border-dashed border-[var(--color-border)]' : 'border-transparent'
                     }`}
-                    style={{ background: color ? color.soft : 'var(--color-surface)' }}
                   >
-                    {lesson ? (
-                      <>
-                        <span className="text-[12px] font-semibold leading-tight md:text-sm" style={{ color: color.bg }}>
-                          {lesson.subject}
-                        </span>
-                        {lesson.room && <span className="text-[10px] text-[var(--color-ink-faint)] md:text-xs">{lesson.room}</span>}
-                      </>
-                    ) : editMode ? (
-                      <span className="text-lg text-[var(--color-ink-faint)]">+</span>
-                    ) : null}
+                    <AnimatePresence mode="wait" initial={false}>
+                      {lesson ? (
+                        <motion.div
+                          key="filled"
+                          initial={{ opacity: 0, scale: 0.6 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.6 }}
+                          transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+                          className="flex flex-col items-center"
+                        >
+                          <span className="text-[12px] font-semibold leading-tight md:text-sm" style={{ color: color.bg }}>
+                            {lesson.subject}
+                          </span>
+                          {lesson.room && <span className="text-[10px] text-[var(--color-ink-faint)] md:text-xs">{lesson.room}</span>}
+                        </motion.div>
+                      ) : editMode ? (
+                        <motion.span
+                          key="plus"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="text-lg text-[var(--color-ink-faint)]"
+                        >
+                          +
+                        </motion.span>
+                      ) : null}
+                    </AnimatePresence>
                   </motion.button>
                 )
               })}

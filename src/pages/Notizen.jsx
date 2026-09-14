@@ -9,6 +9,7 @@ import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
 import SavedToast from '../components/SavedToast'
 import EmptyState from '../components/EmptyState'
+import SwipeToDelete from '../components/SwipeToDelete'
 import Button from '../components/ui/Button'
 
 export default function Notizen() {
@@ -48,29 +49,32 @@ export default function Notizen() {
               <motion.div
                 key={n.id}
                 layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: -26, rotate: i % 2 === 0 ? -5 : 5, scale: 0.92 }}
+                animate={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ delay: i * 0.02 }}
-                className={`flex min-h-[110px] flex-col justify-between rounded-2xl border border-[var(--color-border)] p-4 ${
-                  i % 2 === 0 ? 'col-span-1' : 'col-span-1'
-                }`}
-                style={{ background: color ? color.soft : 'var(--color-surface)' }}
+                transition={{ type: 'spring', stiffness: 300, damping: 22, delay: i * 0.03 }}
               >
-                <div>
-                  {n.subject && (
-                    <p className="mb-1 text-xs font-semibold" style={{ color: color?.bg }}>
-                      {n.subject}
-                    </p>
-                  )}
-                  <p className="whitespace-pre-wrap text-sm">{n.text}</p>
+              <SwipeToDelete onDelete={() => remove(n.id)}>
+                <div
+                  className="flex min-h-[110px] flex-col justify-between rounded-2xl border border-[var(--color-border)] p-4"
+                  style={{ background: color ? color.soft : 'var(--color-surface)' }}
+                >
+                  <div>
+                    {n.subject && (
+                      <p className="mb-1 text-xs font-semibold" style={{ color: color?.bg }}>
+                        {n.subject}
+                      </p>
+                    )}
+                    <p className="whitespace-pre-wrap text-sm">{n.text}</p>
+                  </div>
+                  <button onClick={() => remove(n.id)} className="mt-2 self-end text-[var(--color-ink-faint)]" aria-label="Löschen">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                      <line x1="6" y1="18" x2="18" y2="6" />
+                    </svg>
+                  </button>
                 </div>
-                <button onClick={() => remove(n.id)} className="mt-2 self-end text-[var(--color-ink-faint)]" aria-label="Löschen">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                    <line x1="6" y1="18" x2="18" y2="6" />
-                  </svg>
-                </button>
+              </SwipeToDelete>
               </motion.div>
             )
           })}

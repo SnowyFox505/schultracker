@@ -9,6 +9,7 @@ import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
 import SavedToast from '../components/SavedToast'
 import EmptyState from '../components/EmptyState'
+import SwipeToDelete from '../components/SwipeToDelete'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 
@@ -108,8 +109,9 @@ function HomeworkRow({ hw, done, onToggle, onDelete }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
-      className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
     >
+    <SwipeToDelete onDelete={onDelete}>
+    <div className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
       <motion.button
         onClick={onToggle}
         aria-label="Erledigt umschalten"
@@ -159,6 +161,8 @@ function HomeworkRow({ hw, done, onToggle, onDelete }) {
           </svg>
         </button>
       </div>
+    </div>
+    </SwipeToDelete>
     </motion.div>
   )
 }

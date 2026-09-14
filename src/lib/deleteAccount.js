@@ -4,7 +4,7 @@ import { db } from './firebase'
 
 const SUBCOLLECTIONS = ['schedule', 'homework', 'tests', 'notes']
 
-export async function deleteAccountAndData(user, password) {
+export async function deleteAccountAndData(user, password, { beforeAuthDelete } = {}) {
   const credential = EmailAuthProvider.credential(user.email, password)
   await reauthenticateWithCredential(user, credential)
 
@@ -14,5 +14,6 @@ export async function deleteAccountAndData(user, password) {
   }
 
   await deleteDoc(doc(db, 'users', user.uid))
+  await beforeAuthDelete?.()
   await deleteUser(user)
 }

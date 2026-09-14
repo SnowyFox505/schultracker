@@ -2,10 +2,13 @@ import { AnimatePresence } from 'framer-motion'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import BottomNav from './BottomNav'
 import SideNav from './SideNav'
+import IntroReveal from './IntroReveal'
 import { SettingsIcon } from './navIcons'
+import { useAuth } from '../context/AuthContext'
 
 export default function AppLayout() {
   const location = useLocation()
+  const { profile, justOnboarded, clearJustOnboarded } = useAuth()
 
   return (
     <div className="gradient-warm min-h-screen w-full md:flex">
@@ -27,6 +30,17 @@ export default function AppLayout() {
         </div>
       </div>
       <BottomNav />
+
+      <AnimatePresence>
+        {justOnboarded && (
+          <IntroReveal
+            name={justOnboarded.name}
+            subjects={justOnboarded.subjects}
+            customColors={profile?.customColors || []}
+            onDone={clearJustOnboarded}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

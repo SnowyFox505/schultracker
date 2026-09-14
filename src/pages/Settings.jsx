@@ -9,6 +9,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Sheet from '../components/Sheet'
 import ColorPicker from '../components/ColorPicker'
+import DeletingOverlay from '../components/DeletingOverlay'
 
 export default function Settings() {
   const { user, profile, logout, updateUserProfile, addCustomColor, removeCustomColor, hidePresetColor } = useAuth()
@@ -53,7 +54,9 @@ export default function Settings() {
     setDeleteError('')
     setDeleting(true)
     try {
-      await deleteAccountAndData(user, password)
+      await deleteAccountAndData(user, password, {
+        beforeAuthDelete: () => new Promise((resolve) => setTimeout(resolve, 2300)),
+      })
     } catch (err) {
       if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setDeleteError('Falsches Passwort.')
@@ -65,6 +68,7 @@ export default function Settings() {
   }
 
   return (
+    <>
     <PageTransition>
       <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Einstellungen</h1>
 
@@ -206,5 +210,8 @@ export default function Settings() {
         </form>
       </Sheet>
     </PageTransition>
+
+      <AnimatePresence>{deleting && <DeletingOverlay />}</AnimatePresence>
+    </>
   )
 }

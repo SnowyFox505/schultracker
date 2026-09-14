@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [justOnboarded, setJustOnboarded] = useState(null)
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
@@ -85,6 +86,11 @@ export function AuthProvider({ children }) {
       { ...data, onboardingComplete: true },
       { merge: true }
     )
+    setJustOnboarded({ name: data.name || '', subjects: data.subjects || [] })
+  }
+
+  function clearJustOnboarded() {
+    setJustOnboarded(null)
   }
 
   async function updateUserProfile(data) {
@@ -116,6 +122,8 @@ export function AuthProvider({ children }) {
     user,
     profile,
     loading,
+    justOnboarded,
+    clearJustOnboarded,
     signup,
     login,
     loginWithGoogle,

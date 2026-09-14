@@ -9,7 +9,6 @@ import PageTransition from '../components/PageTransition'
 export default function Signup() {
   const { signup } = useAuth()
   const navigate = useNavigate()
-  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -24,7 +23,7 @@ export default function Signup() {
     }
     setBusy(true)
     try {
-      await signup(email, password, name)
+      await signup(email, password)
       navigate('/onboarding')
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') {
@@ -53,7 +52,6 @@ export default function Signup() {
         <p className="mb-8 text-[var(--color-ink-dim)]">Erstell deinen Account in ein paar Sekunden.</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input label="Name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Dein Name" />
           <Input
             label="E-Mail"
             type="email"

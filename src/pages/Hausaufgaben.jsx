@@ -33,13 +33,13 @@ export default function Hausaufgaben() {
 
   return (
     <PageTransition>
-      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold">Hausaufgaben</h1>
+      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Hausaufgaben</h1>
 
       {items.length === 0 && (
         <p className="mt-10 text-center text-[var(--color-ink-faint)]">Noch keine Hausaufgaben eingetragen.</p>
       )}
 
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
         <AnimatePresence initial={false}>
           {open_.map((hw) => (
             <HomeworkRow key={hw.id} hw={hw} onToggle={() => update(hw.id, { done: true })} onDelete={() => remove(hw.id)} />
@@ -50,7 +50,7 @@ export default function Hausaufgaben() {
       {done.length > 0 && (
         <>
           <p className="mb-2 mt-6 text-sm font-semibold text-[var(--color-ink-faint)]">Erledigt</p>
-          <div className="flex flex-col gap-2.5 opacity-50">
+          <div className="flex flex-col gap-2.5 opacity-50 md:grid md:grid-cols-2 md:gap-3">
             <AnimatePresence initial={false}>
               {done.map((hw) => (
                 <HomeworkRow key={hw.id} hw={hw} done onToggle={() => update(hw.id, { done: false })} onDelete={() => remove(hw.id)} />

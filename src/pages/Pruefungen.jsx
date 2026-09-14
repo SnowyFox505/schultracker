@@ -31,13 +31,13 @@ export default function Pruefungen() {
 
   return (
     <PageTransition>
-      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold">Tests</h1>
+      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Tests</h1>
 
       {items.length === 0 && (
         <p className="mt-10 text-center text-[var(--color-ink-faint)]">Keine anstehenden Tests. Trag welche ein, sobald sie angesagt werden.</p>
       )}
 
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
         <AnimatePresence initial={false}>
           {items.map((t) => (
             <TestRow key={t.id} test={t} subjects={subjects} onDelete={() => remove(t.id)} />

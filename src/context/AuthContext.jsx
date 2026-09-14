@@ -6,7 +6,7 @@ import {
   signOut,
   updateProfile,
 } from 'firebase/auth'
-import { doc, getDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore'
+import { doc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore'
 import { auth, db } from '../lib/firebase'
 
 const AuthContext = createContext(null)
@@ -37,11 +37,10 @@ export function AuthProvider({ children }) {
     return unsub
   }, [user])
 
-  async function signup(email, password, name) {
+  async function signup(email, password) {
     const cred = await createUserWithEmailAndPassword(auth, email, password)
-    await updateProfile(cred.user, { displayName: name })
     await setDoc(doc(db, 'users', cred.user.uid), {
-      name,
+      name: '',
       email,
       onboardingComplete: false,
       subjects: [],
@@ -60,6 +59,9 @@ export function AuthProvider({ children }) {
 
   async function completeOnboarding(data) {
     if (!user) return
+    if (data.name) {
+      await updateProfile(user, { displayName: data.name })
+    }
     await setDoc(
       doc(db, 'users', user.uid),
       { ...data, onboardingComplete: true },

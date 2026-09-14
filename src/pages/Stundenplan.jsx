@@ -46,7 +46,7 @@ export default function Stundenplan() {
   return (
     <PageTransition>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="font-[var(--font-display)] text-3xl font-extrabold">Stundenplan</h1>
+        <h1 className="font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Stundenplan</h1>
         <button
           onClick={() => setEditMode((v) => !v)}
           className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
@@ -58,10 +58,10 @@ export default function Stundenplan() {
       </div>
 
       <div className="overflow-x-auto pb-2">
-        <div className="grid min-w-[560px] grid-cols-[44px_repeat(5,1fr)] gap-1.5">
+        <div className="grid min-w-[560px] grid-cols-[44px_repeat(5,1fr)] gap-1.5 md:min-w-0 md:grid-cols-[64px_repeat(5,1fr)] md:gap-2.5">
           <div />
           {WEEKDAYS.map((d) => (
-            <div key={d} className="pb-1 text-center text-xs font-semibold text-[var(--color-ink-faint)]">
+            <div key={d} className="pb-1 text-center text-xs font-semibold text-[var(--color-ink-faint)] md:text-sm">
               {d}
             </div>
           ))}
@@ -79,17 +79,17 @@ export default function Stundenplan() {
                     key={`${day}-${period}`}
                     onClick={() => openCell(day, period)}
                     whileTap={editMode ? { scale: 0.95 } : {}}
-                    className={`flex min-h-[56px] flex-col items-center justify-center rounded-xl border p-1 text-center ${
+                    className={`flex min-h-[56px] flex-col items-center justify-center rounded-xl border p-1 text-center md:min-h-[72px] md:rounded-2xl ${
                       editMode ? 'border-dashed border-[var(--color-border)]' : 'border-transparent'
                     }`}
                     style={{ background: color ? color.soft : 'var(--color-surface)' }}
                   >
                     {lesson ? (
                       <>
-                        <span className="text-[12px] font-semibold leading-tight" style={{ color: color.bg }}>
+                        <span className="text-[12px] font-semibold leading-tight md:text-sm" style={{ color: color.bg }}>
                           {lesson.subject}
                         </span>
-                        {lesson.room && <span className="text-[10px] text-[var(--color-ink-faint)]">{lesson.room}</span>}
+                        {lesson.room && <span className="text-[10px] text-[var(--color-ink-faint)] md:text-xs">{lesson.room}</span>}
                       </>
                     ) : editMode ? (
                       <span className="text-lg text-[var(--color-ink-faint)]">+</span>

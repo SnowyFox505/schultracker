@@ -25,11 +25,12 @@ export default function Home() {
 
   return (
     <PageTransition>
-      <p className="text-sm font-medium text-[var(--color-ink-faint)]">{greeting()}</p>
-      <h1 className="mb-7 font-[var(--font-display)] text-4xl font-extrabold leading-tight">
+      <p className="text-sm font-medium text-[var(--color-ink-faint)] md:text-base">{greeting()}</p>
+      <h1 className="mb-7 font-[var(--font-display)] text-4xl font-extrabold leading-tight md:mb-10 md:text-5xl">
         {profile?.name?.split(' ')[0] || 'Hey'}
       </h1>
 
+      <div className="md:grid md:grid-cols-3 md:items-start md:gap-6">
       <Section title="Heute" linkTo="/stundenplan">
         {!todayKey ? (
           <EmptyNote text="Heute ist Wochenende 🎉" />
@@ -97,13 +98,14 @@ export default function Home() {
           </div>
         )}
       </Section>
+      </div>
     </PageTransition>
   )
 }
 
 function Section({ title, linkTo, children }) {
   return (
-    <div className="mb-7">
+    <div className="mb-7 md:mb-0">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-bold">{title}</h2>
         <Link to={linkTo} className="text-sm font-medium text-[var(--color-ink-faint)]">

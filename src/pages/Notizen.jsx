@@ -28,13 +28,13 @@ export default function Notizen() {
 
   return (
     <PageTransition>
-      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold">Notizen</h1>
+      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Notizen</h1>
 
       {items.length === 0 && (
         <p className="mt-10 text-center text-[var(--color-ink-faint)]">Noch keine Notizen. Leg direkt los.</p>
       )}
 
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-3 lg:grid-cols-4">
         <AnimatePresence initial={false}>
           {items.map((n, i) => {
             const subjMeta = subjects.find((s) => s.name === n.subject)

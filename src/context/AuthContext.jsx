@@ -78,6 +78,11 @@ export function AuthProvider({ children }) {
 
   async function completeOnboarding(data) {
     if (!user) return
+    // Set before the write: the Firestore write flips onboardingComplete, which the
+    // OnboardingRoute guard reacts to and redirects on — sometimes before our own
+    // navigate() call runs. Setting this first guarantees AppLayout's very first
+    // render (whichever redirect wins the race) already knows to show the reveal.
+    setJustOnboarded({ name: data.name || '', subjects: data.subjects || [] })
     if (data.name) {
       await updateProfile(user, { displayName: data.name })
     }
@@ -86,7 +91,6 @@ export function AuthProvider({ children }) {
       { ...data, onboardingComplete: true },
       { merge: true }
     )
-    setJustOnboarded({ name: data.name || '', subjects: data.subjects || [] })
   }
 
   function clearJustOnboarded() {

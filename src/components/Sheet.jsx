@@ -18,7 +18,7 @@ export default function Sheet({ open, onClose, title, children }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-            className="safe-bottom fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md rounded-t-[28px] border-t border-[var(--color-border)] bg-[var(--color-surface)] px-6 pb-8 pt-4"
+            className="safe-bottom fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md overflow-x-hidden rounded-t-[28px] border-t border-[var(--color-border)] bg-[var(--color-surface)] px-6 pb-8 pt-4"
           >
             <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-[var(--color-border)]" />
             {title && <h2 className="mb-5 font-[var(--font-display)] text-2xl font-bold">{title}</h2>}

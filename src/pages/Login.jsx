@@ -33,8 +33,11 @@ export default function Login() {
     setError('')
     try {
       await loginWithGoogle()
+      navigate('/')
     } catch (err) {
-      setError('Google-Anmeldung fehlgeschlagen.')
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        setError('Google-Anmeldung fehlgeschlagen.')
+      }
     }
   }
 

@@ -2,11 +2,10 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import {
   createUserWithEmailAndPassword,
   getAdditionalUserInfo,
-  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  signInWithRedirect,
+  signInWithPopup,
   signOut,
   updateProfile,
 } from 'firebase/auth'
@@ -29,25 +28,6 @@ export function AuthProvider({ children }) {
       }
     })
     return unsub
-  }, [])
-
-  useEffect(() => {
-    getRedirectResult(auth)
-      .then(async (result) => {
-        if (!result?.user) return
-        const info = getAdditionalUserInfo(result)
-        if (info?.isNewUser) {
-          await setDoc(doc(db, 'users', result.user.uid), {
-            name: result.user.displayName || '',
-            email: result.user.email,
-            onboardingComplete: false,
-            subjects: [],
-            colorTheme: 'sunset',
-            createdAt: serverTimestamp(),
-          })
-        }
-      })
-      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -77,7 +57,18 @@ export function AuthProvider({ children }) {
   }
 
   async function loginWithGoogle() {
-    await signInWithRedirect(auth, new GoogleAuthProvider())
+    const result = await signInWithPopup(auth, new GoogleAuthProvider())
+    const info = getAdditionalUserInfo(result)
+    if (info?.isNewUser) {
+      await setDoc(doc(db, 'users', result.user.uid), {
+        name: result.user.displayName || '',
+        email: result.user.email,
+        onboardingComplete: false,
+        subjects: [],
+        colorTheme: 'sunset',
+        createdAt: serverTimestamp(),
+      })
+    }
   }
 
   async function logout() {

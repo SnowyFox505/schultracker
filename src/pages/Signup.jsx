@@ -4,10 +4,11 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
+import GoogleButton from '../components/GoogleButton'
 import PageTransition from '../components/PageTransition'
 
 export default function Signup() {
-  const { signup } = useAuth()
+  const { signup, loginWithGoogle } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -33,6 +34,15 @@ export default function Signup() {
       }
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function handleGoogle() {
+    setError('')
+    try {
+      await loginWithGoogle()
+    } catch (err) {
+      setError('Google-Anmeldung fehlgeschlagen.')
     }
   }
 
@@ -75,6 +85,14 @@ export default function Signup() {
             {busy ? 'Einen Moment…' : 'Account erstellen'}
           </Button>
         </form>
+
+        <div className="my-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-[var(--color-border)]" />
+          <span className="text-xs text-[var(--color-ink-faint)]">oder</span>
+          <div className="h-px flex-1 bg-[var(--color-border)]" />
+        </div>
+
+        <GoogleButton onClick={handleGoogle} />
 
         <p className="mt-6 text-center text-sm text-[var(--color-ink-dim)]">
           Schon einen Account?{' '}

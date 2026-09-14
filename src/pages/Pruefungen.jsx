@@ -42,7 +42,7 @@ export default function Pruefungen() {
       <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
         <AnimatePresence initial={false}>
           {items.map((t) => (
-            <TestRow key={t.id} test={t} subjects={subjects} onDelete={() => remove(t.id)} />
+            <TestRow key={t.id} test={t} subjects={subjects} customColors={customColors} onDelete={() => remove(t.id)} />
           ))}
         </AnimatePresence>
       </div>
@@ -83,7 +83,7 @@ export default function Pruefungen() {
   )
 }
 
-function TestRow({ test, subjects, onDelete }) {
+function TestRow({ test, subjects, customColors, onDelete }) {
   const subjMeta = subjects.find((s) => s.name === test.subject)
   const color = subjMeta ? colorFor(subjMeta.color, customColors) : colorFor('orange', customColors)
   const daysLeft = daysUntil(test.date)

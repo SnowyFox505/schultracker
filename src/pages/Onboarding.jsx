@@ -172,7 +172,7 @@ export default function Onboarding() {
                 </motion.h1>
                 <p className="mb-6 text-[var(--color-ink-dim)]">
                   {subjects.length > 0
-                    ? `${subjects.length} Fach${subjects.length > 1 ? 'er' : ''} eingerichtet. Du kannst jetzt loslegen.`
+                    ? `${subjects.length} ${subjects.length > 1 ? 'Fächer' : 'Fach'} eingerichtet. Du kannst jetzt loslegen.`
                     : 'Keine Fächer angelegt – kein Problem, du kannst sie jederzeit hinzufügen.'}
                 </p>
                 <div className="flex flex-wrap gap-2">

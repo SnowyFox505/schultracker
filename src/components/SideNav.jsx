@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import { NAV_ITEMS } from '../lib/navItems'
+import { NAV_ITEMS, SETTINGS_ITEM } from '../lib/navItems'
 
 export default function SideNav() {
   const { profile, logout } = useAuth()
@@ -38,6 +38,26 @@ export default function SideNav() {
           </li>
         ))}
       </ul>
+
+      <NavLink to={SETTINGS_ITEM.to} className="relative flex items-center gap-3 rounded-2xl px-3.5 py-3">
+        {({ isActive }) => (
+          <>
+            {isActive && (
+              <motion.div
+                layoutId="nav-pill-desktop"
+                className="absolute inset-0 rounded-2xl bg-[var(--color-surface-2)]"
+                transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+              />
+            )}
+            <span className={`relative z-10 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'}`}>
+              <SETTINGS_ITEM.icon />
+            </span>
+            <span className={`relative z-10 text-[15px] font-medium ${isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-dim)]'}`}>
+              {SETTINGS_ITEM.label}
+            </span>
+          </>
+        )}
+      </NavLink>
 
       <button
         onClick={logout}

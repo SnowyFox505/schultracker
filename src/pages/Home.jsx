@@ -25,7 +25,7 @@ export default function Home() {
 
   return (
     <PageTransition>
-      <p className="text-sm font-medium text-[var(--color-ink-faint)] md:text-base">{greeting()}</p>
+      <p className="text-sm font-medium text-[var(--color-ink-dim)] md:text-base">{greeting()}</p>
       <h1 className="mb-7 font-[var(--font-display)] text-4xl font-extrabold leading-tight md:mb-10 md:text-5xl">
         {profile?.name?.split(' ')[0] || 'Hey'}
       </h1>

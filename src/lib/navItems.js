@@ -1,4 +1,4 @@
-import { ClockIcon, GridIcon, HomeIcon, NoteIcon, TaskIcon } from '../components/navIcons'
+import { ClockIcon, GridIcon, HomeIcon, NoteIcon, SettingsIcon, TaskIcon } from '../components/navIcons'
 
 export const NAV_ITEMS = [
   { to: '/', label: 'Heute', icon: HomeIcon },
@@ -7,3 +7,5 @@ export const NAV_ITEMS = [
   { to: '/pruefungen', label: 'Tests', icon: ClockIcon },
   { to: '/notizen', label: 'Notizen', icon: NoteIcon },
 ]
+
+export const SETTINGS_ITEM = { to: '/einstellungen', label: 'Einstellungen', icon: SettingsIcon }

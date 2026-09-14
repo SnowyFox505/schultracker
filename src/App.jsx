@@ -9,6 +9,7 @@ import Stundenplan from './pages/Stundenplan'
 import Hausaufgaben from './pages/Hausaufgaben'
 import Pruefungen from './pages/Pruefungen'
 import Notizen from './pages/Notizen'
+import Settings from './pages/Settings'
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/hausaufgaben" element={<Hausaufgaben />} />
           <Route path="/pruefungen" element={<Pruefungen />} />
           <Route path="/notizen" element={<Notizen />} />
+          <Route path="/einstellungen" element={<Settings />} />
         </Route>
       </Route>
     </Routes>

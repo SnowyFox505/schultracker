@@ -13,7 +13,7 @@ export default function AppLayout() {
   const { spinning, trigger } = useSpinNavigate('/einstellungen')
 
   return (
-    <div className="gradient-warm flex h-dvh w-full flex-col overflow-hidden md:h-auto md:min-h-dvh md:flex-row md:overflow-visible">
+    <div className="gradient-warm flex h-[var(--app-height,100dvh)] w-full flex-col overflow-hidden md:h-auto md:min-h-dvh md:flex-row md:overflow-visible">
       <SideNav />
       <a
         href="/einstellungen"

@@ -46,7 +46,7 @@ export default function Stundenplan() {
 
   return (
     <PageTransition>
-      <div className="mb-6 flex items-center justify-between pr-16 md:pr-0">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-y-2 pr-16 md:pr-0">
         <h1 className="font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Stundenplan</h1>
         <button
           onClick={() => setEditMode((v) => !v)}

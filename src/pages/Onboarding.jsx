@@ -4,13 +4,15 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
-import { SUBJECT_COLORS } from '../lib/constants'
+import ColorPicker from '../components/ColorPicker'
+import { SUBJECT_COLORS, colorFor } from '../lib/constants'
 
 const TOTAL_STEPS = 3
 
 export default function Onboarding() {
-  const { completeOnboarding } = useAuth()
+  const { profile, completeOnboarding, addCustomColor } = useAuth()
   const navigate = useNavigate()
+  const customColors = profile?.customColors || []
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
   const [name, setName] = useState('')
@@ -36,8 +38,9 @@ export default function Onboarding() {
     if (!trimmed) return
     setSubjects((prev) => [...prev, { id: crypto.randomUUID(), name: trimmed, color: selectedColor }])
     setSubjectName('')
+    const palette = [...SUBJECT_COLORS, ...customColors]
     const usedColors = new Set([...subjects.map((s) => s.color), selectedColor])
-    const nextColor = SUBJECT_COLORS.find((c) => !usedColors.has(c.id)) || SUBJECT_COLORS[(subjects.length + 1) % SUBJECT_COLORS.length]
+    const nextColor = palette.find((c) => !usedColors.has(c.id)) || palette[(subjects.length + 1) % palette.length]
     setSelectedColor(nextColor.id)
   }
 
@@ -117,35 +120,19 @@ export default function Onboarding() {
                   </Button>
                 </div>
 
-                <div className="mb-6 flex flex-wrap gap-2.5">
-                  {SUBJECT_COLORS.map((c) => (
-                    <motion.button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setSelectedColor(c.id)}
-                      whileTap={{ scale: 0.85 }}
-                      animate={{ scale: selectedColor === c.id ? 1.15 : 1 }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 20 }}
-                      className="relative h-8 w-8 rounded-full"
-                      style={{ background: c.bg }}
-                      aria-label={`Farbe ${c.id}`}
-                    >
-                      {selectedColor === c.id && (
-                        <motion.span
-                          layoutId="color-ring"
-                          className="absolute -inset-1 rounded-full border-2"
-                          style={{ borderColor: c.bg }}
-                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                        />
-                      )}
-                    </motion.button>
-                  ))}
+                <div className="mb-6">
+                  <ColorPicker
+                    value={selectedColor}
+                    onChange={setSelectedColor}
+                    customColors={customColors}
+                    onAddCustom={addCustomColor}
+                  />
                 </div>
 
                 <div className="flex flex-wrap gap-2">
                   <AnimatePresence initial={false}>
                     {subjects.map((s, i) => {
-                      const color = SUBJECT_COLORS.find((c) => c.id === s.color)
+                      const color = colorFor(s.color, customColors)
                       return (
                         <motion.button
                           key={s.id}
@@ -185,7 +172,7 @@ export default function Onboarding() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {subjects.map((s, i) => {
-                    const color = SUBJECT_COLORS.find((c) => c.id === s.color)
+                    const color = colorFor(s.color, customColors)
                     return (
                       <motion.span
                         key={s.id}

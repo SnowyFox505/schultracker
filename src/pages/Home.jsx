@@ -11,6 +11,7 @@ const JS_DAY_TO_WEEKDAY = { 1: 'Mo', 2: 'Di', 3: 'Mi', 4: 'Do', 5: 'Fr' }
 
 export default function Home() {
   const { profile } = useAuth()
+  const customColors = profile?.customColors || []
   const { lessons } = useSchedule()
   const { items: homework } = useCollection('homework', { order: 'dueDate', direction: 'asc' })
   const { items: tests } = useCollection('tests', { order: 'date', direction: 'asc' })
@@ -25,7 +26,7 @@ export default function Home() {
 
   return (
     <PageTransition>
-      <p className="text-sm font-medium text-[var(--color-ink-dim)] md:text-base">{greeting()}</p>
+      <p className="text-base font-semibold text-[var(--color-ink-dim)] md:text-lg">{greeting()}</p>
       <h1 className="mb-7 font-[var(--font-display)] text-4xl font-extrabold leading-tight md:mb-10 md:text-5xl">
         {profile?.name?.split(' ')[0] || 'Hey'}
       </h1>
@@ -39,7 +40,7 @@ export default function Home() {
         ) : (
           <div className="flex flex-col gap-2">
             {todayLessons.map((l, i) => {
-              const color = colorFor(l.color)
+              const color = colorFor(l.color, customColors)
               return (
                 <motion.div
                   key={i}

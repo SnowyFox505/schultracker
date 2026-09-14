@@ -74,6 +74,13 @@ export function AuthProvider({ children }) {
     await setDoc(doc(db, 'users', user.uid), data, { merge: true })
   }
 
+  async function addCustomColor(color) {
+    if (!user) return
+    const existing = profile?.customColors || []
+    if (existing.some((c) => c.id === color.id)) return
+    await updateUserProfile({ customColors: [...existing, color] })
+  }
+
   const value = {
     user,
     profile,
@@ -83,6 +90,7 @@ export function AuthProvider({ children }) {
     logout,
     completeOnboarding,
     updateUserProfile,
+    addCustomColor,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

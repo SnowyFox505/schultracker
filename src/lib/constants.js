@@ -19,8 +19,17 @@ export const SUBJECT_COLORS = [
   { id: 'slate', bg: '#94a3b8', soft: '#94a3b826' },
 ]
 
-export function colorFor(colorId) {
-  return SUBJECT_COLORS.find((c) => c.id === colorId) || SUBJECT_COLORS[0]
+export function colorFor(colorId, customColors = []) {
+  return (
+    SUBJECT_COLORS.find((c) => c.id === colorId) ||
+    customColors.find((c) => c.id === colorId) ||
+    SUBJECT_COLORS[0]
+  )
+}
+
+export function makeCustomColor(hex) {
+  const id = `custom-${hex.replace('#', '').toLowerCase()}`
+  return { id, bg: hex, soft: `${hex}26` }
 }
 
 export const DEFAULT_PERIODS = [

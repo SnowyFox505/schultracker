@@ -17,6 +17,7 @@ export default function Stundenplan() {
   const [room, setRoom] = useState('')
 
   const subjects = profile?.subjects || []
+  const customColors = profile?.customColors || []
 
   function openCell(day, period) {
     if (!editMode) return
@@ -73,7 +74,7 @@ export default function Stundenplan() {
               </div>
               {WEEKDAYS.map((day) => {
                 const lesson = lessons[`${day}-${period}`]
-                const color = lesson ? colorFor(lesson.color) : null
+                const color = lesson ? colorFor(lesson.color, customColors) : null
                 return (
                   <motion.button
                     key={`${day}-${period}`}
@@ -117,8 +118,8 @@ export default function Stundenplan() {
                   onClick={() => setSubject(s.name)}
                   className="rounded-full px-3.5 py-2 text-sm font-medium transition-transform active:scale-95"
                   style={{
-                    background: subject === s.name ? colorFor(s.color).bg : colorFor(s.color).soft,
-                    color: subject === s.name ? '#0a0a0f' : colorFor(s.color).bg,
+                    background: subject === s.name ? colorFor(s.color, customColors).bg : colorFor(s.color, customColors).soft,
+                    color: subject === s.name ? '#0a0a0f' : colorFor(s.color, customColors).bg,
                   }}
                 >
                   {s.name}

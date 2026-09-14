@@ -8,10 +8,12 @@ import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Sheet from '../components/Sheet'
+import ColorPicker from '../components/ColorPicker'
 
 export default function Settings() {
-  const { user, profile, logout, updateUserProfile } = useAuth()
+  const { user, profile, logout, updateUserProfile, addCustomColor } = useAuth()
   const subjects = profile?.subjects || []
+  const customColors = profile?.customColors || []
 
   const [newName, setNewName] = useState('')
   const [newColor, setNewColor] = useState(SUBJECT_COLORS[0].id)
@@ -29,8 +31,9 @@ export default function Settings() {
       subjects: [...subjects, { id: crypto.randomUUID(), name: trimmed, color: newColor }],
     })
     setNewName('')
+    const palette = [...SUBJECT_COLORS, ...customColors]
     const usedColors = new Set([...subjects.map((s) => s.color), newColor])
-    const nextColor = SUBJECT_COLORS.find((c) => !usedColors.has(c.id)) || SUBJECT_COLORS[0]
+    const nextColor = palette.find((c) => !usedColors.has(c.id)) || palette[0]
     setNewColor(nextColor.id)
   }
 
@@ -70,7 +73,7 @@ export default function Settings() {
           <div className="flex flex-col gap-2">
             <AnimatePresence initial={false}>
               {subjects.map((s) => {
-                const color = colorFor(s.color)
+                const color = colorFor(s.color, customColors)
                 return (
                   <motion.div
                     key={s.id}
@@ -101,21 +104,14 @@ export default function Settings() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="flex flex-wrap gap-2.5 overflow-hidden px-1"
+                          className="overflow-hidden px-1"
                         >
-                          {SUBJECT_COLORS.map((c) => (
-                            <button
-                              key={c.id}
-                              onClick={() => recolorSubject(s.id, c.id)}
-                              className="relative h-8 w-8 rounded-full"
-                              style={{ background: c.bg }}
-                              aria-label={c.id}
-                            >
-                              {s.color === c.id && (
-                                <span className="absolute -inset-1 rounded-full border-2" style={{ borderColor: c.bg }} />
-                              )}
-                            </button>
-                          ))}
+                          <ColorPicker
+                            value={s.color}
+                            onChange={(id) => recolorSubject(s.id, id)}
+                            customColors={customColors}
+                            onAddCustom={addCustomColor}
+                          />
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -139,20 +135,8 @@ export default function Settings() {
               +
             </Button>
           </div>
-          <div className="mt-3 flex flex-wrap gap-2.5 px-1">
-            {SUBJECT_COLORS.map((c) => (
-              <motion.button
-                key={c.id}
-                onClick={() => setNewColor(c.id)}
-                animate={{ scale: newColor === c.id ? 1.15 : 1 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 20 }}
-                className="relative h-7 w-7 rounded-full"
-                style={{ background: c.bg }}
-                aria-label={c.id}
-              >
-                {newColor === c.id && <span className="absolute -inset-1 rounded-full border-2" style={{ borderColor: c.bg }} />}
-              </motion.button>
-            ))}
+          <div className="mt-3 px-1">
+            <ColorPicker value={newColor} onChange={setNewColor} customColors={customColors} onAddCustom={addCustomColor} size="sm" />
           </div>
         </Card>
       </section>

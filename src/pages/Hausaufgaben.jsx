@@ -18,6 +18,7 @@ export default function Hausaufgaben() {
   const [dueDate, setDueDate] = useState('')
 
   const subjects = profile?.subjects || []
+  const customColors = profile?.customColors || []
   const open_ = items.filter((i) => !i.done)
   const done = items.filter((i) => i.done)
 
@@ -32,6 +33,7 @@ export default function Hausaufgaben() {
   }
 
   return (
+    <>
     <PageTransition>
       <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Hausaufgaben</h1>
 
@@ -59,6 +61,7 @@ export default function Hausaufgaben() {
           </div>
         </>
       )}
+    </PageTransition>
 
       <Fab onClick={() => setOpen(true)} label="Hausaufgabe hinzufügen" />
 
@@ -73,8 +76,8 @@ export default function Hausaufgaben() {
                   onClick={() => setSubject(s.name)}
                   className="rounded-full px-3.5 py-2 text-sm font-medium transition-transform active:scale-95"
                   style={{
-                    background: subject === s.name ? colorFor(s.color).bg : colorFor(s.color).soft,
-                    color: subject === s.name ? '#0a0a0f' : colorFor(s.color).bg,
+                    background: subject === s.name ? colorFor(s.color, customColors).bg : colorFor(s.color, customColors).soft,
+                    color: subject === s.name ? '#0a0a0f' : colorFor(s.color, customColors).bg,
                   }}
                 >
                   {s.name}
@@ -89,7 +92,7 @@ export default function Hausaufgaben() {
           </Button>
         </form>
       </Sheet>
-    </PageTransition>
+    </>
   )
 }
 

@@ -8,7 +8,7 @@ export default function Fab({ onClick, label = 'Hinzufügen' }) {
   function handleClick() {
     setRipples((r) => [...r, Date.now() + Math.random()])
     setBump((b) => b + 1)
-    onClick?.()
+    setTimeout(() => onClick?.(), 480)
   }
 
   return (

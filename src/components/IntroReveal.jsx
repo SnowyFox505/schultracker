@@ -99,7 +99,7 @@ export default function IntroReveal({ name, subjects = [], customColors = [], on
         animate={{ opacity: [0, 1, 1], y: 0 }}
         transition={{ delay: 2.5, duration: 0.6, times: [0, 0.4, 1] }}
       >
-        Bereit, {name?.trim().split(' ')[0] || 'los'} zulegen.
+        Startklar, {name?.trim().split(' ')[0] || 'los'}.
       </motion.p>
 
       <motion.p

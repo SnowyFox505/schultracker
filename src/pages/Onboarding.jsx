@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -14,6 +14,7 @@ export default function Onboarding() {
   const navigate = useNavigate()
   const customColors = profile?.customColors || []
   const hiddenColors = profile?.hiddenColors || []
+  const [showIntro, setShowIntro] = useState(true)
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
   const [name, setName] = useState('')
@@ -61,6 +62,8 @@ export default function Onboarding() {
 
   return (
     <div className="gradient-warm relative flex min-h-dvh w-full flex-col overflow-hidden px-6 pb-10 pt-10 md:items-center md:px-6">
+      <AnimatePresence>{showIntro && <OnboardingIntro onDone={() => setShowIntro(false)} />}</AnimatePresence>
+
       <FloatingOrbs />
 
       <div className="relative z-10 flex w-full flex-1 flex-col md:max-w-lg">
@@ -247,6 +250,36 @@ function ProgressBar({ step, total }) {
         </div>
       ))}
     </div>
+  )
+}
+
+function OnboardingIntro({ onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 1500)
+    return () => clearTimeout(t)
+  }, [onDone])
+
+  return (
+    <motion.div
+      className="gradient-warm fixed inset-0 z-[90] flex flex-col items-center justify-center overflow-hidden"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
+    >
+      <motion.div
+        className="absolute h-64 w-64 rounded-full bg-[var(--color-accent)]/25 blur-[90px]"
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1.2, opacity: 0.8 }}
+        transition={{ duration: 1.5, ease: 'easeOut' }}
+      />
+      <motion.p
+        initial={{ opacity: 0, y: 14, scale: 0.94 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+        className="relative font-[var(--font-display)] text-3xl font-extrabold md:text-4xl"
+      >
+        Fangen wir an.
+      </motion.p>
+    </motion.div>
   )
 }
 

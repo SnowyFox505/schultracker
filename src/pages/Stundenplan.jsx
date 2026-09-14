@@ -58,7 +58,7 @@ export default function Stundenplan() {
         </button>
       </div>
 
-      <div className="overflow-x-auto pb-2">
+      <div className="touch-pan-x overflow-x-auto pb-2">
         <div className="grid min-w-[560px] grid-cols-[44px_repeat(5,1fr)] gap-1.5 md:min-w-0 md:grid-cols-[64px_repeat(5,1fr)] md:gap-2.5">
           <div />
           {WEEKDAYS.map((d) => (
@@ -80,7 +80,7 @@ export default function Stundenplan() {
                     key={`${day}-${period}`}
                     onClick={() => openCell(day, period)}
                     whileTap={editMode ? { scale: 0.95 } : {}}
-                    className={`flex min-h-[56px] flex-col items-center justify-center rounded-xl border p-1 text-center md:min-h-[72px] md:rounded-2xl ${
+                    className={`touch-manipulation flex min-h-[56px] flex-col items-center justify-center rounded-xl border p-1 text-center md:min-h-[72px] md:rounded-2xl ${
                       editMode ? 'border-dashed border-[var(--color-border)]' : 'border-transparent'
                     }`}
                     style={{ background: color ? color.soft : 'var(--color-surface)' }}

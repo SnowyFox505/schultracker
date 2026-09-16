@@ -4,11 +4,11 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 
 ## 🟢 Einfach
 
-- [ ] Tab "Tests" umbenennen zu "Tests / Termine"
-- [ ] "Allgemein"-Kategorie bei Tests ergänzen (analog zu Notizen)
-- [ ] Icon-Animationen der Bottom-Nav (Pop-Effekt beim aktiv werden) auch für die Desktop-SideNav ergänzen
-- [ ] Fachschrift im Stundenplan glänzend/neonweiß stylen
-- [ ] "Anstehende Tests"-Übersicht filtern: nur Termine aus den nächsten 3 Wochen anzeigen
+- [x] Tab "Tests" umbenennen zu "Tests / Termine"
+- [x] "Allgemein"-Kategorie bei Tests ergänzen (analog zu Notizen)
+- [x] Icon-Animationen der Bottom-Nav (Pop-Effekt beim aktiv werden) auch für die Desktop-SideNav ergänzen
+- [x] Fachschrift im Stundenplan glänzend/neonweiß stylen
+- [x] "Anstehende Tests"-Übersicht filtern: nur Termine aus den nächsten 3 Wochen anzeigen (Home-Dashboard-Vorschau)
 
 ## 🟡 Mittel
 

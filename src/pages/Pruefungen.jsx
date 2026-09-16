@@ -27,7 +27,7 @@ export default function Pruefungen() {
 
   async function handleAdd(e) {
     e.preventDefault()
-    if (!subject || !date) return
+    if (!date) return
     await add({ subject, topic: topic.trim(), date })
     setSubject('')
     setTopic('')
@@ -62,6 +62,17 @@ export default function Pruefungen() {
         <form onSubmit={handleAdd} className="flex flex-col gap-4">
           {subjects.length > 0 ? (
             <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSubject('')}
+                className="rounded-full px-3.5 py-2 text-sm font-medium"
+                style={{
+                  background: subject === '' ? 'var(--color-accent)' : 'var(--color-surface-2)',
+                  color: subject === '' ? '#0a0a0f' : 'var(--color-ink-dim)',
+                }}
+              >
+                Allgemein
+              </button>
               {subjects.map((s) => (
                 <button
                   key={s.id}
@@ -115,7 +126,7 @@ function TestRow({ test, subjects, customColors, onDelete }) {
         </span>
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[15px] font-semibold">{test.subject}</p>
+        <p className="text-[15px] font-semibold">{test.subject || 'Allgemein'}</p>
         {test.topic && <p className="truncate text-sm text-[var(--color-ink-dim)]">{test.topic}</p>}
       </div>
       <div className="flex flex-col items-end gap-1">

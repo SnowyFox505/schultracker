@@ -101,7 +101,10 @@ export default function Stundenplan() {
                           transition={{ type: 'spring', stiffness: 380, damping: 22 }}
                           className="flex flex-col items-center"
                         >
-                          <span className="text-[12px] font-semibold leading-tight md:text-sm" style={{ color: color.bg }}>
+                          <span
+                            className="text-[12px] font-semibold leading-tight text-white md:text-sm"
+                            style={{ textShadow: `0 0 7px ${color.bg}cc, 0 0 2px #ffffffee` }}
+                          >
                             {lesson.subject}
                           </span>
                           {lesson.room && <span className="text-[10px] text-[var(--color-ink-faint)] md:text-xs">{lesson.room}</span>}

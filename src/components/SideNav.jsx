@@ -31,9 +31,15 @@ export default function SideNav() {
                       transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                     />
                   )}
-                  <span className={`relative z-10 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'}`}>
+                  <motion.span
+                    key={isActive ? 'active' : 'inactive'}
+                    initial={isActive ? { scale: 0.6, y: 3 } : false}
+                    animate={{ scale: 1, y: 0 }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+                    className={`relative z-10 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'}`}
+                  >
                     <Icon />
-                  </span>
+                  </motion.span>
                   <span className={`relative z-10 text-[15px] font-medium ${isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-dim)]'}`}>
                     {label}
                   </span>
@@ -52,9 +58,15 @@ export default function SideNav() {
             transition={{ type: 'spring', stiffness: 400, damping: 32 }}
           />
         )}
-        <span className={`relative z-10 ${settingsActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'}`}>
+        <motion.span
+          key={settingsActive ? 'active' : 'inactive'}
+          initial={settingsActive ? { scale: 0.6, y: 3 } : false}
+          animate={{ scale: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+          className={`relative z-10 ${settingsActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'}`}
+        >
           <SettingsIcon spinning={spinning} />
-        </span>
+        </motion.span>
         <span className={`relative z-10 text-[15px] font-medium ${settingsActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-dim)]'}`}>
           {SETTINGS_ITEM.label}
         </span>

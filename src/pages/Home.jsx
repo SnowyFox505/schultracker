@@ -22,7 +22,7 @@ export default function Home() {
     : []
 
   const openHomework = homework.filter((h) => !h.done).slice(0, 4)
-  const upcomingTests = tests.filter((t) => daysUntil(t.date) >= 0).slice(0, 3)
+  const upcomingTests = tests.filter((t) => daysUntil(t.date) >= 0 && daysUntil(t.date) <= 21).slice(0, 3)
 
   return (
     <PageTransition>
@@ -88,7 +88,7 @@ export default function Home() {
             {upcomingTests.map((t) => (
               <div key={t.id} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
                 <div className="flex-1">
-                  <p className="text-[15px] font-semibold">{t.subject}</p>
+                  <p className="text-[15px] font-semibold">{t.subject || 'Allgemein'}</p>
                   {t.topic && <p className="text-xs text-[var(--color-ink-faint)]">{t.topic}</p>}
                 </div>
                 <span className="rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--color-accent)]">

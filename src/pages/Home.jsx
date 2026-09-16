@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useSchedule } from '../lib/useSchedule'
 import { useCollection } from '../lib/useCollection'
-import { WEEKDAYS, DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
+import { DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Card from '../components/ui/Card'
 

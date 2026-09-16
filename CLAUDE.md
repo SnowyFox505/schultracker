@@ -40,6 +40,7 @@ Everything currently lives under `users/{uid}/...` — fully siloed per user, no
 
 - `users/{uid}` — profile doc: `name`, `email`, `onboardingComplete`, `subjects` (`[{id, name, color}]`), `customColors`, `hiddenColors`, `colorTheme`.
 - `users/{uid}/schedule/{day-period}` — one doc per lesson slot, id is literally `"${day}-${period}"` (e.g. `"Mo-3"`). Managed by `src/lib/useSchedule.js` (not the generic hook below — it's a map keyed by slot id, not a list).
+- `users/{uid}/breaks/{afterPeriod}` — one doc per gap between two periods (doc id is the period number the break comes *after*, e.g. `"2"` = the break between period 2 and 3), applies to every weekday that has that period — not tied to a single day/cell like `schedule` is. Fields: `afterPeriod`, `duration` (minutes). Managed by `src/lib/useBreaks.js`. Rendered in `Stundenplan.jsx` as a full-width row (`col-span-6`) between the corresponding period rows, editable only in edit mode via its own small Sheet (separate from the per-cell lesson Sheet).
 - `users/{uid}/homework`, `users/{uid}/tests`, `users/{uid}/notes` — generic list collections, all read/written through `src/lib/useCollection.js` (`useCollection(name, {order, direction})` → `{items, add, update, remove}`).
 
 `firestore.rules` enforces `request.auth.uid == userId` on the whole `users/{userId}` subtree — any new subcollection or cross-user feature needs its own rule block (see the "Bubble" plan below).

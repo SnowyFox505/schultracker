@@ -13,7 +13,7 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 ## 🟡 Mittel
 
 - [x] Namen, Daten und Notizen bearbeitbar machen — Hausaufgaben/Tests/Notizen sind jetzt per Tap auf die Zeile bearbeitbar (Titel, Fach, Datum, Text)
-- [x] Pause-Funktion im Stundenplan — eigene "Pause"-Pille im Zellen-Sheet (grau, ohne Raum-Feld)
+- [x] Pause-Funktion im Stundenplan — eigene wochenweite Pausen-Zeile zwischen zwei Stunden (nicht als Fach in einer einzelnen Zelle), mit einstellbarer Dauer in Minuten, gilt für alle Wochentage
 - [x] "Nächste Stunde"-Button bei Hausaufgaben — füllt das Fällig-Datum automatisch mit dem nächsten Termin des gewählten Fachs laut Stundenplan
 - [x] IntroReveal-Fortschrittsbalken — durchgehend laufender Balken über die volle ~6-Sek.-Dauer statt der ausblendenden Deko-Linie
 

@@ -112,11 +112,18 @@ export default function IntroReveal({ name, subjects = [], customColors = [], on
       </motion.p>
 
       <motion.div
-        className="absolute bottom-14 h-px w-24 bg-gradient-to-r from-transparent via-[var(--color-ink-faint)] to-transparent"
-        initial={{ opacity: 0, scaleX: 0 }}
-        animate={{ opacity: [0, 0.5, 0], scaleX: [0, 1, 1] }}
-        transition={{ delay: 3.4, duration: 2, ease: 'easeInOut' }}
-      />
+        className="absolute bottom-16 h-1 w-36 overflow-hidden rounded-full bg-white/10 md:w-48"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.4 }}
+      >
+        <motion.div
+          className="h-full rounded-full bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-2)]"
+          initial={{ width: '0%' }}
+          animate={{ width: '100%' }}
+          transition={{ duration: DURATION, ease: 'linear' }}
+        />
+      </motion.div>
     </motion.div>
   )
 }

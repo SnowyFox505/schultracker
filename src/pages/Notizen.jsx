@@ -14,8 +14,9 @@ import Button from '../components/ui/Button'
 
 export default function Notizen() {
   const { profile } = useAuth()
-  const { items, add, remove } = useCollection('notes', { order: 'createdAt', direction: 'desc' })
+  const { items, add, update, remove } = useCollection('notes', { order: 'createdAt', direction: 'desc' })
   const [open, setOpen] = useState(false)
+  const [editingId, setEditingId] = useState(null)
   const [text, setText] = useState('')
   const [subject, setSubject] = useState('')
   const [showSaved, triggerSaved] = useSavedToast()
@@ -23,12 +24,31 @@ export default function Notizen() {
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
 
-  async function handleAdd(e) {
-    e.preventDefault()
-    if (!text.trim()) return
-    await add({ text: text.trim(), subject: subject || null })
+  function openAdd() {
+    setEditingId(null)
     setText('')
     setSubject('')
+    setOpen(true)
+  }
+
+  function openEdit(note) {
+    setEditingId(note.id)
+    setText(note.text)
+    setSubject(note.subject || '')
+    setOpen(true)
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (!text.trim()) return
+    if (editingId) {
+      await update(editingId, { text: text.trim(), subject: subject || null })
+    } else {
+      await add({ text: text.trim(), subject: subject || null })
+    }
+    setText('')
+    setSubject('')
+    setEditingId(null)
     setOpen(false)
     triggerSaved()
   }
@@ -59,14 +79,14 @@ export default function Notizen() {
                   className="flex min-h-[110px] flex-col justify-between rounded-2xl border border-[var(--color-border)] p-4"
                   style={{ background: color ? color.soft : 'var(--color-surface)' }}
                 >
-                  <div>
+                  <button type="button" onClick={() => openEdit(n)} className="text-left">
                     {n.subject && (
                       <p className="mb-1 text-xs font-semibold" style={{ color: color?.bg }}>
                         {n.subject}
                       </p>
                     )}
                     <p className="whitespace-pre-wrap text-sm">{n.text}</p>
-                  </div>
+                  </button>
                   <button onClick={() => remove(n.id)} className="mt-2 self-end text-[var(--color-ink-faint)]" aria-label="Löschen">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                       <line x1="6" y1="6" x2="18" y2="18" />
@@ -84,10 +104,10 @@ export default function Notizen() {
 
       <AnimatePresence>{showSaved && <SavedToast text="Notiz gespeichert" />}</AnimatePresence>
 
-      <Fab onClick={() => setOpen(true)} label="Notiz hinzufügen" />
+      <Fab onClick={openAdd} label="Notiz hinzufügen" />
 
-      <Sheet open={open} onClose={() => setOpen(false)} title="Neue Notiz">
-        <form onSubmit={handleAdd} className="flex flex-col gap-4">
+      <Sheet open={open} onClose={() => setOpen(false)} title={editingId ? 'Notiz bearbeiten' : 'Neue Notiz'}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {subjects.length > 0 && (
             <div className="flex flex-wrap gap-2">
               <button

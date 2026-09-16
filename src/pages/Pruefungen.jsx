@@ -15,8 +15,9 @@ import Button from '../components/ui/Button'
 
 export default function Pruefungen() {
   const { profile } = useAuth()
-  const { items, add, remove } = useCollection('tests', { order: 'date', direction: 'asc' })
+  const { items, add, update, remove } = useCollection('tests', { order: 'date', direction: 'asc' })
   const [open, setOpen] = useState(false)
+  const [editingId, setEditingId] = useState(null)
   const [subject, setSubject] = useState('')
   const [topic, setTopic] = useState('')
   const [date, setDate] = useState('')
@@ -25,13 +26,34 @@ export default function Pruefungen() {
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
 
-  async function handleAdd(e) {
-    e.preventDefault()
-    if (!date) return
-    await add({ subject, topic: topic.trim(), date })
+  function openAdd() {
+    setEditingId(null)
     setSubject('')
     setTopic('')
     setDate('')
+    setOpen(true)
+  }
+
+  function openEdit(test) {
+    setEditingId(test.id)
+    setSubject(test.subject || '')
+    setTopic(test.topic || '')
+    setDate(test.date)
+    setOpen(true)
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (!date) return
+    if (editingId) {
+      await update(editingId, { subject, topic: topic.trim(), date })
+    } else {
+      await add({ subject, topic: topic.trim(), date })
+    }
+    setSubject('')
+    setTopic('')
+    setDate('')
+    setEditingId(null)
     setOpen(false)
     triggerSaved()
   }
@@ -48,7 +70,7 @@ export default function Pruefungen() {
       <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
         <AnimatePresence initial={false}>
           {items.map((t) => (
-            <TestRow key={t.id} test={t} subjects={subjects} customColors={customColors} onDelete={() => remove(t.id)} />
+            <TestRow key={t.id} test={t} subjects={subjects} customColors={customColors} onDelete={() => remove(t.id)} onEdit={() => openEdit(t)} />
           ))}
         </AnimatePresence>
       </div>
@@ -56,10 +78,10 @@ export default function Pruefungen() {
 
       <AnimatePresence>{showSaved && <SavedToast text="Test gespeichert" />}</AnimatePresence>
 
-      <Fab onClick={() => setOpen(true)} label="Test hinzufügen" />
+      <Fab onClick={openAdd} label="Test hinzufügen" />
 
-      <Sheet open={open} onClose={() => setOpen(false)} title="Neuer Test">
-        <form onSubmit={handleAdd} className="flex flex-col gap-4">
+      <Sheet open={open} onClose={() => setOpen(false)} title={editingId ? 'Test bearbeiten' : 'Neuer Test'}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {subjects.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               <button
@@ -94,7 +116,7 @@ export default function Pruefungen() {
           <Input label="Thema (optional)" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="z.B. Quadratische Gleichungen" />
           <Input label="Datum" type="date" required value={date} onChange={(e) => setDate(e.target.value)} />
           <Button type="submit" className="mt-2 w-full">
-            Hinzufügen
+            {editingId ? 'Speichern' : 'Hinzufügen'}
           </Button>
         </form>
       </Sheet>
@@ -102,7 +124,7 @@ export default function Pruefungen() {
   )
 }
 
-function TestRow({ test, subjects, customColors, onDelete }) {
+function TestRow({ test, subjects, customColors, onDelete, onEdit }) {
   const subjMeta = subjects.find((s) => s.name === test.subject)
   const color = subjMeta ? colorFor(subjMeta.color, customColors) : colorFor('orange', customColors)
   const daysLeft = daysUntil(test.date)
@@ -125,10 +147,10 @@ function TestRow({ test, subjects, customColors, onDelete }) {
           {dayOfMonth(test.date)}
         </span>
       </div>
-      <div className="min-w-0 flex-1">
+      <button type="button" onClick={onEdit} className="min-w-0 flex-1 text-left">
         <p className="text-[15px] font-semibold">{test.subject || 'Allgemein'}</p>
         {test.topic && <p className="truncate text-sm text-[var(--color-ink-dim)]">{test.topic}</p>}
-      </div>
+      </button>
       <div className="flex flex-col items-end gap-1">
         <motion.span
           animate={urgent ? { scale: [1, 1.09, 1] } : {}}

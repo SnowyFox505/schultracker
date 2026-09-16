@@ -1,5 +1,7 @@
 export const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr']
 
+export const JS_DAY_TO_WEEKDAY = { 1: 'Mo', 2: 'Di', 3: 'Mi', 4: 'Do', 5: 'Fr' }
+
 export const WEEKDAY_LABELS = {
   Mo: 'Montag',
   Di: 'Dienstag',

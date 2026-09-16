@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useCollection } from '../lib/useCollection'
+import { useSchedule } from '../lib/useSchedule'
 import { useSavedToast } from '../lib/useSavedToast'
-import { colorFor } from '../lib/constants'
+import { DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
@@ -16,7 +17,9 @@ import Button from '../components/ui/Button'
 export default function Hausaufgaben() {
   const { profile } = useAuth()
   const { items, add, update, remove } = useCollection('homework', { order: 'dueDate', direction: 'asc' })
+  const { lessons } = useSchedule()
   const [open, setOpen] = useState(false)
+  const [editingId, setEditingId] = useState(null)
   const [subject, setSubject] = useState('')
   const [title, setTitle] = useState('')
   const [dueDate, setDueDate] = useState('')
@@ -27,15 +30,41 @@ export default function Hausaufgaben() {
   const open_ = items.filter((i) => !i.done)
   const done = items.filter((i) => i.done)
 
-  async function handleAdd(e) {
+  function openAdd() {
+    setEditingId(null)
+    setSubject('')
+    setTitle('')
+    setDueDate('')
+    setOpen(true)
+  }
+
+  function openEdit(hw) {
+    setEditingId(hw.id)
+    setSubject(hw.subject || '')
+    setTitle(hw.title)
+    setDueDate(hw.dueDate)
+    setOpen(true)
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault()
     if (!title.trim() || !dueDate) return
-    await add({ subject: subject || null, title: title.trim(), dueDate, done: false })
+    if (editingId) {
+      await update(editingId, { subject: subject || null, title: title.trim(), dueDate })
+    } else {
+      await add({ subject: subject || null, title: title.trim(), dueDate, done: false })
+    }
     setTitle('')
     setDueDate('')
     setSubject('')
+    setEditingId(null)
     setOpen(false)
     triggerSaved()
+  }
+
+  function fillNextLesson() {
+    const next = nextLessonDate(subject, lessons)
+    if (next) setDueDate(next)
   }
 
   return (
@@ -48,7 +77,7 @@ export default function Hausaufgaben() {
       <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
         <AnimatePresence initial={false}>
           {open_.map((hw) => (
-            <HomeworkRow key={hw.id} hw={hw} onToggle={() => update(hw.id, { done: true })} onDelete={() => remove(hw.id)} />
+            <HomeworkRow key={hw.id} hw={hw} onToggle={() => update(hw.id, { done: true })} onDelete={() => remove(hw.id)} onEdit={() => openEdit(hw)} />
           ))}
         </AnimatePresence>
       </div>
@@ -59,7 +88,7 @@ export default function Hausaufgaben() {
           <div className="flex flex-col gap-2.5 opacity-50 md:grid md:grid-cols-2 md:gap-3">
             <AnimatePresence initial={false}>
               {done.map((hw) => (
-                <HomeworkRow key={hw.id} hw={hw} done onToggle={() => update(hw.id, { done: false })} onDelete={() => remove(hw.id)} />
+                <HomeworkRow key={hw.id} hw={hw} done onToggle={() => update(hw.id, { done: false })} onDelete={() => remove(hw.id)} onEdit={() => openEdit(hw)} />
               ))}
             </AnimatePresence>
           </div>
@@ -69,10 +98,10 @@ export default function Hausaufgaben() {
 
       <AnimatePresence>{showSaved && <SavedToast text="Hausaufgabe gespeichert" />}</AnimatePresence>
 
-      <Fab onClick={() => setOpen(true)} label="Hausaufgabe hinzufügen" />
+      <Fab onClick={openAdd} label="Hausaufgabe hinzufügen" />
 
-      <Sheet open={open} onClose={() => setOpen(false)} title="Neue Hausaufgabe">
-        <form onSubmit={handleAdd} className="flex flex-col gap-4">
+      <Sheet open={open} onClose={() => setOpen(false)} title={editingId ? 'Hausaufgabe bearbeiten' : 'Neue Hausaufgabe'}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {subjects.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {subjects.map((s) => (
@@ -92,9 +121,24 @@ export default function Hausaufgaben() {
             </div>
           )}
           <Input label="Aufgabe" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="z.B. S. 42, Nr. 3-5" />
-          <Input label="Fällig am" type="date" required value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <div>
+            <Input label="Fällig am" type="date" required value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            {subject && (
+              <button
+                type="button"
+                onClick={fillNextLesson}
+                className="mt-2 flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)] active:opacity-70"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3.5 2" />
+                </svg>
+                Nächste {subject}-Stunde
+              </button>
+            )}
+          </div>
           <Button type="submit" className="mt-2 w-full">
-            Hinzufügen
+            {editingId ? 'Speichern' : 'Hinzufügen'}
           </Button>
         </form>
       </Sheet>
@@ -102,7 +146,7 @@ export default function Hausaufgaben() {
   )
 }
 
-function HomeworkRow({ hw, done, onToggle, onDelete }) {
+function HomeworkRow({ hw, done, onToggle, onDelete, onEdit }) {
   return (
     <motion.div
       layout
@@ -148,10 +192,10 @@ function HomeworkRow({ hw, done, onToggle, onDelete }) {
           )}
         </AnimatePresence>
       </motion.button>
-      <div className="min-w-0 flex-1">
+      <button type="button" onClick={onEdit} className="min-w-0 flex-1 text-left">
         {hw.subject && <p className="text-xs font-semibold text-[var(--color-accent)]">{hw.subject}</p>}
         <p className={`truncate text-[15px] ${done ? 'line-through text-[var(--color-ink-faint)]' : ''}`}>{hw.title}</p>
-      </div>
+      </button>
       <div className="flex items-center gap-2">
         <span className="text-xs text-[var(--color-ink-faint)]">{formatDate(hw.dueDate)}</span>
         <button onClick={onDelete} aria-label="Löschen" className="text-[var(--color-ink-faint)]">
@@ -171,4 +215,23 @@ function formatDate(iso) {
   if (!iso) return ''
   const d = new Date(iso)
   return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+}
+
+function nextLessonDate(subject, lessons) {
+  if (!subject) return null
+  for (let i = 1; i <= 9; i++) {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    d.setDate(d.getDate() + i)
+    const weekday = JS_DAY_TO_WEEKDAY[d.getDay()]
+    if (!weekday) continue
+    const hasLesson = DEFAULT_PERIODS.some(({ period }) => lessons[`${weekday}-${period}`]?.subject === subject)
+    if (hasLesson) {
+      const y = d.getFullYear()
+      const m = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      return `${y}-${m}-${day}`
+    }
+  }
+  return null
 }

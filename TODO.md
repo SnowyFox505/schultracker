@@ -12,10 +12,10 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 
 ## 🟡 Mittel
 
-- [ ] Namen, Daten und Notizen bearbeitbar machen — aktuell nur löschen + neu anlegen möglich, kein Edit für bestehende Hausaufgaben/Tests/Notizen (Titel, Fach, Datum, Text)
-- [ ] Pause-Funktion im Stundenplan einfügen (Detail noch zu klären: echte Pausen-Zeile im Raster, oder eine "Pause"-Option statt Fach für eine Stunde?)
-- [ ] "Nächste Stunde"-Button bei Hausaufgaben: sobald ein Fach ausgewählt ist, füllt ein Button das Fällig-Datum automatisch mit dem nächsten Termin dieses Fachs laut Stundenplan (Beispiel: Mittwoch in Englisch, Fach "Englisch" gewählt → Datum wird automatisch nächster Dienstag)
-- [ ] IntroReveal (die ~6-Sek.-Animation direkt nach dem Onboarding) fühlt sich in der zweiten Hälfte wie eingefroren an, weil nach ~2-3 Sek. nichts mehr sichtbar passiert, bis sie ausblendet, und man sie nicht wegklicken kann → durchgehend laufender dünner Fortschrittsbalken über die volle Dauer (analog zum Fortschrittsbalken im Onboarding)
+- [x] Namen, Daten und Notizen bearbeitbar machen — Hausaufgaben/Tests/Notizen sind jetzt per Tap auf die Zeile bearbeitbar (Titel, Fach, Datum, Text)
+- [x] Pause-Funktion im Stundenplan — eigene "Pause"-Pille im Zellen-Sheet (grau, ohne Raum-Feld)
+- [x] "Nächste Stunde"-Button bei Hausaufgaben — füllt das Fällig-Datum automatisch mit dem nächsten Termin des gewählten Fachs laut Stundenplan
+- [x] IntroReveal-Fortschrittsbalken — durchgehend laufender Balken über die volle ~6-Sek.-Dauer statt der ausblendenden Deko-Linie
 
 ## 🔴 Schwer / größer
 

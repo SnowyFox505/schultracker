@@ -13,6 +13,7 @@ import EmptyState from '../components/EmptyState'
 import SwipeToDelete from '../components/SwipeToDelete'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
+import SketchPad, { SketchThumbnail } from '../components/SketchPad'
 
 export default function Hausaufgaben() {
   const { profile } = useAuth()
@@ -22,6 +23,8 @@ export default function Hausaufgaben() {
   const [editingId, setEditingId] = useState(null)
   const [subject, setSubject] = useState('')
   const [title, setTitle] = useState('')
+  const [mode, setMode] = useState('text')
+  const [sketch, setSketch] = useState([])
   const [dueDate, setDueDate] = useState('')
   const [showSaved, triggerSaved] = useSavedToast()
 
@@ -34,27 +37,42 @@ export default function Hausaufgaben() {
     setEditingId(null)
     setSubject('')
     setTitle('')
+    setMode('text')
+    setSketch([])
     setDueDate('')
     setOpen(true)
   }
 
   function openEdit(hw) {
+    const hasSketch = hw.sketch && hw.sketch.length > 0
     setEditingId(hw.id)
     setSubject(hw.subject || '')
-    setTitle(hw.title)
+    setMode(hasSketch ? 'sketch' : 'text')
+    setTitle(hasSketch ? '' : hw.title || '')
+    setSketch(hasSketch ? strokesFromFirestore(hw.sketch) : [])
     setDueDate(hw.dueDate)
     setOpen(true)
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!title.trim() || !dueDate) return
+    if (mode === 'text' && !title.trim()) return
+    if (mode === 'sketch' && sketch.length === 0) return
+    if (!dueDate) return
+    const data = {
+      subject: subject || null,
+      title: mode === 'text' ? title.trim() : '',
+      sketch: mode === 'sketch' ? strokesToFirestore(sketch) : null,
+      dueDate,
+    }
     if (editingId) {
-      await update(editingId, { subject: subject || null, title: title.trim(), dueDate })
+      await update(editingId, data)
     } else {
-      await add({ subject: subject || null, title: title.trim(), dueDate, done: false })
+      await add({ ...data, done: false })
     }
     setTitle('')
+    setSketch([])
+    setMode('text')
     setDueDate('')
     setSubject('')
     setEditingId(null)
@@ -120,7 +138,34 @@ export default function Hausaufgaben() {
               ))}
             </div>
           )}
-          <Input label="Aufgabe" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="z.B. S. 42, Nr. 3-5" />
+          <div>
+            <span className="mb-2 block text-sm font-medium text-[var(--color-ink-dim)]">Aufgabe</span>
+            <div className="mb-3 flex gap-1 rounded-full bg-[var(--color-surface-2)] p-1">
+              <button
+                type="button"
+                onClick={() => setMode('text')}
+                className={`flex-1 rounded-full py-2 text-sm font-semibold transition-colors ${
+                  mode === 'text' ? 'bg-[var(--color-accent)] text-black' : 'text-[var(--color-ink-faint)]'
+                }`}
+              >
+                Text
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('sketch')}
+                className={`flex-1 rounded-full py-2 text-sm font-semibold transition-colors ${
+                  mode === 'sketch' ? 'bg-[var(--color-accent)] text-black' : 'text-[var(--color-ink-faint)]'
+                }`}
+              >
+                ✍️ Handschrift
+              </button>
+            </div>
+            {mode === 'text' ? (
+              <Input required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="z.B. S. 42, Nr. 3-5" />
+            ) : (
+              <SketchPad value={sketch} onChange={setSketch} />
+            )}
+          </div>
           <div>
             <Input label="Fällig am" type="date" required value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             {subject && (
@@ -194,7 +239,11 @@ function HomeworkRow({ hw, done, onToggle, onDelete, onEdit }) {
       </motion.button>
       <button type="button" onClick={onEdit} className="min-w-0 flex-1 text-left">
         {hw.subject && <p className="text-xs font-semibold text-[var(--color-accent)]">{hw.subject}</p>}
-        <p className={`truncate text-[15px] ${done ? 'line-through text-[var(--color-ink-faint)]' : ''}`}>{hw.title}</p>
+        {hw.sketch && hw.sketch.length > 0 ? (
+          <SketchThumbnail strokes={strokesFromFirestore(hw.sketch)} className={`h-8 w-24 ${done ? 'opacity-50' : ''}`} />
+        ) : (
+          <p className={`truncate text-[15px] ${done ? 'line-through text-[var(--color-ink-faint)]' : ''}`}>{hw.title}</p>
+        )}
       </button>
       <div className="flex items-center gap-2">
         <span className="text-xs text-[var(--color-ink-faint)]">{formatDate(hw.dueDate)}</span>
@@ -209,6 +258,16 @@ function HomeworkRow({ hw, done, onToggle, onDelete, onEdit }) {
     </SwipeToDelete>
     </motion.div>
   )
+}
+
+// Firestore rejects arrays nested directly inside arrays, so strokes (array of point-arrays)
+// are stored as an array of { points } objects and converted back at the edges.
+function strokesToFirestore(strokes) {
+  return strokes.map((points) => ({ points }))
+}
+
+function strokesFromFirestore(sketch) {
+  return (sketch || []).map((s) => s.points)
 }
 
 function formatDate(iso) {

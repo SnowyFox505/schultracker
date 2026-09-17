@@ -79,7 +79,7 @@ export default function Home() {
               <div key={h.id} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
                 <div className="flex-1">
                   {h.subject && <p className="text-xs font-semibold text-[var(--color-accent)]">{h.subject}</p>}
-                  <p className="text-[15px]">{h.title}</p>
+                  <p className="text-[15px]">{h.sketch && h.sketch.length > 0 ? '✍️ Skizze' : h.title}</p>
                 </div>
                 <span className="text-xs text-[var(--color-ink-faint)]">{formatDate(h.dueDate)}</span>
               </div>

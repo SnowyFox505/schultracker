@@ -157,7 +157,7 @@ export default function Hausaufgaben() {
                   mode === 'sketch' ? 'bg-[var(--color-accent)] text-black' : 'text-[var(--color-ink-faint)]'
                 }`}
               >
-                ✍️ Handschrift
+                ✍️ Stift
               </button>
             </div>
             {mode === 'text' ? (

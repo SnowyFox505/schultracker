@@ -1,21 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
 
 const MIN_DIST_SQ = 0.0000625 // ~0.008 in normalized 0..1 units — thins points while dragging
-const PEN_COOLDOWN_MS = 350 // ignore touch (palm) shortly after the pen lifts, in case it's still resting
+const MAX_UNDO = 6
 
 export default function SketchPad({ value = [], onChange, height = 180 }) {
   const canvasRef = useRef(null)
-  // Tracked per-pointerId so a palm (touch) and the Apple Pencil (pen) touching at the
-  // same time don't clobber a single shared "current stroke" — that was the root cause
-  // of drawing feeling random/unreliable with the pencil (see CLAUDE.md for the writeup).
+  // Tracked per-pointerId so two simultaneous contacts (e.g. a mouse plus a pen, in theory)
+  // never clobber a single shared "current stroke".
   const activeStrokesRef = useRef(new Map())
-  const pointerTypesRef = useRef(new Map())
-  const penDownRef = useRef(false)
-  const penUpAtRef = useRef(0)
   const [strokes, setStrokes] = useState(value)
+  const [undosLeft, setUndosLeft] = useState(MAX_UNDO)
+  // This is a controlled component: every onChange we fire flows right back down as a new
+  // `value` prop. Without this, that echo would look identical to "a different item was
+  // opened" and reset the undo budget back to MAX_UNDO after every single stroke/undo.
+  const lastEmittedRef = useRef(value)
 
   useEffect(() => {
+    if (value === lastEmittedRef.current) return
+    lastEmittedRef.current = value
     setStrokes(value)
+    setUndosLeft(MAX_UNDO)
   }, [value])
 
   useEffect(() => {
@@ -75,18 +79,11 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
   }
 
   function handlePointerDown(e) {
-    const isPalmTouch =
-      e.pointerType === 'touch' && (penDownRef.current || Date.now() - penUpAtRef.current < PEN_COOLDOWN_MS)
-    if (isPalmTouch) return
-
-    if (e.pointerType === 'pen') {
-      penDownRef.current = true
-      // A palm touch may have landed a few ms before the pencil tip — discard any
-      // in-progress touch strokes now that we know the pencil is the real input.
-      for (const [id, type] of pointerTypesRef.current) {
-        if (type === 'touch') activeStrokesRef.current.delete(id)
-      }
-    }
+    // Pencil-only: with a finger allowed to draw too, a resting palm competing with the
+    // Apple Pencil made strokes feel completely unreliable. Simplest fix that's actually
+    // reliable: while in this mode, only 'pen' (Apple Pencil) and 'mouse' (desktop) draw —
+    // touch is ignored outright rather than trying to guess "was that a palm or a finger".
+    if (e.pointerType === 'touch') return
 
     e.preventDefault()
     try {
@@ -94,7 +91,6 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
     } catch {
       // ignore — a capture failure shouldn't stop the stroke from being tracked
     }
-    pointerTypesRef.current.set(e.pointerId, e.pointerType)
     activeStrokesRef.current.set(e.pointerId, [pointFromEvent(e)])
   }
 
@@ -116,11 +112,6 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
   function handlePointerUp(e) {
     const stroke = activeStrokesRef.current.get(e.pointerId)
     activeStrokesRef.current.delete(e.pointerId)
-    pointerTypesRef.current.delete(e.pointerId)
-    if (e.pointerType === 'pen') {
-      penDownRef.current = false
-      penUpAtRef.current = Date.now()
-    }
     if (!stroke) return
     const finished = stroke.map((p) => ({
       x: Math.round(p.x * 1000) / 1000,
@@ -128,6 +119,7 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
     }))
     if (finished.length > 1) {
       const next = [...strokes, finished]
+      lastEmittedRef.current = next
       setStrokes(next)
       onChange?.(next)
     } else {
@@ -135,7 +127,17 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
     }
   }
 
+  function undo() {
+    if (undosLeft <= 0 || strokes.length === 0) return
+    const next = strokes.slice(0, -1)
+    lastEmittedRef.current = next
+    setUndosLeft((n) => n - 1)
+    setStrokes(next)
+    onChange?.(next)
+  }
+
   function clear() {
+    lastEmittedRef.current = []
     setStrokes([])
     onChange?.([])
   }
@@ -152,12 +154,19 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
         onPointerLeave={handlePointerUp}
       />
       <div className="mt-2 flex items-center justify-between">
-        <span className="text-xs text-[var(--color-ink-faint)]">Mit Finger oder Stift zeichnen</span>
-        {strokes.length > 0 && (
-          <button type="button" onClick={clear} className="text-sm font-medium text-[var(--color-ink-faint)] active:opacity-70">
-            Löschen
-          </button>
-        )}
+        <span className="text-xs text-[var(--color-ink-faint)]">Nur mit dem Stift zeichnen</span>
+        <div className="flex items-center gap-4">
+          {strokes.length > 0 && undosLeft > 0 && (
+            <button type="button" onClick={undo} className="text-sm font-medium text-[var(--color-ink-faint)] active:opacity-70">
+              Zurück
+            </button>
+          )}
+          {strokes.length > 0 && (
+            <button type="button" onClick={clear} className="text-sm font-medium text-[var(--color-ink-faint)] active:opacity-70">
+              Löschen
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -29,7 +29,7 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 - [ ] Bubble: Beitritt per QR-Code (App generiert QR-Code für den eigenen Bubble-Code, Kumpel scannt ihn z.B. mit dem iPad und tritt sofort bei) — Erweiterung des bestehenden code-basierten Beitritts, nicht Ersatz
 - [ ] Bubble: Echtzeit-Sync ist im bestehenden Plan (`onSnapshot`) eigentlich schon "gratis" enthalten — beim Umsetzen der Bubble explizit gegenprüfen/hervorheben, dass neue Hausaufgaben ohne Verzögerung bei allen Mitgliedern auftauchen
 - [ ] Offline-First-Modus (IndexedDB-Cache, damit Hausaufgaben auch ganz ohne Netz eingetragen werden können und im Hintergrund synchronisieren, sobald wieder Verbindung da ist) — großer Architektur-Einschnitt, vorher Plan+Absprache nötig
-- [x] Apple-Pencil-Notizfeld — beim Hinzufügen/Bearbeiten einer Hausaufgabe per Text/Handschrift-Umschalter wählbar; Zeichenfeld statt Textfeld, Skizze wird als kleines Vorschaubild in der Liste angezeigt
+- [x] Apple-Pencil-Notizfeld — beim Hinzufügen/Bearbeiten von Hausaufgaben und Notizen per Text/Stift-Umschalter wählbar; Zeichenfeld statt Textfeld (nur per Apple Pencil, Finger wird ignoriert, siehe CLAUDE.md), Skizze wird als kleines Vorschaubild in der Liste angezeigt, plus "Zurück"-Button (max. 6x rückgängig)
 - [ ] Split-View/Drag-and-Drop auf iPad — Layout passt sich an geteilten Bildschirm an; Fotos (z.B. vom Tafelbild) per Drag-and-Drop in eine Hausaufgabe ziehbar
 - [ ] Push-Benachrichtigungen (braucht Firebase Cloud Messaging + Service-Worker-Erweiterung + Backend/Functions für zeitgesteuerten Versand):
   - Abend-Check ~18:00 Uhr: erinnert nur, wenn für morgen noch offene Hausaufgaben da sind (bleibt still, wenn alles erledigt ist)

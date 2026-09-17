@@ -75,6 +75,7 @@ export function AuthProvider({ children }) {
 
   async function logout() {
     await signOut(auth)
+    setLogoutFlow('idle')
   }
 
   function requestLogout() {

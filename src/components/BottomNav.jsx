@@ -28,7 +28,7 @@ export default function BottomNav() {
                     <Icon />
                   </motion.span>
                   <span
-                    className={`relative z-10 text-[11px] font-medium ${
+                    className={`relative z-10 text-center text-[11px] font-medium leading-tight ${
                       isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-faint)]'
                     }`}
                   >

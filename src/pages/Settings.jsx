@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { useSchedule } from '../lib/useSchedule'
 import { SUBJECT_COLORS, colorFor } from '../lib/constants'
 import { deleteAccountAndData } from '../lib/deleteAccount'
 import PageTransition from '../components/PageTransition'
@@ -13,6 +14,7 @@ import DeletingOverlay from '../components/DeletingOverlay'
 
 export default function Settings() {
   const { user, profile, logout, updateUserProfile, addCustomColor, removeCustomColor, hidePresetColor } = useAuth()
+  const { lessons, setLesson } = useSchedule()
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
   const hiddenColors = profile?.hiddenColors || []
@@ -20,6 +22,8 @@ export default function Settings() {
   const [newName, setNewName] = useState('')
   const [newColor, setNewColor] = useState(SUBJECT_COLORS[0].id)
   const [editingId, setEditingId] = useState(null)
+  const [namingId, setNamingId] = useState(null)
+  const [nameDraft, setNameDraft] = useState('')
 
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [password, setPassword] = useState('')
@@ -43,9 +47,35 @@ export default function Settings() {
     await updateUserProfile({ subjects: subjects.filter((s) => s.id !== id) })
   }
 
+  function lessonsForSubject(name) {
+    return Object.values(lessons).filter((l) => l.subject === name)
+  }
+
   async function recolorSubject(id, color) {
+    const subj = subjects.find((s) => s.id === id)
     await updateUserProfile({ subjects: subjects.map((s) => (s.id === id ? { ...s, color } : s)) })
+    if (subj) {
+      await Promise.all(
+        lessonsForSubject(subj.name).map((l) => setLesson(l.day, l.period, { ...l, color }))
+      )
+    }
     setEditingId(null)
+  }
+
+  function startRename(s) {
+    setNamingId(s.id)
+    setNameDraft(s.name)
+  }
+
+  async function saveRename(id) {
+    const trimmed = nameDraft.trim()
+    const subj = subjects.find((s) => s.id === id)
+    setNamingId(null)
+    if (!trimmed || !subj || trimmed === subj.name) return
+    await updateUserProfile({ subjects: subjects.map((s) => (s.id === id ? { ...s, name: trimmed } : s)) })
+    await Promise.all(
+      lessonsForSubject(subj.name).map((l) => setLesson(l.day, l.period, { ...l, subject: trimmed }))
+    )
   }
 
   async function handleDelete(e) {
@@ -95,7 +125,30 @@ export default function Settings() {
                         style={{ background: color.bg }}
                         aria-label="Farbe ändern"
                       />
-                      <span className="flex-1 text-[15px] font-medium">{s.name}</span>
+                      {namingId === s.id ? (
+                        <input
+                          autoFocus
+                          value={nameDraft}
+                          onChange={(e) => setNameDraft(e.target.value)}
+                          onBlur={() => saveRename(s.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              e.currentTarget.blur()
+                            }
+                            if (e.key === 'Escape') setNamingId(null)
+                          }}
+                          className="min-w-0 flex-1 rounded-lg border border-[var(--color-accent)] bg-[var(--color-surface)] px-2 py-1 text-[15px] font-medium text-[var(--color-ink)] outline-none"
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => startRename(s)}
+                          className="flex-1 truncate text-left text-[15px] font-medium"
+                        >
+                          {s.name}
+                        </button>
+                      )}
                       <button onClick={() => removeSubject(s.id)} className="text-[var(--color-ink-faint)]" aria-label="Löschen">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                           <line x1="6" y1="6" x2="18" y2="18" />

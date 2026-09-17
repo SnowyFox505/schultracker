@@ -33,11 +33,11 @@ export default function Sheet({ open, onClose, title, children }) {
           >
             <div
               onPointerDown={(e) => dragControls.start(e)}
-              className="-mx-6 -mt-4 mb-1 flex touch-none cursor-grab justify-center px-6 pb-4 pt-4 active:cursor-grabbing"
+              className="-mx-6 -mt-4 mb-1 touch-none cursor-grab px-6 pb-5 pt-6 active:cursor-grabbing"
             >
-              <div className="h-1 w-10 rounded-full bg-[var(--color-border)]" />
+              <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-[var(--color-border)]" />
+              {title && <h2 className="font-[var(--font-display)] text-2xl font-bold">{title}</h2>}
             </div>
-            {title && <h2 className="mb-5 font-[var(--font-display)] text-2xl font-bold">{title}</h2>}
             {children}
           </motion.div>
         </>

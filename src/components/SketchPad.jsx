@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 
 const MIN_DIST_SQ = 0.0000625 // ~0.008 in normalized 0..1 units — thins points while dragging
+const PEN_COOLDOWN_MS = 350 // ignore touch (palm) shortly after the pen lifts, in case it's still resting
 
 export default function SketchPad({ value = [], onChange, height = 180 }) {
   const canvasRef = useRef(null)
-  const drawingRef = useRef(false)
-  const currentStrokeRef = useRef([])
+  // Tracked per-pointerId so a palm (touch) and the Apple Pencil (pen) touching at the
+  // same time don't clobber a single shared "current stroke" — that was the root cause
+  // of drawing feeling random/unreliable with the pencil (see CLAUDE.md for the writeup).
+  const activeStrokesRef = useRef(new Map())
+  const pointerTypesRef = useRef(new Map())
+  const penDownRef = useRef(false)
+  const penUpAtRef = useRef(0)
   const [strokes, setStrokes] = useState(value)
 
   useEffect(() => {
@@ -64,39 +70,68 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
     }
   }
 
+  function redrawWithActive() {
+    draw([...strokes, ...activeStrokesRef.current.values()])
+  }
+
   function handlePointerDown(e) {
+    const isPalmTouch =
+      e.pointerType === 'touch' && (penDownRef.current || Date.now() - penUpAtRef.current < PEN_COOLDOWN_MS)
+    if (isPalmTouch) return
+
+    if (e.pointerType === 'pen') {
+      penDownRef.current = true
+      // A palm touch may have landed a few ms before the pencil tip — discard any
+      // in-progress touch strokes now that we know the pencil is the real input.
+      for (const [id, type] of pointerTypesRef.current) {
+        if (type === 'touch') activeStrokesRef.current.delete(id)
+      }
+    }
+
     e.preventDefault()
-    canvasRef.current.setPointerCapture(e.pointerId)
-    drawingRef.current = true
-    currentStrokeRef.current = [pointFromEvent(e)]
+    try {
+      canvasRef.current.setPointerCapture(e.pointerId)
+    } catch {
+      // ignore — a capture failure shouldn't stop the stroke from being tracked
+    }
+    pointerTypesRef.current.set(e.pointerId, e.pointerType)
+    activeStrokesRef.current.set(e.pointerId, [pointFromEvent(e)])
   }
 
   function handlePointerMove(e) {
-    if (!drawingRef.current) return
+    const stroke = activeStrokesRef.current.get(e.pointerId)
+    if (!stroke) return
     e.preventDefault()
     const pt = pointFromEvent(e)
-    const last = currentStrokeRef.current[currentStrokeRef.current.length - 1]
+    const last = stroke[stroke.length - 1]
     if (last) {
       const dx = pt.x - last.x
       const dy = pt.y - last.y
       if (dx * dx + dy * dy < MIN_DIST_SQ) return
     }
-    currentStrokeRef.current.push(pt)
-    draw([...strokes, currentStrokeRef.current])
+    stroke.push(pt)
+    redrawWithActive()
   }
 
-  function handlePointerUp() {
-    if (!drawingRef.current) return
-    drawingRef.current = false
-    const finished = currentStrokeRef.current.map((p) => ({
+  function handlePointerUp(e) {
+    const stroke = activeStrokesRef.current.get(e.pointerId)
+    activeStrokesRef.current.delete(e.pointerId)
+    pointerTypesRef.current.delete(e.pointerId)
+    if (e.pointerType === 'pen') {
+      penDownRef.current = false
+      penUpAtRef.current = Date.now()
+    }
+    if (!stroke) return
+    const finished = stroke.map((p) => ({
       x: Math.round(p.x * 1000) / 1000,
       y: Math.round(p.y * 1000) / 1000,
     }))
-    currentStrokeRef.current = []
     if (finished.length > 1) {
       const next = [...strokes, finished]
       setStrokes(next)
       onChange?.(next)
+    } else {
+      redrawWithActive()
     }
   }
 

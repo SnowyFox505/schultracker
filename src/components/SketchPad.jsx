@@ -128,6 +128,16 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
   )
 }
 
+// Firestore rejects arrays nested directly inside arrays, so strokes (array of point-arrays)
+// are stored as an array of { points } objects and converted back at the edges.
+export function strokesToFirestore(strokes) {
+  return strokes.map((points) => ({ points }))
+}
+
+export function strokesFromFirestore(sketch) {
+  return (sketch || []).map((s) => s.points)
+}
+
 export function SketchThumbnail({ strokes, className = '' }) {
   if (!strokes || strokes.length === 0) return null
   return (

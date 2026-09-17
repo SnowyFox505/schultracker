@@ -11,6 +11,7 @@ import SavedToast from '../components/SavedToast'
 import EmptyState from '../components/EmptyState'
 import SwipeToDelete from '../components/SwipeToDelete'
 import Button from '../components/ui/Button'
+import SketchPad, { SketchThumbnail, strokesFromFirestore, strokesToFirestore } from '../components/SketchPad'
 
 export default function Notizen() {
   const { profile } = useAuth()
@@ -18,6 +19,8 @@ export default function Notizen() {
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [text, setText] = useState('')
+  const [mode, setMode] = useState('text')
+  const [sketch, setSketch] = useState([])
   const [subject, setSubject] = useState('')
   const [showSaved, triggerSaved] = useSavedToast()
 
@@ -27,26 +30,39 @@ export default function Notizen() {
   function openAdd() {
     setEditingId(null)
     setText('')
+    setMode('text')
+    setSketch([])
     setSubject('')
     setOpen(true)
   }
 
   function openEdit(note) {
+    const hasSketch = note.sketch && note.sketch.length > 0
     setEditingId(note.id)
-    setText(note.text)
+    setMode(hasSketch ? 'sketch' : 'text')
+    setText(hasSketch ? '' : note.text || '')
+    setSketch(hasSketch ? strokesFromFirestore(note.sketch) : [])
     setSubject(note.subject || '')
     setOpen(true)
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!text.trim()) return
+    if (mode === 'text' && !text.trim()) return
+    if (mode === 'sketch' && sketch.length === 0) return
+    const data = {
+      text: mode === 'text' ? text.trim() : '',
+      sketch: mode === 'sketch' ? strokesToFirestore(sketch) : null,
+      subject: subject || null,
+    }
     if (editingId) {
-      await update(editingId, { text: text.trim(), subject: subject || null })
+      await update(editingId, data)
     } else {
-      await add({ text: text.trim(), subject: subject || null })
+      await add(data)
     }
     setText('')
+    setSketch([])
+    setMode('text')
     setSubject('')
     setEditingId(null)
     setOpen(false)
@@ -85,7 +101,11 @@ export default function Notizen() {
                         {n.subject}
                       </p>
                     )}
-                    <p className="whitespace-pre-wrap text-sm">{n.text}</p>
+                    {n.sketch && n.sketch.length > 0 ? (
+                      <SketchThumbnail strokes={strokesFromFirestore(n.sketch)} className="h-14 w-full text-[var(--color-ink)]" />
+                    ) : (
+                      <p className="whitespace-pre-wrap text-sm">{n.text}</p>
+                    )}
                   </button>
                   <button onClick={() => remove(n.id)} className="mt-2 self-end text-[var(--color-ink-faint)]" aria-label="Löschen">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -137,14 +157,38 @@ export default function Notizen() {
               ))}
             </div>
           )}
-          <textarea
-            autoFocus
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Was möchtest du dir merken?"
-            rows={4}
-            className="w-full resize-none rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] px-4 py-3.5 text-[16px] outline-none placeholder:text-[var(--color-ink-faint)] focus:border-[var(--color-accent)]"
-          />
+          <div className="flex gap-1 rounded-full bg-[var(--color-surface-2)] p-1">
+            <button
+              type="button"
+              onClick={() => setMode('text')}
+              className={`flex-1 rounded-full py-2 text-sm font-semibold transition-colors ${
+                mode === 'text' ? 'bg-[var(--color-accent)] text-black' : 'text-[var(--color-ink-faint)]'
+              }`}
+            >
+              Text
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('sketch')}
+              className={`flex-1 rounded-full py-2 text-sm font-semibold transition-colors ${
+                mode === 'sketch' ? 'bg-[var(--color-accent)] text-black' : 'text-[var(--color-ink-faint)]'
+              }`}
+            >
+              ✍️ Handschrift
+            </button>
+          </div>
+          {mode === 'text' ? (
+            <textarea
+              autoFocus
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Was möchtest du dir merken?"
+              rows={4}
+              className="w-full resize-none rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] px-4 py-3.5 text-[16px] outline-none placeholder:text-[var(--color-ink-faint)] focus:border-[var(--color-accent)]"
+            />
+          ) : (
+            <SketchPad value={sketch} onChange={setSketch} />
+          )}
           <Button type="submit" className="mt-2 w-full">
             Speichern
           </Button>

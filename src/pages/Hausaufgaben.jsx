@@ -13,7 +13,7 @@ import EmptyState from '../components/EmptyState'
 import SwipeToDelete from '../components/SwipeToDelete'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
-import SketchPad, { SketchThumbnail } from '../components/SketchPad'
+import SketchPad, { SketchThumbnail, strokesFromFirestore, strokesToFirestore } from '../components/SketchPad'
 
 export default function Hausaufgaben() {
   const { profile } = useAuth()
@@ -258,16 +258,6 @@ function HomeworkRow({ hw, done, onToggle, onDelete, onEdit }) {
     </SwipeToDelete>
     </motion.div>
   )
-}
-
-// Firestore rejects arrays nested directly inside arrays, so strokes (array of point-arrays)
-// are stored as an array of { points } objects and converted back at the edges.
-function strokesToFirestore(strokes) {
-  return strokes.map((points) => ({ points }))
-}
-
-function strokesFromFirestore(sketch) {
-  return (sketch || []).map((s) => s.points)
 }
 
 function formatDate(iso) {

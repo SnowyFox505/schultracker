@@ -70,7 +70,7 @@ Related, separate fix: the Stundenplan grid cells (inside a horizontally-scrolla
 ### Shared UI conventions
 
 - `PageTransition` wraps each route's content for the fade/slide-in transition; pages compose it plus their own `Fab`/`Sheet`/toast as siblings (see any page in `src/pages/`).
-- `Sheet` is the bottom-sheet modal used for all "add X" forms.
+- `Sheet` is the bottom-sheet modal used for all "add X" forms. Besides tapping the backdrop, it can also be dismissed by dragging its top grab handle down (Framer Motion `dragControls` scoped to just that handle strip via `dragListener={false}` + `onPointerDown` → `dragControls.start(e)`, not the whole sheet, so it doesn't fight with scrolling or drawing inside the form) — closes past ~120px of drag or with enough release velocity, otherwise snaps back (`dragSnapToOrigin`).
 - `useSavedToast()` (`src/lib/useSavedToast.js`) + `<SavedToast />` is the standard "✓ gespeichert" confirmation after a write; call `trigger()` right after the Firestore write resolves. Used in Stundenplan/Hausaufgaben/Pruefungen/Notizen.
 - `SwipeToDelete` wraps list rows (Hausaufgaben/Tests/Notizen) to add a left-swipe-to-delete affordance behind the existing tap-to-delete X button (kept for accessibility/desktop). Uses Framer Motion `drag="x"` with a red trash-icon background revealed underneath.
 - `EmptyState` is the standard "nothing here yet" placeholder (breathing dot + text) — used instead of a bare `<p>` for empty lists; `Home.jsx`'s `EmptyNote` is a compact variant of the same idea inside a `Card`.

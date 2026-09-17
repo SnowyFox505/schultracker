@@ -19,6 +19,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [justOnboarded, setJustOnboarded] = useState(null)
+  const [logoutFlow, setLogoutFlow] = useState('idle') // 'idle' | 'confirm' | 'running'
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
@@ -74,6 +75,18 @@ export function AuthProvider({ children }) {
 
   async function logout() {
     await signOut(auth)
+  }
+
+  function requestLogout() {
+    setLogoutFlow('confirm')
+  }
+
+  function cancelLogout() {
+    setLogoutFlow('idle')
+  }
+
+  function beginLogout() {
+    setLogoutFlow('running')
   }
 
   async function completeOnboarding(data) {
@@ -132,6 +145,10 @@ export function AuthProvider({ children }) {
     login,
     loginWithGoogle,
     logout,
+    logoutFlow,
+    requestLogout,
+    cancelLogout,
+    beginLogout,
     completeOnboarding,
     updateUserProfile,
     addCustomColor,

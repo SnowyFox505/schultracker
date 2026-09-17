@@ -6,7 +6,7 @@ import { useSpinNavigate } from '../lib/useSpinNavigate'
 import { SettingsIcon } from './navIcons'
 
 export default function SideNav() {
-  const { profile, logout } = useAuth()
+  const { profile, requestLogout } = useAuth()
   const location = useLocation()
   const { spinning, trigger } = useSpinNavigate(SETTINGS_ITEM.to)
   const settingsActive = location.pathname === SETTINGS_ITEM.to
@@ -73,7 +73,7 @@ export default function SideNav() {
       </a>
 
       <button
-        onClick={logout}
+        onClick={requestLogout}
         className="flex items-center gap-3 rounded-2xl px-3.5 py-3 text-[15px] font-medium text-[var(--color-ink-faint)] transition-colors hover:text-[var(--color-ink)]"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

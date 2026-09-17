@@ -3,13 +3,16 @@ import { Outlet, useLocation } from 'react-router-dom'
 import BottomNav from './BottomNav'
 import SideNav from './SideNav'
 import IntroReveal from './IntroReveal'
+import LoggingOutOverlay from './LoggingOutOverlay'
+import Sheet from './Sheet'
+import Button from './ui/Button'
 import { SettingsIcon } from './navIcons'
 import { useAuth } from '../context/AuthContext'
 import { useSpinNavigate } from '../lib/useSpinNavigate'
 
 export default function AppLayout() {
   const location = useLocation()
-  const { profile, justOnboarded, clearJustOnboarded } = useAuth()
+  const { profile, justOnboarded, clearJustOnboarded, logoutFlow, cancelLogout, beginLogout, logout } = useAuth()
   const { spinning, trigger } = useSpinNavigate('/einstellungen')
 
   return (
@@ -43,6 +46,24 @@ export default function AppLayout() {
             onDone={clearJustOnboarded}
           />
         )}
+      </AnimatePresence>
+
+      <Sheet open={logoutFlow === 'confirm'} onClose={cancelLogout} title="Wirklich abmelden?">
+        <p className="mb-5 text-sm text-[var(--color-ink-dim)]">
+          Du wirst ausgeloggt und musst dich beim nächsten Mal wieder anmelden.
+        </p>
+        <div className="flex gap-3">
+          <Button variant="secondary" type="button" onClick={cancelLogout} className="flex-1">
+            Abbrechen
+          </Button>
+          <Button type="button" onClick={beginLogout} className="flex-1">
+            Ja, abmelden
+          </Button>
+        </div>
+      </Sheet>
+
+      <AnimatePresence>
+        {logoutFlow === 'running' && <LoggingOutOverlay name={profile?.name} onDone={logout} />}
       </AnimatePresence>
     </div>
   )

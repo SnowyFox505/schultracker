@@ -13,7 +13,7 @@ import ColorPicker from '../components/ColorPicker'
 import DeletingOverlay from '../components/DeletingOverlay'
 
 export default function Settings() {
-  const { user, profile, logout, updateUserProfile, addCustomColor, removeCustomColor, hidePresetColor } = useAuth()
+  const { user, profile, requestLogout, updateUserProfile, addCustomColor, removeCustomColor, hidePresetColor } = useAuth()
   const { lessons, setLesson } = useSchedule()
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
@@ -216,7 +216,7 @@ export default function Settings() {
         <h2 className="mb-3 text-lg font-bold">Account</h2>
         <Card className="!p-4">
           <p className="mb-4 text-sm text-[var(--color-ink-dim)]">{user?.email}</p>
-          <Button variant="secondary" onClick={logout} className="w-full">
+          <Button variant="secondary" onClick={requestLogout} className="w-full">
             Abmelden
           </Button>
         </Card>

@@ -2,6 +2,10 @@
 
 Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09-16 übertragen und nach Umsetzungsaufwand sortiert. Bearbeitete Punkte werden hier abgehakt, nicht gelöscht — damit die Historie sichtbar bleibt.
 
+## 🐛 Bugs
+
+- [x] Stundenplan lässt sich auf dem Handy nicht vertikal scrollen, dadurch ist die 8. Stunde nicht erreichbar — behoben durch `touch-pan-y` zusätzlich zu `touch-pan-x` auf dem Grid-Container (`touch-action: pan-x pan-y` statt nur `pan-x`), sodass horizontales UND vertikales Touch-Scrollen wieder beide funktionieren.
+
 ## 🟢 Einfach
 
 - [x] Tab "Tests" umbenennen zu "Tests / Termine"
@@ -16,12 +20,22 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 - [x] Pause-Funktion im Stundenplan — eigene wochenweite Pausen-Zeile zwischen zwei Stunden (nicht als Fach in einer einzelnen Zelle), mit einstellbarer Dauer in Minuten, gilt für alle Wochentage
 - [x] "Nächste Stunde"-Button bei Hausaufgaben — füllt das Fällig-Datum automatisch mit dem nächsten Termin des gewählten Fachs laut Stundenplan
 - [x] IntroReveal-Fortschrittsbalken — durchgehend laufender Balken über die volle ~6-Sek.-Dauer statt der ausblendenden Deko-Linie
+- [x] "Heute"-Board auf dem Home-Dashboard: sobald die letzte Stunde des Tages (zeitlich) vorbei ist, zeigt der Block automatisch schon "Morgen" mit den Stunden des nächsten Tages statt der (dann irrelevanten) heutigen
 
 ## 🔴 Schwer / größer
 
 - [ ] Foto-Anhänge bei Tests für Lernstoff (Firebase Storage, Upload-UI, Anzeige)
-- [ ] Geteilter Stundenplan (analog zur Bubble-Idee für Hausaufgaben) — noch vage, kein konkreter Scope
+- [ ] Geteilter Stundenplan (analog zur Bubble-Idee für Hausaufgaben, ggf. auch per Code teilbar) — noch vage, kein konkreter Scope
+- [ ] Bubble: Beitritt per QR-Code (App generiert QR-Code für den eigenen Bubble-Code, Kumpel scannt ihn z.B. mit dem iPad und tritt sofort bei) — Erweiterung des bestehenden code-basierten Beitritts, nicht Ersatz
+- [ ] Bubble: Echtzeit-Sync ist im bestehenden Plan (`onSnapshot`) eigentlich schon "gratis" enthalten — beim Umsetzen der Bubble explizit gegenprüfen/hervorheben, dass neue Hausaufgaben ohne Verzögerung bei allen Mitgliedern auftauchen
+- [ ] Offline-First-Modus (IndexedDB-Cache, damit Hausaufgaben auch ganz ohne Netz eingetragen werden können und im Hintergrund synchronisieren, sobald wieder Verbindung da ist) — großer Architektur-Einschnitt, vorher Plan+Absprache nötig
+- [ ] Apple-Pencil-Notizfeld — kleines Zeichenfeld (Canvas), um schnell eine Skizze/Formel zu kritzeln und an eine Hausaufgabe anzuhängen
+- [ ] Split-View/Drag-and-Drop auf iPad — Layout passt sich an geteilten Bildschirm an; Fotos (z.B. vom Tafelbild) per Drag-and-Drop in eine Hausaufgabe ziehbar
+- [ ] Push-Benachrichtigungen (braucht Firebase Cloud Messaging + Service-Worker-Erweiterung + Backend/Functions für zeitgesteuerten Versand):
+  - Abend-Check ~18:00 Uhr: erinnert nur, wenn für morgen noch offene Hausaufgaben da sind (bleibt still, wenn alles erledigt ist)
+  - Test-Countdown: gestufte Erinnerung, z.B. 5 Tage vorher + nochmal am Vorabend
+  - Gezielter Einzelversand über individuelle Geräte-Token, damit z.B. nur die Person mit der vergessenen Aufgabe benachrichtigt wird, nicht die ganze Bubble
 
 ## Sonstiges
 
-- Das "Bubble"-Feature (geteilte Hausaufgaben) selbst ist separat geplant, siehe `~/.claude/plans/synchronous-waddling-cloud.md` bzw. den Abschnitt dazu in `CLAUDE.md`.
+- Das "Bubble"-Feature (geteilte Hausaufgaben) selbst ist separat geplant, siehe `~/.claude/plans/synchronous-waddling-cloud.md` bzw. den Abschnitt dazu in `CLAUDE.md`. Die neuen Bubble-Erweiterungsideen (QR-Beitritt, Push-Benachrichtigungen) oben sind spätere Ausbaustufen davon, nicht Teil des ursprünglichen v1-Scopes.

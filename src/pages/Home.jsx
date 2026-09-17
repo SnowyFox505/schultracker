@@ -14,10 +14,20 @@ export default function Home() {
   const { items: homework } = useCollection('homework', { order: 'dueDate', direction: 'asc' })
   const { items: tests } = useCollection('tests', { order: 'date', direction: 'asc' })
 
-  const todayKey = JS_DAY_TO_WEEKDAY[new Date().getDay()]
+  const now = new Date()
+  const todayKeyRaw = JS_DAY_TO_WEEKDAY[now.getDay()]
+  const todaysPeriods = todayKeyRaw
+    ? DEFAULT_PERIODS.filter(({ period }) => lessons[`${todayKeyRaw}-${period}`]).map(({ period }) => period)
+    : []
+  const lastPeriodToday = todaysPeriods.length ? Math.max(...todaysPeriods) : null
+  const showTomorrow = lastPeriodToday !== null && isPast(endTimeForPeriod(lastPeriodToday), now)
+
+  const displayDate = showTomorrow ? new Date(now.getTime() + 86400000) : now
+  const todayKey = JS_DAY_TO_WEEKDAY[displayDate.getDay()]
   const todayLessons = todayKey
     ? DEFAULT_PERIODS.map(({ period }) => lessons[`${todayKey}-${period}`]).filter(Boolean)
     : []
+  const heuteLabel = showTomorrow ? 'Morgen' : 'Heute'
 
   const openHomework = homework.filter((h) => !h.done).slice(0, 4)
   const upcomingTests = tests.filter((t) => daysUntil(t.date) >= 0 && daysUntil(t.date) <= 21).slice(0, 3)
@@ -30,9 +40,9 @@ export default function Home() {
       </h1>
 
       <div className="md:grid md:grid-cols-3 md:items-start md:gap-6">
-      <Section title="Heute" linkTo="/stundenplan">
+      <Section title={heuteLabel} linkTo="/stundenplan">
         {!todayKey ? (
-          <EmptyNote text="Heute ist Wochenende 🎉" />
+          <EmptyNote text={`${heuteLabel} ist Wochenende 🎉`} />
         ) : todayLessons.length === 0 ? (
           <EmptyNote text="Keine Stunden eingetragen." />
         ) : (
@@ -136,6 +146,19 @@ function greeting() {
   if (h < 11) return 'Guten Morgen'
   if (h < 17) return 'Hey'
   return 'Guten Abend'
+}
+
+function endTimeForPeriod(period) {
+  const entry = DEFAULT_PERIODS.find((p) => p.period === period)
+  if (!entry) return null
+  const [, end] = entry.time.split('–')
+  const [h, m] = end.split(':').map(Number)
+  return { h, m }
+}
+
+function isPast(time, now) {
+  if (!time) return false
+  return now.getHours() > time.h || (now.getHours() === time.h && now.getMinutes() >= time.m)
 }
 
 function daysUntil(iso) {

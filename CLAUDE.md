@@ -95,6 +95,8 @@ A friend of the user's suggested a feature to share homework between 2–3 peopl
 
 If this plan file is gone, re-derive the design from this section plus the data-model conventions above before implementing — don't skip re-confirming scope with the user, since "which collections get shared" and "what happens to existing data" were deliberate product decisions, not technical defaults.
 
+**Later extension ideas for Bubble** (not in the v1 scope above, collected in `TODO.md` under 🔴): joining via a scanned QR code instead of typing the code manually; explicitly verifying the realtime sync experience (the `onSnapshot`-based design already gives this "for free," just needs highlighting/testing when v1 is built); push notifications (evening reminder for open homework due tomorrow, staged test-countdown reminders, per-device-token targeted sends) — this last one needs Firebase Cloud Messaging plus a scheduled backend (Cloud Functions or similar), which this repo doesn't have yet, so it's a bigger infra addition than anything else here.
+
 ## Backlog
 
 `TODO.md` in the repo root tracks the user's ongoing list of feature ideas/fixes (collected from their in-app Notizen), sorted easy → hard. Check it for pending work and check items off (don't delete) as they're completed.

@@ -1,4 +1,16 @@
-import { arrayUnion, doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
+import {
+  arrayRemove,
+  arrayUnion,
+  collection,
+  deleteDoc,
+  deleteField,
+  doc,
+  getDoc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore'
 import { db } from './firebase'
 
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
@@ -48,7 +60,25 @@ export async function joinBubble(user, name, rawCode) {
   return code
 }
 
-// v1: only detaches this user's profile; their uid stays in the bubble's members array.
+// Removes the user from the bubble's members; the last member out deletes the bubble and its homework.
 export async function leaveBubble(user) {
-  await setDoc(doc(db, 'users', user.uid), { bubbleId: null }, { merge: true })
+  const userRef = doc(db, 'users', user.uid)
+  const bubbleId = (await getDoc(userRef)).data()?.bubbleId
+  if (bubbleId) {
+    const ref = doc(db, 'bubbles', bubbleId)
+    const snap = await getDoc(ref)
+    if (snap.exists()) {
+      if (snap.data().members.length <= 1) {
+        const items = await getDocs(collection(ref, 'homework'))
+        await Promise.all(items.docs.map((d) => deleteDoc(d.ref)))
+        await deleteDoc(ref)
+      } else {
+        await updateDoc(ref, {
+          members: arrayRemove(user.uid),
+          [`memberNames.${user.uid}`]: deleteField(),
+        })
+      }
+    }
+  }
+  await setDoc(userRef, { bubbleId: null }, { merge: true })
 }

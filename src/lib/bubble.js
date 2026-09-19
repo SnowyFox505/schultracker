@@ -1,4 +1,5 @@
 import {
+  addDoc,
   arrayRemove,
   arrayUnion,
   collection,
@@ -81,4 +82,22 @@ export async function leaveBubble(user) {
     }
   }
   await setDoc(userRef, { bubbleId: null }, { merge: true })
+}
+
+// Moves the user's own open (not done) private homework into their bubble.
+export async function migrateHomework(user, name, bubbleId, items) {
+  const target = collection(db, 'bubbles', bubbleId, 'homework')
+  for (const { id, subject, title, sketch, dueDate } of items) {
+    await addDoc(target, {
+      subject: subject ?? null,
+      title: title ?? '',
+      sketch: sketch ?? null,
+      dueDate,
+      done: false,
+      addedBy: user.uid,
+      addedByName: name,
+      createdAt: serverTimestamp(),
+    })
+    await deleteDoc(doc(db, 'users', user.uid, 'homework', id))
+  }
 }

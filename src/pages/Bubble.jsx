@@ -3,7 +3,8 @@ import { useSearchParams } from 'react-router-dom'
 import QRCode from 'qrcode'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '../lib/firebase'
-import { createBubble, joinBubble, leaveBubble } from '../lib/bubble'
+import { createBubble, joinBubble, leaveBubble, migrateHomework } from '../lib/bubble'
+import { useCollection } from '../lib/useCollection'
 import { useAuth } from '../context/AuthContext'
 import PageTransition from '../components/PageTransition'
 import Sheet from '../components/Sheet'
@@ -21,6 +22,9 @@ export default function Bubble() {
   const [joinCode, setJoinCode] = useState(() => (searchParams.get('code') || '').toUpperCase().slice(0, 6))
   const [qr, setQr] = useState('')
   const [scanning, setScanning] = useState(false)
+  const [askMigrate, setAskMigrate] = useState(false)
+  const { items: personalHomework } = useCollection('homework', { order: 'dueDate', direction: 'asc' })
+  const openOld = personalHomework.filter((h) => !h.done)
   const [bubbleError, setBubbleError] = useState('')
   const [bubbleBusy, setBubbleBusy] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -40,12 +44,24 @@ export default function Bubble() {
     QRCode.toDataURL(link, { margin: 1, width: 240, color: { dark: '#0a0a0f', light: '#ffffff' } }).then(setQr)
   }, [bubbleId])
 
-  async function runBubble(action) {
+  async function migrate() {
+    setBubbleBusy(true)
+    try {
+      await migrateHomework(user, profile?.name || '', bubbleId, openOld)
+    } catch {
+      setBubbleError('Übernehmen hat nicht geklappt. Versuch es nochmal.')
+    }
+    setBubbleBusy(false)
+    setAskMigrate(false)
+  }
+
+  async function runBubble(action, offerMigration = false) {
     setBubbleError('')
     setBubbleBusy(true)
     try {
       await action()
       setJoinCode('')
+      if (offerMigration) setAskMigrate(true)
     } catch (err) {
       setBubbleError(
         err.message === 'not-found'
@@ -89,6 +105,11 @@ export default function Bubble() {
                 <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-[0.25em]">{bubbleId}</span>
                 <span className="text-sm font-medium text-[var(--color-accent)]">{copied ? 'Kopiert ✓' : 'Kopieren'}</span>
               </button>
+              {openOld.length > 0 && (
+                <Button variant="secondary" onClick={() => setAskMigrate(true)} className="mb-3 w-full">
+                  Meine alten Hausaufgaben übernehmen ({openOld.length})
+                </Button>
+              )}
               {qr && (
                 <div className="mb-4 flex flex-col items-center">
                   <img src={qr} alt="QR-Code zum Beitreten" className="h-44 w-44 rounded-2xl" />
@@ -104,7 +125,7 @@ export default function Bubble() {
               <p className="mb-4 text-sm text-[var(--color-ink-dim)]">
                 Teile Hausaufgaben mit bis zu 2 Freunden — nur einer muss sie eintragen.
               </p>
-              <Button disabled={bubbleBusy} onClick={() => runBubble(() => createBubble(user, profile?.name || ''))} className="mb-4 w-full">
+              <Button disabled={bubbleBusy} onClick={() => runBubble(() => createBubble(user, profile?.name || ''), true)} className="mb-4 w-full">
                 Bubble erstellen
               </Button>
               <Button variant="secondary" onClick={() => setScanning(true)} className="mb-4 w-full">
@@ -121,7 +142,7 @@ export default function Bubble() {
                 <Button
                   variant="secondary"
                   disabled={bubbleBusy || joinCode.length < 6}
-                  onClick={() => runBubble(() => joinBubble(user, profile?.name || '', joinCode))}
+                  onClick={() => runBubble(() => joinBubble(user, profile?.name || '', joinCode), true)}
                   className="px-4"
                 >
                   Beitreten
@@ -133,12 +154,26 @@ export default function Bubble() {
         </Card>
       </section>
 
+      <Sheet open={askMigrate && !!bubbleId && openOld.length > 0} onClose={() => setAskMigrate(false)} title="Alte Hausaufgaben mitnehmen?">
+        <p className="mb-5 text-sm text-[var(--color-ink-dim)]">
+          Du hast noch {openOld.length} offene Hausaufgabe{openOld.length === 1 ? '' : 'n'}, die nur du siehst. Sollen sie in deine Bubble, damit alle sie sehen?
+        </p>
+        <div className="flex gap-3">
+          <Button variant="secondary" type="button" onClick={() => setAskMigrate(false)} className="flex-1">
+            Erstmal nicht
+          </Button>
+          <Button type="button" disabled={bubbleBusy} onClick={migrate} className="flex-1">
+            Ja, gerne!
+          </Button>
+        </div>
+      </Sheet>
+
       <Sheet open={scanning} onClose={() => setScanning(false)} title="QR-Code scannen">
         {scanning && (
           <QrScanner
             onCode={(code) => {
               setScanning(false)
-              runBubble(() => joinBubble(user, profile?.name || '', code))
+              runBubble(() => joinBubble(user, profile?.name || '', code), true)
             }}
           />
         )}

@@ -91,7 +91,7 @@ There's no automated test suite. Every feature/fix in this project so far has be
 
 ## "Bubble" (shared homework) — v1 built (needs `firestore.rules` pasted into the Firebase Console to work)
 
-**Implemented:** `firestore.rules` (bubbles block), `src/lib/bubble.js` (create/join/leave), `src/lib/useHomework.js` (merges personal + bubble homework; used by `Hausaufgaben.jsx` and `Home.jsx`; `update`/`remove` take the item, not an id), Bubble card in `Settings.jsx`, `users/{uid}.bubbleId`. Leaving only clears `bubbleId` (uid stays in `members`), account deletion doesn't touch bubbles — both deliberately deferred. The rest of this section is the original plan.
+**Implemented:** `firestore.rules` (bubbles block), `src/lib/bubble.js` (create/join/leave), `src/lib/useHomework.js` (merges personal + bubble homework; used by `Hausaufgaben.jsx` and `Home.jsx`; `update`/`remove` take the item, not an id), Bubble page `src/pages/Bubble.jsx` (own route `/bubble` + 6th nav item, not in Settings), `users/{uid}.bubbleId`. Leaving only clears `bubbleId` (uid stays in `members`), account deletion doesn't touch bubbles — both deliberately deferred. The rest of this section is the original plan.
 
 A friend of the user's suggested a feature to share homework between 2–3 people so only one person has to enter it. The user wants it named exactly **"Bubble"** (you "join someone's Bubble" via a code). A full implementation plan exists at `C:\Users\neuba\.claude\plans\synchronous-waddling-cloud.md` (may or may not still be present depending on plan-file retention) covering:
 

@@ -3,6 +3,9 @@ import { useAuth } from '../context/AuthContext'
 import { importSchedule, migrateTests, shareSchedule, unshareSchedule } from '../lib/bubble'
 import { useBubbleSchedules } from '../lib/useBubbleSchedules'
 import { useCollection } from '../lib/useCollection'
+import { useTests } from '../lib/useTests'
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { db } from '../lib/firebase'
 import { useSchedule } from '../lib/useSchedule'
 import { useBreaks } from '../lib/useBreaks'
 import Sheet from './Sheet'
@@ -15,6 +18,9 @@ export default function BubbleShare({ bubbleId }) {
   const { breaks } = useBreaks()
   const schedules = useBubbleSchedules(bubbleId)
   const { items: personalTests } = useCollection('tests', { order: 'date', direction: 'asc' })
+  const { items: visibleTests } = useTests()
+  const sharedVisible = visibleTests.filter((t) => t.shared)
+  const [askKeep, setAskKeep] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [askTests, setAskTests] = useState(false)
@@ -37,7 +43,29 @@ export default function BubbleShare({ bubbleId }) {
     setBusy(false)
   }
 
+  async function turnOffTests(keep) {
+    setBusy(true)
+    try {
+      if (keep) {
+        const target = collection(db, 'users', user.uid, 'tests')
+        for (const { subject, topic, date, photos } of sharedVisible) {
+          await addDoc(target, { subject: subject ?? '', topic: topic ?? '', date, photos: photos ?? [], createdAt: serverTimestamp() })
+        }
+      }
+      await updateUserProfile({ shareTests: false })
+    } catch {
+      setError('Das hat nicht geklappt. Versuch es nochmal.')
+    }
+    setBusy(false)
+    setAskKeep(false)
+  }
+
   async function toggleTests() {
+    if (shareTests) {
+      if (sharedVisible.length > 0) setAskKeep(true)
+      else await updateUserProfile({ shareTests: false })
+      return
+    }
     const next = !shareTests
     await updateUserProfile({ shareTests: next })
     if (next && upcomingOld.length > 0) setAskTests(true)
@@ -69,7 +97,7 @@ export default function BubbleShare({ bubbleId }) {
       <Card className="!p-4">
         <ToggleRow
           label="Tests & Termine teilen"
-          hint="Neue Tests siehst du gemeinsam mit der Bubble. Nur für dich ein- oder ausschaltbar."
+          hint="Neue Tests teilst du mit der Bubble. Jeder stellt das für sich ein: Nur wer es angeschaltet hat, sieht die geteilten Tests."
           on={shareTests}
           onClick={toggleTests}
         />
@@ -107,6 +135,20 @@ export default function BubbleShare({ bubbleId }) {
           </Button>
           <Button type="button" onClick={doImport} className="flex-1">
             Ja, importieren
+          </Button>
+        </div>
+      </Sheet>
+
+      <Sheet open={askKeep} onClose={() => setAskKeep(false)} title="Tests behalten?">
+        <p className="mb-5 text-sm text-[var(--color-ink-dim)]">
+          Du siehst gerade {sharedVisible.length} geteilte{sharedVisible.length === 1 ? 'n Test' : ' Tests'}. Wenn du das Teilen ausschaltest, sind sie bei dir sonst nicht mehr sichtbar. Sollen sie als private Kopien bei dir bleiben?
+        </p>
+        <div className="flex gap-3">
+          <Button variant="secondary" type="button" disabled={busy} onClick={() => turnOffTests(false)} className="flex-1">
+            Nein, ausblenden
+          </Button>
+          <Button type="button" disabled={busy} onClick={() => turnOffTests(true)} className="flex-1">
+            Ja, behalten
           </Button>
         </div>
       </Sheet>

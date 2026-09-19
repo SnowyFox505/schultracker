@@ -41,6 +41,6 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 
 ## Sonstiges
 
-- Bubble v1 ist gebaut (Hausaufgaben teilen per Code); Verlassen/Account-Löschen räumen auf; offen: QR-Beitritt, Migration alter Hausaufgaben.
+- Bubble v1 ist gebaut (Hausaufgaben teilen per Code); Verlassen/Account-Löschen räumen auf; QR-Beitritt gebaut; offen: Migration alter Hausaufgaben.
 
 - Das "Bubble"-Feature (geteilte Hausaufgaben) selbst ist separat geplant, siehe `~/.claude/plans/synchronous-waddling-cloud.md` bzw. den Abschnitt dazu in `CLAUDE.md`. Die neuen Bubble-Erweiterungsideen (QR-Beitritt, Push-Benachrichtigungen) oben sind spätere Ausbaustufen davon, nicht Teil des ursprünglichen v1-Scopes.

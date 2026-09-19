@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import QRCode from 'qrcode'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { createBubble, joinBubble, leaveBubble } from '../lib/bubble'
@@ -11,9 +13,11 @@ import Input from '../components/ui/Input'
 
 export default function Bubble() {
   const { user, profile } = useAuth()
+  const [searchParams] = useSearchParams()
   const bubbleId = profile?.bubbleId || null
   const [bubble, setBubble] = useState(null)
-  const [joinCode, setJoinCode] = useState('')
+  const [joinCode, setJoinCode] = useState(() => (searchParams.get('code') || '').toUpperCase().slice(0, 6))
+  const [qr, setQr] = useState('')
   const [bubbleError, setBubbleError] = useState('')
   const [bubbleBusy, setBubbleBusy] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -25,6 +29,12 @@ export default function Bubble() {
       (snap) => setBubble(snap.exists() ? snap.data() : null),
       () => setBubble(null)
     )
+  }, [bubbleId])
+
+  useEffect(() => {
+    if (!bubbleId) return
+    const link = `${window.location.origin}/bubble?code=${bubbleId}`
+    QRCode.toDataURL(link, { margin: 1, width: 240, color: { dark: '#0a0a0f', light: '#ffffff' } }).then(setQr)
   }, [bubbleId])
 
   async function runBubble(action) {
@@ -76,6 +86,12 @@ export default function Bubble() {
                 <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-[0.25em]">{bubbleId}</span>
                 <span className="text-sm font-medium text-[var(--color-accent)]">{copied ? 'Kopiert ✓' : 'Kopieren'}</span>
               </button>
+              {qr && (
+                <div className="mb-4 flex flex-col items-center">
+                  <img src={qr} alt="QR-Code zum Beitreten" className="h-44 w-44 rounded-2xl" />
+                  <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Freund scannt das mit der Kamera und tritt bei</p>
+                </div>
+              )}
               <Button variant="secondary" disabled={bubbleBusy} onClick={() => runBubble(() => leaveBubble(user))} className="w-full">
                 Bubble verlassen
               </Button>

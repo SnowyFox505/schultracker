@@ -3,7 +3,7 @@ import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore'
 import { db } from './firebase'
 import { leaveBubble } from './bubble'
 
-const SUBCOLLECTIONS = ['schedule', 'breaks', 'bubbleState', 'homework', 'tests', 'notes']
+const SUBCOLLECTIONS = ['schedule', 'breaks', 'devices', 'bubbleState', 'homework', 'tests', 'notes']
 
 export async function deleteAccountAndData(user, password, { beforeAuthDelete } = {}) {
   const credential = EmailAuthProvider.credential(user.email, password)

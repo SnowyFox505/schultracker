@@ -11,6 +11,7 @@ import Input from '../components/ui/Input'
 import Sheet from '../components/Sheet'
 import ColorPicker from '../components/ColorPicker'
 import DeletingOverlay from '../components/DeletingOverlay'
+import PushSettings from '../components/PushSettings'
 
 export default function Settings() {
   const { user, profile, requestLogout, updateUserProfile, addCustomColor, removeCustomColor, hidePresetColor } = useAuth()
@@ -223,6 +224,13 @@ export default function Settings() {
             />
             <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Farbe lang drücken zum Löschen (Orange bleibt immer).</p>
           </div>
+        </Card>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="mb-3 text-lg font-bold">Benachrichtigungen</h2>
+        <Card className="!p-4">
+          <PushSettings />
         </Card>
       </section>
 

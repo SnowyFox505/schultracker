@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useCollection } from '../lib/useCollection'
 import { useSavedToast } from '../lib/useSavedToast'
 import { colorFor } from '../lib/constants'
+import { compressImage } from '../lib/imageCompress'
 import PageTransition from '../components/PageTransition'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
@@ -13,6 +14,8 @@ import SwipeToDelete from '../components/SwipeToDelete'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 
+const MAX_PHOTOS = 4
+
 export default function Pruefungen() {
   const { profile } = useAuth()
   const { items, add, update, remove } = useCollection('tests', { order: 'date', direction: 'asc' })
@@ -21,6 +24,9 @@ export default function Pruefungen() {
   const [subject, setSubject] = useState('')
   const [topic, setTopic] = useState('')
   const [date, setDate] = useState('')
+  const [photos, setPhotos] = useState([])
+  const [viewing, setViewing] = useState(null)
+  const [photoBusy, setPhotoBusy] = useState(false)
   const [showSaved, triggerSaved] = useSavedToast()
 
   const subjects = profile?.subjects || []
@@ -31,6 +37,7 @@ export default function Pruefungen() {
     setSubject('')
     setTopic('')
     setDate('')
+    setPhotos([])
     setOpen(true)
   }
 
@@ -39,6 +46,7 @@ export default function Pruefungen() {
     setSubject(test.subject || '')
     setTopic(test.topic || '')
     setDate(test.date)
+    setPhotos(test.photos || [])
     setOpen(true)
   }
 
@@ -46,16 +54,31 @@ export default function Pruefungen() {
     e.preventDefault()
     if (!date) return
     if (editingId) {
-      await update(editingId, { subject, topic: topic.trim(), date })
+      await update(editingId, { subject, topic: topic.trim(), date, photos })
     } else {
-      await add({ subject, topic: topic.trim(), date })
+      await add({ subject, topic: topic.trim(), date, photos })
     }
     setSubject('')
     setTopic('')
     setDate('')
+    setPhotos([])
     setEditingId(null)
     setOpen(false)
     triggerSaved()
+  }
+
+  async function addPhotos(e) {
+    const files = Array.from(e.target.files || []).slice(0, MAX_PHOTOS - photos.length)
+    e.target.value = ''
+    if (!files.length) return
+    setPhotoBusy(true)
+    try {
+      const done = await Promise.all(files.map((f) => compressImage(f)))
+      setPhotos((p) => [...p, ...done].slice(0, MAX_PHOTOS))
+    } catch {
+      // unreadable image — ignore
+    }
+    setPhotoBusy(false)
   }
 
   return (
@@ -70,7 +93,7 @@ export default function Pruefungen() {
       <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
         <AnimatePresence initial={false}>
           {items.map((t) => (
-            <TestRow key={t.id} test={t} subjects={subjects} customColors={customColors} onDelete={() => remove(t.id)} onEdit={() => openEdit(t)} />
+            <TestRow key={t.id} test={t} subjects={subjects} customColors={customColors} onDelete={() => remove(t.id)} onEdit={() => openEdit(t)} onPhoto={setViewing} />
           ))}
         </AnimatePresence>
       </div>
@@ -115,16 +138,55 @@ export default function Pruefungen() {
           )}
           <Input label="Thema (optional)" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="z.B. Quadratische Gleichungen" />
           <Input label="Datum" type="date" required value={date} onChange={(e) => setDate(e.target.value)} />
+          <div>
+            <span className="mb-2 block text-sm font-medium text-[var(--color-ink-dim)]">Fotos (optional)</span>
+            <div className="flex flex-wrap gap-2">
+              {photos.map((src, i) => (
+                <div key={i} className="relative h-16 w-16">
+                  <img src={src} alt="" className="h-16 w-16 rounded-xl object-cover" />
+                  <button
+                    type="button"
+                    aria-label="Foto entfernen"
+                    onClick={() => setPhotos((p) => p.filter((_, j) => j !== i))}
+                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff6b81] text-xs font-bold text-black"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {photos.length < MAX_PHOTOS && (
+                <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[var(--color-border)] text-2xl text-[var(--color-ink-faint)] active:opacity-70">
+                  {photoBusy ? '…' : '📷'}
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={addPhotos} />
+                </label>
+              )}
+            </div>
+            <p className="mt-1.5 text-xs text-[var(--color-ink-faint)]">Bis zu {MAX_PHOTOS} Fotos, werden verkleinert gespeichert.</p>
+          </div>
           <Button type="submit" className="mt-2 w-full">
             {editingId ? 'Speichern' : 'Hinzufügen'}
           </Button>
         </form>
       </Sheet>
+
+      <AnimatePresence>
+        {viewing && (
+          <motion.div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setViewing(null)}
+          >
+            <img src={viewing} alt="" className="max-h-full max-w-full rounded-2xl object-contain" />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }
 
-function TestRow({ test, subjects, customColors, onDelete, onEdit }) {
+function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto }) {
   const subjMeta = subjects.find((s) => s.name === test.subject)
   const color = subjMeta ? colorFor(subjMeta.color, customColors) : colorFor('orange', customColors)
   const daysLeft = daysUntil(test.date)
@@ -150,6 +212,22 @@ function TestRow({ test, subjects, customColors, onDelete, onEdit }) {
       <button type="button" onClick={onEdit} className="min-w-0 flex-1 text-left">
         <p className="text-[15px] font-semibold">{test.subject || 'Allgemein'}</p>
         {test.topic && <p className="truncate text-sm text-[var(--color-ink-dim)]">{test.topic}</p>}
+        {test.photos?.length > 0 && (
+          <div className="mt-1.5 flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+            {test.photos.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt=""
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onPhoto(src)
+                }}
+                className="h-9 w-9 cursor-pointer rounded-lg object-cover"
+              />
+            ))}
+          </div>
+        )}
       </button>
       <div className="flex flex-col items-end gap-1">
         <motion.span

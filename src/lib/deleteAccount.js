@@ -2,7 +2,7 @@ import { deleteUser, EmailAuthProvider, reauthenticateWithCredential } from 'fir
 import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore'
 import { db } from './firebase'
 
-const SUBCOLLECTIONS = ['schedule', 'breaks', 'homework', 'tests', 'notes']
+const SUBCOLLECTIONS = ['schedule', 'breaks', 'bubbleState', 'homework', 'tests', 'notes']
 
 export async function deleteAccountAndData(user, password, { beforeAuthDelete } = {}) {
   const credential = EmailAuthProvider.credential(user.email, password)

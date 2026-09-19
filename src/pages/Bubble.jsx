@@ -4,6 +4,7 @@ import { db } from '../lib/firebase'
 import { createBubble, joinBubble, leaveBubble } from '../lib/bubble'
 import { useAuth } from '../context/AuthContext'
 import PageTransition from '../components/PageTransition'
+import BubbleOrb from '../components/BubbleOrb'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -58,6 +59,8 @@ export default function Bubble() {
     <PageTransition>
       <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Bubble</h1>
 
+      {bubbleId && bubble?.memberNames && <BubbleOrb names={Object.values(bubble.memberNames)} />}
+
       <section>
         <Card className="!p-4">
           {bubbleId ? (
@@ -73,11 +76,6 @@ export default function Bubble() {
                 <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-[0.25em]">{bubbleId}</span>
                 <span className="text-sm font-medium text-[var(--color-accent)]">{copied ? 'Kopiert ✓' : 'Kopieren'}</span>
               </button>
-              {bubbleId && bubble?.memberNames && (
-                <p className="mb-4 text-sm text-[var(--color-ink-dim)]">
-                  Mitglieder: {Object.values(bubble.memberNames).join(', ')}
-                </p>
-              )}
               <Button variant="secondary" disabled={bubbleBusy} onClick={() => runBubble(() => leaveBubble(user))} className="w-full">
                 Bubble verlassen
               </Button>

@@ -36,7 +36,7 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
   - Test-Countdown: gestufte Erinnerung, z.B. 5 Tage vorher + nochmal am Vorabend
   - Gezielter Einzelversand über individuelle Geräte-Token, damit z.B. nur die Person mit der vergessenen Aufgabe benachrichtigt wird, nicht die ganze Bubble
 
-- [ ] Bubble-Optik: die Bubble als schöne orange "Luftblase" darstellen, in der die Namen aller Mitglieder herumschweben (animiert, siehe Animations-Tiers in CLAUDE.md)
+- [x] Bubble-Optik: die Bubble als schöne orange "Luftblase" darstellen, in der die Namen aller Mitglieder herumschweben (animiert, siehe Animations-Tiers in CLAUDE.md)
 - [x] Bubble eigene Unterseite: alles rund um die Bubble (erstellen/beitreten/Mitglieder/verlassen, spätere Bubble-Einstellungen) aus den Einstellungen in eine neue Seite "Bubble" verschieben (Route + Nav-Eintrag)
 
 ## Sonstiges

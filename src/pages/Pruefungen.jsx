@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import { useCollection } from '../lib/useCollection'
+import { useTests } from '../lib/useTests'
 import { useSavedToast } from '../lib/useSavedToast'
 import { colorFor } from '../lib/constants'
 import { compressImage } from '../lib/imageCompress'
@@ -18,7 +18,7 @@ const MAX_PHOTOS = 4
 
 export default function Pruefungen() {
   const { profile } = useAuth()
-  const { items, add, update, remove } = useCollection('tests', { order: 'date', direction: 'asc' })
+  const { items, add, update, remove } = useTests()
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [subject, setSubject] = useState('')
@@ -54,7 +54,7 @@ export default function Pruefungen() {
     e.preventDefault()
     if (!date) return
     if (editingId) {
-      await update(editingId, { subject, topic: topic.trim(), date, photos })
+      await update(items.find((i) => i.id === editingId), { subject, topic: topic.trim(), date, photos })
     } else {
       await add({ subject, topic: topic.trim(), date, photos })
     }
@@ -93,7 +93,7 @@ export default function Pruefungen() {
       <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
         <AnimatePresence initial={false}>
           {items.map((t) => (
-            <TestRow key={t.id} test={t} subjects={subjects} customColors={customColors} onDelete={() => remove(t.id)} onEdit={() => openEdit(t)} onPhoto={setViewing} />
+            <TestRow key={t.id} test={t} subjects={subjects} customColors={customColors} onDelete={() => remove(t)} onEdit={() => openEdit(t)} onPhoto={setViewing} />
           ))}
         </AnimatePresence>
       </div>

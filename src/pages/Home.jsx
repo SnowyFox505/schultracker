@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useSchedule } from '../lib/useSchedule'
-import { useCollection } from '../lib/useCollection'
+import { useTests } from '../lib/useTests'
 import { useHomework } from '../lib/useHomework'
 import { DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
@@ -13,7 +13,7 @@ export default function Home() {
   const customColors = profile?.customColors || []
   const { lessons } = useSchedule()
   const { items: homework } = useHomework()
-  const { items: tests } = useCollection('tests', { order: 'date', direction: 'asc' })
+  const { items: tests } = useTests()
 
   const now = new Date()
   const todayKeyRaw = JS_DAY_TO_WEEKDAY[now.getDay()]

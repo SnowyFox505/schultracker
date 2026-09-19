@@ -33,6 +33,19 @@ service cloud.firestore {
         allow read, write: if request.auth != null
           && request.auth.uid in get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members;
       }
+
+      match /tests/{docId} {
+        allow read, write: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members;
+      }
+
+      match /schedules/{ownerId} {
+        allow read: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members;
+        allow write: if request.auth != null
+          && request.auth.uid == ownerId
+          && request.auth.uid in get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members;
+      }
     }
   }
 }

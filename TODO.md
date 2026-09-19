@@ -25,7 +25,7 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 ## 🔴 Schwer / größer
 
 - [x] Foto-Anhänge bei Tests — ohne Firebase Storage: Fotos werden im Browser auf ~180 KB verkleinert und als `photos`-Array im Test-Dokument gespeichert (max. 4). Falls Qualität zu schlecht: wieder entfernen oder Limits in `src/lib/imageCompress.js` anpassen
-- [ ] Geteilter Stundenplan (analog zur Bubble-Idee für Hausaufgaben, ggf. auch per Code teilbar) — noch vage, kein konkreter Scope
+- [x] Geteilter Stundenplan (gebaut als Kopie-zum-Importieren in der Bubble, plus Tests-Toggle) (analog zur Bubble-Idee für Hausaufgaben, ggf. auch per Code teilbar) — noch vage, kein konkreter Scope
 - [ ] Bubble: Beitritt per QR-Code (App generiert QR-Code für den eigenen Bubble-Code, Kumpel scannt ihn z.B. mit dem iPad und tritt sofort bei) — Erweiterung des bestehenden code-basierten Beitritts, nicht Ersatz
 - [ ] Bubble: Echtzeit-Sync ist im bestehenden Plan (`onSnapshot`) eigentlich schon "gratis" enthalten — beim Umsetzen der Bubble explizit gegenprüfen/hervorheben, dass neue Hausaufgaben ohne Verzögerung bei allen Mitgliedern auftauchen
 - [ ] Offline-First-Modus (IndexedDB-Cache, damit Hausaufgaben auch ganz ohne Netz eingetragen werden können und im Hintergrund synchronisieren, sobald wieder Verbindung da ist) — großer Architektur-Einschnitt, vorher Plan+Absprache nötig

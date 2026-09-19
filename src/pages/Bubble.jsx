@@ -10,6 +10,7 @@ import PageTransition from '../components/PageTransition'
 import Sheet from '../components/Sheet'
 import QrScanner from '../components/QrScanner'
 import BubbleOrb from '../components/BubbleOrb'
+import BubbleShare from '../components/BubbleShare'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -153,6 +154,8 @@ export default function Bubble() {
           {bubbleError && <p className="mt-3 text-sm text-[#ff6b81]">{bubbleError}</p>}
         </Card>
       </section>
+
+      {bubbleId && <BubbleShare bubbleId={bubbleId} />}
 
       <Sheet open={askMigrate && !!bubbleId && openOld.length > 0} onClose={() => setAskMigrate(false)} title="Alte Hausaufgaben mitnehmen?">
         <p className="mb-5 text-sm text-[var(--color-ink-dim)]">

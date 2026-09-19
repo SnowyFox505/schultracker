@@ -70,10 +70,13 @@ export async function leaveBubble(user) {
     const snap = await getDoc(ref)
     if (snap.exists()) {
       if (snap.data().members.length <= 1) {
-        const items = await getDocs(collection(ref, 'homework'))
-        await Promise.all(items.docs.map((d) => deleteDoc(d.ref)))
+        for (const sub of ['homework', 'tests', 'schedules']) {
+          const items = await getDocs(collection(ref, sub))
+          await Promise.all(items.docs.map((d) => deleteDoc(d.ref)))
+        }
         await deleteDoc(ref)
       } else {
+        await deleteDoc(doc(ref, 'schedules', user.uid))
         await updateDoc(ref, {
           members: arrayRemove(user.uid),
           [`memberNames.${user.uid}`]: deleteField(),
@@ -99,5 +102,68 @@ export async function migrateHomework(user, name, bubbleId, items) {
       createdAt: serverTimestamp(),
     })
     await deleteDoc(doc(db, 'users', user.uid, 'homework', id))
+  }
+}
+
+// Moves the user's own upcoming private tests into their bubble.
+export async function migrateTests(user, name, bubbleId, items) {
+  const target = collection(db, 'bubbles', bubbleId, 'tests')
+  for (const { id, subject, topic, date, photos } of items) {
+    await addDoc(target, {
+      subject: subject ?? '',
+      topic: topic ?? '',
+      date,
+      photos: photos ?? [],
+      addedBy: user.uid,
+      addedByName: name,
+      createdAt: serverTimestamp(),
+    })
+    await deleteDoc(doc(db, 'users', user.uid, 'tests', id))
+  }
+}
+
+// Schedule sharing: a snapshot copy per member at bubbles/{id}/schedules/{uid}.
+export async function shareSchedule(user, name, bubbleId, { lessons, breaks, subjects, customColors }) {
+  await setDoc(doc(db, 'bubbles', bubbleId, 'schedules', user.uid), {
+    ownerName: name,
+    lessons: Object.values(lessons).map(({ day, period, subject, room, color }) => ({
+      day,
+      period,
+      subject,
+      room: room || '',
+      color: color || 'orange',
+    })),
+    breaks: Object.values(breaks).map(({ afterPeriod, duration }) => ({ afterPeriod, duration })),
+    subjects: subjects.map(({ name: n, color }) => ({ name: n, color })),
+    customColors: customColors || [],
+    sharedAt: serverTimestamp(),
+  })
+}
+
+export async function unshareSchedule(user, bubbleId) {
+  await deleteDoc(doc(db, 'bubbles', bubbleId, 'schedules', user.uid))
+}
+
+// Replaces the importer's schedule + breaks with the shared one, and adds any missing subjects/colors.
+export async function importSchedule(user, sched, profile, updateUserProfile) {
+  for (const sub of ['schedule', 'breaks']) {
+    const old = await getDocs(collection(db, 'users', user.uid, sub))
+    await Promise.all(old.docs.map((d) => deleteDoc(d.ref)))
+  }
+  await Promise.all([
+    ...sched.lessons.map((l) => setDoc(doc(db, 'users', user.uid, 'schedule', `${l.day}-${l.period}`), l)),
+    ...sched.breaks.map((b) => setDoc(doc(db, 'users', user.uid, 'breaks', String(b.afterPeriod)), b)),
+  ])
+  const ownSubjects = profile?.subjects || []
+  const missing = sched.subjects
+    .filter((s) => !ownSubjects.some((o) => o.name === s.name))
+    .map((s) => ({ id: crypto.randomUUID(), name: s.name, color: s.color }))
+  const ownColors = profile?.customColors || []
+  const newColors = (sched.customColors || []).filter((c) => !ownColors.some((o) => o.id === c.id))
+  if (missing.length || newColors.length) {
+    await updateUserProfile({
+      subjects: [...ownSubjects, ...missing],
+      customColors: [...ownColors, ...newColors],
+    })
   }
 }

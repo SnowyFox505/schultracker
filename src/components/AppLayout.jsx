@@ -1,12 +1,12 @@
 import { AnimatePresence } from 'framer-motion'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import BottomNav from './BottomNav'
 import SideNav from './SideNav'
 import IntroReveal from './IntroReveal'
 import LoggingOutOverlay from './LoggingOutOverlay'
 import Sheet from './Sheet'
 import Button from './ui/Button'
-import { SettingsIcon } from './navIcons'
+import { BubbleIcon, SettingsIcon } from './navIcons'
 import { useAuth } from '../context/AuthContext'
 import { useSpinNavigate } from '../lib/useSpinNavigate'
 
@@ -26,6 +26,17 @@ export default function AppLayout() {
       >
         <SettingsIcon spinning={spinning} />
       </a>
+      <Link
+        to="/bubble"
+        aria-label="Bubble"
+        className={`fixed right-[4.5rem] top-[calc(env(safe-area-inset-top)+1.25rem)] z-30 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-xl md:hidden ${
+          location.pathname === '/bubble'
+            ? 'bg-[var(--color-accent)] text-black'
+            : 'bg-[var(--color-surface)]/80 text-[var(--color-ink-dim)]'
+        }`}
+      >
+        <BubbleIcon />
+      </Link>
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto md:overflow-visible">
         <div className="safe-top mx-auto w-full max-w-md px-5 pb-6 pt-6 md:max-w-3xl md:px-10 md:pb-16 md:pt-12 lg:max-w-5xl xl:max-w-6xl">
           <AnimatePresence mode="wait">

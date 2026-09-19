@@ -6,6 +6,8 @@ import { db } from '../lib/firebase'
 import { createBubble, joinBubble, leaveBubble } from '../lib/bubble'
 import { useAuth } from '../context/AuthContext'
 import PageTransition from '../components/PageTransition'
+import Sheet from '../components/Sheet'
+import QrScanner from '../components/QrScanner'
 import BubbleOrb from '../components/BubbleOrb'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -18,6 +20,7 @@ export default function Bubble() {
   const [bubble, setBubble] = useState(null)
   const [joinCode, setJoinCode] = useState(() => (searchParams.get('code') || '').toUpperCase().slice(0, 6))
   const [qr, setQr] = useState('')
+  const [scanning, setScanning] = useState(false)
   const [bubbleError, setBubbleError] = useState('')
   const [bubbleBusy, setBubbleBusy] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -104,6 +107,9 @@ export default function Bubble() {
               <Button disabled={bubbleBusy} onClick={() => runBubble(() => createBubble(user, profile?.name || ''))} className="mb-4 w-full">
                 Bubble erstellen
               </Button>
+              <Button variant="secondary" onClick={() => setScanning(true)} className="mb-4 w-full">
+                📷 QR-Code scannen
+              </Button>
               <div className="flex gap-2">
                 <Input
                   value={joinCode}
@@ -127,6 +133,17 @@ export default function Bubble() {
         </Card>
       </section>
 
+      <Sheet open={scanning} onClose={() => setScanning(false)} title="QR-Code scannen">
+        {scanning && (
+          <QrScanner
+            onCode={(code) => {
+              setScanning(false)
+              runBubble(() => joinBubble(user, profile?.name || '', code))
+            }}
+          />
+        )}
+        <p className="mt-3 text-center text-xs text-[var(--color-ink-faint)]">Halte die Kamera auf den QR-Code deines Freundes.</p>
+      </Sheet>
     </PageTransition>
   )
 }

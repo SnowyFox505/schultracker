@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import { useCollection } from '../lib/useCollection'
+import { useHomework } from '../lib/useHomework'
 import { useSchedule } from '../lib/useSchedule'
 import { useSavedToast } from '../lib/useSavedToast'
 import { DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
@@ -16,8 +16,8 @@ import Button from '../components/ui/Button'
 import SketchPad, { SketchThumbnail, strokesFromFirestore, strokesToFirestore } from '../components/SketchPad'
 
 export default function Hausaufgaben() {
-  const { profile } = useAuth()
-  const { items, add, update, remove } = useCollection('homework', { order: 'dueDate', direction: 'asc' })
+  const { user, profile } = useAuth()
+  const { items, add, update, remove } = useHomework()
   const { lessons } = useSchedule()
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -66,7 +66,7 @@ export default function Hausaufgaben() {
       dueDate,
     }
     if (editingId) {
-      await update(editingId, data)
+      await update(items.find((i) => i.id === editingId), data)
     } else {
       await add({ ...data, done: false })
     }
@@ -95,7 +95,7 @@ export default function Hausaufgaben() {
       <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
         <AnimatePresence initial={false}>
           {open_.map((hw) => (
-            <HomeworkRow key={hw.id} hw={hw} onToggle={() => update(hw.id, { done: true })} onDelete={() => remove(hw.id)} onEdit={() => openEdit(hw)} />
+            <HomeworkRow key={hw.id} hw={hw} uid={user?.uid} onToggle={() => update(hw, { done: true })} onDelete={() => remove(hw)} onEdit={() => openEdit(hw)} />
           ))}
         </AnimatePresence>
       </div>
@@ -106,7 +106,7 @@ export default function Hausaufgaben() {
           <div className="flex flex-col gap-2.5 opacity-50 md:grid md:grid-cols-2 md:gap-3">
             <AnimatePresence initial={false}>
               {done.map((hw) => (
-                <HomeworkRow key={hw.id} hw={hw} done onToggle={() => update(hw.id, { done: false })} onDelete={() => remove(hw.id)} onEdit={() => openEdit(hw)} />
+                <HomeworkRow key={hw.id} hw={hw} uid={user?.uid} done onToggle={() => update(hw, { done: false })} onDelete={() => remove(hw)} onEdit={() => openEdit(hw)} />
               ))}
             </AnimatePresence>
           </div>
@@ -191,7 +191,7 @@ export default function Hausaufgaben() {
   )
 }
 
-function HomeworkRow({ hw, done, onToggle, onDelete, onEdit }) {
+function HomeworkRow({ hw, uid, done, onToggle, onDelete, onEdit }) {
   return (
     <motion.div
       layout
@@ -239,6 +239,9 @@ function HomeworkRow({ hw, done, onToggle, onDelete, onEdit }) {
       </motion.button>
       <button type="button" onClick={onEdit} className="min-w-0 flex-1 text-left">
         {hw.subject && <p className="text-xs font-semibold text-[var(--color-accent)]">{hw.subject}</p>}
+        {hw.shared && hw.addedBy !== uid && hw.addedByName && (
+          <p className="text-[11px] text-[var(--color-ink-faint)]">von {hw.addedByName}</p>
+        )}
         {hw.sketch && hw.sketch.length > 0 ? (
           <SketchThumbnail strokes={strokesFromFirestore(hw.sketch)} className={`h-8 w-24 ${done ? 'opacity-50' : ''}`} />
         ) : (

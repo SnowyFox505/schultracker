@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useSchedule } from '../lib/useSchedule'
 import { useCollection } from '../lib/useCollection'
+import { useHomework } from '../lib/useHomework'
 import { DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Card from '../components/ui/Card'
@@ -11,7 +12,7 @@ export default function Home() {
   const { profile } = useAuth()
   const customColors = profile?.customColors || []
   const { lessons } = useSchedule()
-  const { items: homework } = useCollection('homework', { order: 'dueDate', direction: 'asc' })
+  const { items: homework } = useHomework()
   const { items: tests } = useCollection('tests', { order: 'date', direction: 'asc' })
 
   const now = new Date()

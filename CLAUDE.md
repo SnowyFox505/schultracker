@@ -89,7 +89,9 @@ There's no automated test suite. Every feature/fix in this project so far has be
 4. Deploying to production (`npx vercel --prod --yes`) and re-verifying on the live URL before considering a mobile/Safari-specific fix confirmed — the local dev server has its own HMR-only quirks (e.g. a Framer Motion element observed stuck at `opacity: 0` only under Vite dev/HMR, never in a production build) that can produce false positives/negatives unrelated to the actual bug.
 5. For anything Safari/iOS-standalone-specific: Chrome DevTools device emulation reliably fails to reproduce the real bug (see the layout-shell section above) — treat an emulator-clean result as inconclusive, not as confirmation, and be ready to ask the user to test on their actual phone and describe/screen-record what they see.
 
-## Planned but not yet built: "Bubble" (shared homework)
+## "Bubble" (shared homework) — v1 built (needs `firestore.rules` pasted into the Firebase Console to work)
+
+**Implemented:** `firestore.rules` (bubbles block), `src/lib/bubble.js` (create/join/leave), `src/lib/useHomework.js` (merges personal + bubble homework; used by `Hausaufgaben.jsx` and `Home.jsx`; `update`/`remove` take the item, not an id), Bubble card in `Settings.jsx`, `users/{uid}.bubbleId`. Leaving only clears `bubbleId` (uid stays in `members`), account deletion doesn't touch bubbles — both deliberately deferred. The rest of this section is the original plan.
 
 A friend of the user's suggested a feature to share homework between 2–3 people so only one person has to enter it. The user wants it named exactly **"Bubble"** (you "join someone's Bubble" via a code). A full implementation plan exists at `C:\Users\neuba\.claude\plans\synchronous-waddling-cloud.md` (may or may not still be present depending on plan-file retention) covering:
 

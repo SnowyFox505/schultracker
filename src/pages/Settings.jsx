@@ -25,6 +25,7 @@ export default function Settings() {
   const [namingId, setNamingId] = useState(null)
   const [nameDraft, setNameDraft] = useState('')
 
+  const [refreshing, setRefreshing] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [password, setPassword] = useState('')
   const [deleteError, setDeleteError] = useState('')
@@ -76,6 +77,19 @@ export default function Settings() {
     await Promise.all(
       lessonsForSubject(subj.name).map((l) => setLesson(l.day, l.period, { ...l, subject: trimmed }))
     )
+  }
+
+  async function refreshApp() {
+    setRefreshing(true)
+    try {
+      const regs = await navigator.serviceWorker?.getRegistrations()
+      await Promise.all((regs || []).map((r) => r.unregister()))
+      const keys = await caches.keys()
+      await Promise.all(keys.map((k) => caches.delete(k)))
+    } catch {
+      // still reload below
+    }
+    window.location.reload()
   }
 
   async function handleDelete(e) {
@@ -209,6 +223,18 @@ export default function Settings() {
             />
             <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Farbe lang drücken zum Löschen (Orange bleibt immer).</p>
           </div>
+        </Card>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="mb-3 text-lg font-bold">App</h2>
+        <Card className="!p-4">
+          <p className="mb-4 text-sm text-[var(--color-ink-dim)]">
+            Holt die neueste Version: leert den Zwischenspeicher und lädt die App neu. Deine Daten bleiben erhalten.
+          </p>
+          <Button variant="secondary" onClick={refreshApp} disabled={refreshing} className="w-full">
+            {refreshing ? 'Lädt neu…' : 'App aktualisieren'}
+          </Button>
         </Card>
       </section>
 

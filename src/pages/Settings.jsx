@@ -48,7 +48,7 @@ export default function Settings() {
           {(profile?.name || '?').charAt(0).toUpperCase()}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-base font-bold">{profile?.name || 'Du'}</p>
+          <p className="truncate text-base font-bold text-[var(--color-accent)]">{profile?.name || 'Du'}</p>
           <p className="truncate text-sm text-[var(--color-ink-faint)]">{user?.email}</p>
         </div>
       </div>

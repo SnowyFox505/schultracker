@@ -1,6 +1,12 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '3.6',
+    date: '20.09.2026',
+    title: 'Neue Bubble-Optik',
+    items: ['Die Bubble sieht jetzt aus wie eine echte, schimmernde Luftblase'],
+  },
+  {
     version: '3.5',
     date: '20.09.2026',
     title: 'Neue Einstellungen und Versionsanzeige',

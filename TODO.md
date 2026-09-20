@@ -39,6 +39,8 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 - [x] Bubble-Optik: die Bubble als schöne orange "Luftblase" darstellen, in der die Namen aller Mitglieder herumschweben (animiert, siehe Animations-Tiers in CLAUDE.md)
 - [x] Bubble eigene Unterseite: alles rund um die Bubble (erstellen/beitreten/Mitglieder/verlassen, spätere Bubble-Einstellungen) aus den Einstellungen in eine neue Seite "Bubble" verschieben (Route + Nav-Eintrag)
 
+- [x] Bubble-Design überarbeiten: statt einer einfachen orangenen Kugel eine echte, schöne Luftblase (leicht übertrieben, aber nicht 1:1 kopiert) — glasig/durchscheinend, schimmernde Regenbogen-Reflexe an den Rändern, weiche Glanzlichter, warmer orangener Glow drumherum, ein paar kleine Bläschen in der Nähe; Namen schweben weiter darin (`BubbleOrb.jsx`)
+
 ## Sonstiges
 
 - Bubble v1 ist gebaut (Hausaufgaben teilen per Code); Verlassen/Account-Löschen räumen auf; QR-Beitritt gebaut; Migration alter Hausaufgaben gebaut.

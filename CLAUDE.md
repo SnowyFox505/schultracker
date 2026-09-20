@@ -107,6 +107,10 @@ If this plan file is gone, re-derive the design from this section plus the data-
 
 `/einstellungen` (`Settings.jsx`) is an overview list (profile card + one row per area, each showing its current state); the areas are subpages under `/einstellungen/{faecher,benachrichtigungen,app,account}` (`SettingsSubjects/Notifications/App/Account.jsx`) wrapped in `SubPage` (back link + title). The Bubble row just links to `/bubble`. Add new settings areas as a new subpage plus a row, not as another card on one long page.
 
+## Versioning
+
+The app shows "Version X.Y · date time" at the bottom of Settings. Source of truth is `version` in `package.json` (shown as `X.Y` when the patch is 0). **Bump the minor number (3.2 → 3.3) on every deploy to production; only bump the major number (3.x → 4.0) when the user says so** — they decide when a new big release starts. Keep the git commit and the deploy in step with the bump.
+
 ## Backlog
 
 `TODO.md` in the repo root tracks the user's ongoing list of feature ideas/fixes (collected from their in-app Notizen), sorted easy → hard. Check it for pending work and check items off (don't delete) as they're completed.

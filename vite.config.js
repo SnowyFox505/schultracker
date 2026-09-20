@@ -1,13 +1,16 @@
+import { readFileSync } from 'node:fs'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
+// version lives in package.json: bump the minor part on every release, the major part only when the user says so
+const APP_VERSION = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')).version.replace(/\.0$/, '')
 const BUILD_LABEL = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 
 export default defineConfig({
-  define: { __BUILD_LABEL__: JSON.stringify(BUILD_LABEL) },
+  define: { __BUILD_LABEL__: JSON.stringify(BUILD_LABEL), __APP_VERSION__: JSON.stringify(APP_VERSION) },
   plugins: [
     react(),
     tailwindcss(),

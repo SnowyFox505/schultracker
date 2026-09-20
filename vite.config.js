@@ -4,7 +4,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
+const BUILD_LABEL = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+
 export default defineConfig({
+  define: { __BUILD_LABEL__: JSON.stringify(BUILD_LABEL) },
   plugins: [
     react(),
     tailwindcss(),

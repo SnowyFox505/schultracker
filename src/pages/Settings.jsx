@@ -48,7 +48,7 @@ export default function Settings() {
           {(profile?.name || '?').charAt(0).toUpperCase()}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-base font-bold text-[var(--color-accent)]">{profile?.name || 'Du'}</p>
+          <p className="truncate text-base font-bold" style={{ color: '#ff7c3a' }}>{profile?.name || 'Du'}</p>
           <p className="truncate text-sm text-[var(--color-ink-faint)]">{user?.email}</p>
         </div>
       </div>
@@ -62,6 +62,7 @@ export default function Settings() {
       </div>
 
       <p className="mt-10 text-center text-xs text-[var(--color-ink-faint)]">Developer: Leopold N.</p>
+      <p className="mt-1 text-center text-[11px] text-[var(--color-ink-faint)]">Version {__BUILD_LABEL__}</p>
     </PageTransition>
   )
 }

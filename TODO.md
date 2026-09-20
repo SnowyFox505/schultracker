@@ -31,7 +31,7 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 - [ ] Offline-First-Modus (IndexedDB-Cache, damit Hausaufgaben auch ganz ohne Netz eingetragen werden können und im Hintergrund synchronisieren, sobald wieder Verbindung da ist) — großer Architektur-Einschnitt, vorher Plan+Absprache nötig
 - [x] Apple-Pencil-Notizfeld — beim Hinzufügen/Bearbeiten von Hausaufgaben und Notizen per Text/Stift-Umschalter wählbar; Zeichenfeld statt Textfeld (nur per Apple Pencil, Finger wird ignoriert, siehe CLAUDE.md), Skizze wird als kleines Vorschaubild in der Liste angezeigt, plus "Zurück"-Button (max. 6x rückgängig)
 - [ ] Split-View/Drag-and-Drop auf iPad — Layout passt sich an geteilten Bildschirm an; Fotos (z.B. vom Tafelbild) per Drag-and-Drop in eine Hausaufgabe ziehbar
-- [~] Push-Benachrichtigungen (gebaut: Erlaubnis-Knopf, Einstellungen, Server; offen: Onboarding-Schritt, Firebase/Vercel/cron-job.org-Setup durch Nutzer) (braucht Firebase Cloud Messaging + Service-Worker-Erweiterung + Backend/Functions für zeitgesteuerten Versand):
+- [x] Push-Benachrichtigungen (Erlaubnis-Knopf, Einstellungen, Onboarding-Schritt, Server + cron-job.org laufen; gezielter Einzelversand bewusst nicht gebaut) (braucht Firebase Cloud Messaging + Service-Worker-Erweiterung + Backend/Functions für zeitgesteuerten Versand):
   - Abend-Check ~18:00 Uhr: erinnert nur, wenn für morgen noch offene Hausaufgaben da sind (bleibt still, wenn alles erledigt ist)
   - Test-Countdown: gestufte Erinnerung, z.B. 5 Tage vorher + nochmal am Vorabend
   - Gezielter Einzelversand über individuelle Geräte-Token, damit z.B. nur die Person mit der vergessenen Aufgabe benachrichtigt wird, nicht die ganze Bubble

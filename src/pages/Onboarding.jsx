@@ -1,3 +1,4 @@
+import PushSettings from '../components/PushSettings'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -8,7 +9,7 @@ import ColorPicker from '../components/ColorPicker'
 import { GridIcon, TaskIcon, ClockIcon, NoteIcon } from '../components/navIcons'
 import { SUBJECT_COLORS, colorFor } from '../lib/constants'
 
-const TOTAL_STEPS = 3
+const TOTAL_STEPS = 4
 
 export default function Onboarding() {
   const { profile, completeOnboarding, addCustomColor, removeCustomColor, hidePresetColor } = useAuth()
@@ -165,6 +166,16 @@ export default function Onboarding() {
             )}
 
             {step === 2 && (
+              <Step key="push" direction={direction}>
+                <h1 className="mb-2 font-[var(--font-display)] text-4xl font-extrabold leading-tight">Erinnerungen</h1>
+                <p className="mb-6 text-[var(--color-ink-dim)]">
+                  Optional: Lass dich an offene Hausaufgaben und Tests erinnern. Das kannst du jederzeit in den Einstellungen ändern.
+                </p>
+                <PushSettings />
+              </Step>
+            )}
+
+            {step === 3 && (
               <Step key="ready" direction={direction}>
                 <motion.h1
                   initial={{ opacity: 0, scale: 0.9 }}

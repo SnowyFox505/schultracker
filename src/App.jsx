@@ -15,6 +15,7 @@ import SettingsSubjects from './pages/SettingsSubjects'
 import SettingsNotifications from './pages/SettingsNotifications'
 import SettingsApp from './pages/SettingsApp'
 import SettingsAccount from './pages/SettingsAccount'
+import SettingsUpdates from './pages/SettingsUpdates'
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="/einstellungen/benachrichtigungen" element={<SettingsNotifications />} />
           <Route path="/einstellungen/app" element={<SettingsApp />} />
           <Route path="/einstellungen/account" element={<SettingsAccount />} />
+          <Route path="/einstellungen/neuigkeiten" element={<SettingsUpdates />} />
         </Route>
       </Route>
     </Routes>

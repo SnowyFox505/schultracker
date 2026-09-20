@@ -109,7 +109,7 @@ If this plan file is gone, re-derive the design from this section plus the data-
 
 ## Versioning
 
-The app shows "Version X.Y · date time" at the bottom of Settings. Source of truth is `version` in `package.json` (shown as `X.Y` when the patch is 0). **Bump the minor number (3.2 → 3.3) on every deploy to production; only bump the major number (3.x → 4.0) when the user says so** — they decide when a new big release starts. Keep the git commit and the deploy in step with the bump.
+The app shows "Version X.Y · date time" at the bottom of Settings. Source of truth is `version` in `package.json` (shown as `X.Y` when the patch is 0). **Bump the minor number (3.2 → 3.3) on every deploy to production; only bump the major number (3.x → 4.0) when the user says so** — they decide when a new big release starts. Keep the git commit and the deploy in step with the bump. **Every deploy also adds an entry at the top of `src/lib/changelog.js`** (version, date, short German title, 1–5 plain-language bullets) — it is shown on Settings → "Was ist neu".
 
 ## Backlog
 

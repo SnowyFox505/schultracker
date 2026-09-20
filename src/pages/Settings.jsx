@@ -25,6 +25,12 @@ const RefreshIcon = () => (
     <path d="M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4" />
   </svg>
 )
+const SparkIcon = () => (
+  <svg {...svg}>
+    <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z" />
+    <path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7.7-2Z" />
+  </svg>
+)
 const UserIcon = () => (
   <svg {...svg}>
     <circle cx="12" cy="8" r="4" />
@@ -58,6 +64,7 @@ export default function Settings() {
         <Row to="/einstellungen/benachrichtigungen" icon={<BellIcon />} title="Benachrichtigungen" hint={pushLabel} />
         <Row to="/bubble" icon={<BubbleIcon />} title="Bubble" hint={bubbleLabel} />
         <Row to="/einstellungen/app" icon={<RefreshIcon />} title="App aktualisieren" hint="Neueste Version holen" />
+        <Row to="/einstellungen/neuigkeiten" icon={<SparkIcon />} title="Was ist neu" hint={`Version ${__APP_VERSION__}`} />
         <Row to="/einstellungen/account" icon={<UserIcon />} title="Account" hint="Abmelden, Konto löschen" />
       </div>
 

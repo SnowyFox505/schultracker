@@ -103,6 +103,10 @@ If this plan file is gone, re-derive the design from this section plus the data-
 
 **Later extension ideas for Bubble** (not in the v1 scope above, collected in `TODO.md` under 🔴): joining via a scanned QR code instead of typing the code manually; explicitly verifying the realtime sync experience (the `onSnapshot`-based design already gives this "for free," just needs highlighting/testing when v1 is built); push notifications (evening reminder for open homework due tomorrow, staged test-countdown reminders, per-device-token targeted sends) — this last one needs Firebase Cloud Messaging plus a scheduled backend (Cloud Functions or similar), which this repo doesn't have yet, so it's a bigger infra addition than anything else here.
 
+### Settings structure
+
+`/einstellungen` (`Settings.jsx`) is an overview list (profile card + one row per area, each showing its current state); the areas are subpages under `/einstellungen/{faecher,benachrichtigungen,app,account}` (`SettingsSubjects/Notifications/App/Account.jsx`) wrapped in `SubPage` (back link + title). The Bubble row just links to `/bubble`. Add new settings areas as a new subpage plus a row, not as another card on one long page.
+
 ## Backlog
 
 `TODO.md` in the repo root tracks the user's ongoing list of feature ideas/fixes (collected from their in-app Notizen), sorted easy → hard. Check it for pending work and check items off (don't delete) as they're completed.

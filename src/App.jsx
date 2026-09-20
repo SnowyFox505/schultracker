@@ -11,6 +11,10 @@ import Pruefungen from './pages/Pruefungen'
 import Notizen from './pages/Notizen'
 import Bubble from './pages/Bubble'
 import Settings from './pages/Settings'
+import SettingsSubjects from './pages/SettingsSubjects'
+import SettingsNotifications from './pages/SettingsNotifications'
+import SettingsApp from './pages/SettingsApp'
+import SettingsAccount from './pages/SettingsAccount'
 
 export default function App() {
   return (
@@ -33,6 +37,10 @@ export default function App() {
           <Route path="/notizen" element={<Notizen />} />
           <Route path="/bubble" element={<Bubble />} />
           <Route path="/einstellungen" element={<Settings />} />
+          <Route path="/einstellungen/faecher" element={<SettingsSubjects />} />
+          <Route path="/einstellungen/benachrichtigungen" element={<SettingsNotifications />} />
+          <Route path="/einstellungen/app" element={<SettingsApp />} />
+          <Route path="/einstellungen/account" element={<SettingsAccount />} />
         </Route>
       </Route>
     </Routes>

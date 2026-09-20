@@ -9,7 +9,7 @@ export default function SideNav() {
   const { profile, requestLogout } = useAuth()
   const location = useLocation()
   const { spinning, trigger } = useSpinNavigate(SETTINGS_ITEM.to)
-  const settingsActive = location.pathname === SETTINGS_ITEM.to
+  const settingsActive = location.pathname.startsWith(SETTINGS_ITEM.to)
 
   return (
     <nav className="safe-top sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]/40 px-4 py-8 md:flex lg:w-72">

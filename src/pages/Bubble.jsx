@@ -97,8 +97,8 @@ export default function Bubble() {
             code={fx.code}
             name={profile?.name || ''}
             onDone={() => {
+              if (fx.mode !== 'leave') setAskMigrate(true)
               setFx(null)
-              setAskMigrate(true)
             }}
           />
         )}
@@ -134,7 +134,7 @@ export default function Bubble() {
                   <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Freund scannt das mit der Kamera und tritt bei</p>
                 </div>
               )}
-              <Button variant="secondary" disabled={bubbleBusy} onClick={() => runBubble(() => leaveBubble(user))} className="w-full">
+              <Button variant="secondary" disabled={bubbleBusy} onClick={() => runBubble(() => leaveBubble(user), 'leave')} className="w-full">
                 Bubble verlassen
               </Button>
             </>

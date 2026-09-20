@@ -11,6 +11,8 @@ import Sheet from '../components/Sheet'
 import QrScanner from '../components/QrScanner'
 import BubbleOrb from '../components/BubbleOrb'
 import BubbleShare from '../components/BubbleShare'
+import BubbleFx from '../components/BubbleFx'
+import { AnimatePresence } from 'framer-motion'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -24,6 +26,7 @@ export default function Bubble() {
   const [qr, setQr] = useState('')
   const [scanning, setScanning] = useState(false)
   const [askMigrate, setAskMigrate] = useState(false)
+  const [fx, setFx] = useState(null)
   const { items: personalHomework } = useCollection('homework', { order: 'dueDate', direction: 'asc' })
   const openOld = personalHomework.filter((h) => !h.done)
   const [bubbleError, setBubbleError] = useState('')
@@ -56,13 +59,13 @@ export default function Bubble() {
     setAskMigrate(false)
   }
 
-  async function runBubble(action, offerMigration = false) {
+  async function runBubble(action, fxMode = null) {
     setBubbleError('')
     setBubbleBusy(true)
     try {
-      await action()
+      const result = await action()
       setJoinCode('')
-      if (offerMigration) setAskMigrate(true)
+      if (fxMode) setFx({ mode: fxMode, code: result })
     } catch (err) {
       setBubbleError(
         err.message === 'not-found'
@@ -86,6 +89,20 @@ export default function Bubble() {
   }
 
   return (
+    <>
+      <AnimatePresence>
+        {fx && (
+          <BubbleFx
+            mode={fx.mode}
+            code={fx.code}
+            name={profile?.name || ''}
+            onDone={() => {
+              setFx(null)
+              setAskMigrate(true)
+            }}
+          />
+        )}
+      </AnimatePresence>
     <PageTransition>
       <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Bubble</h1>
 
@@ -126,7 +143,7 @@ export default function Bubble() {
               <p className="mb-4 text-sm text-[var(--color-ink-dim)]">
                 Teile Hausaufgaben mit bis zu 2 Freunden — nur einer muss sie eintragen.
               </p>
-              <Button disabled={bubbleBusy} onClick={() => runBubble(() => createBubble(user, profile?.name || ''), true)} className="mb-4 w-full">
+              <Button disabled={bubbleBusy} onClick={() => runBubble(() => createBubble(user, profile?.name || ''), 'create')} className="mb-4 w-full">
                 Bubble erstellen
               </Button>
               <Button variant="secondary" onClick={() => setScanning(true)} className="mb-4 w-full">
@@ -143,7 +160,7 @@ export default function Bubble() {
                 <Button
                   variant="secondary"
                   disabled={bubbleBusy || joinCode.length < 6}
-                  onClick={() => runBubble(() => joinBubble(user, profile?.name || '', joinCode), true)}
+                  onClick={() => runBubble(() => joinBubble(user, profile?.name || '', joinCode), 'join')}
                   className="px-4"
                 >
                   Beitreten
@@ -176,12 +193,13 @@ export default function Bubble() {
           <QrScanner
             onCode={(code) => {
               setScanning(false)
-              runBubble(() => joinBubble(user, profile?.name || '', code), true)
+              runBubble(() => joinBubble(user, profile?.name || '', code), 'join')
             }}
           />
         )}
         <p className="mt-3 text-center text-xs text-[var(--color-ink-faint)]">Halte die Kamera auf den QR-Code deines Freundes.</p>
       </Sheet>
     </PageTransition>
+    </>
   )
 }

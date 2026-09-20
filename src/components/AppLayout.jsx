@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import BottomNav from './BottomNav'
@@ -7,6 +8,7 @@ import LoggingOutOverlay from './LoggingOutOverlay'
 import Sheet from './Sheet'
 import Button from './ui/Button'
 import { BubbleIcon, SettingsIcon } from './navIcons'
+import { UpdatedBurst } from './UpdateFx'
 import { useAuth } from '../context/AuthContext'
 import { useSpinNavigate } from '../lib/useSpinNavigate'
 
@@ -14,6 +16,21 @@ export default function AppLayout() {
   const location = useLocation()
   const { profile, justOnboarded, clearJustOnboarded, logoutFlow, cancelLogout, beginLogout, logout } = useAuth()
   const { spinning, trigger } = useSpinNavigate('/einstellungen')
+  const [justUpdated, setJustUpdated] = useState(() => {
+    try {
+      const v = sessionStorage.getItem('justUpdated') === '1'
+      sessionStorage.removeItem('justUpdated')
+      return v
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    if (!justUpdated) return
+    const t = setTimeout(() => setJustUpdated(false), 3000)
+    return () => clearTimeout(t)
+  }, [justUpdated])
 
   return (
     <div className="gradient-warm flex h-[var(--app-height,100dvh)] w-full flex-col overflow-hidden md:h-auto md:min-h-dvh md:flex-row md:overflow-visible">
@@ -72,6 +89,8 @@ export default function AppLayout() {
           </Button>
         </div>
       </Sheet>
+
+      <AnimatePresence>{justUpdated && <UpdatedBurst />}</AnimatePresence>
 
       <AnimatePresence>
         {logoutFlow === 'running' && <LoggingOutOverlay name={profile?.name} onDone={logout} />}

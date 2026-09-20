@@ -12,6 +12,7 @@ import Sheet from '../components/Sheet'
 import ColorPicker from '../components/ColorPicker'
 import DeletingOverlay from '../components/DeletingOverlay'
 import PushSettings from '../components/PushSettings'
+import { UpdatingOverlay } from '../components/UpdateFx'
 
 export default function Settings() {
   const { user, profile, requestLogout, updateUserProfile, addCustomColor, removeCustomColor, hidePresetColor } = useAuth()
@@ -82,6 +83,7 @@ export default function Settings() {
 
   async function refreshApp() {
     setRefreshing(true)
+    const minWait = new Promise((r) => setTimeout(r, 3000))
     try {
       const regs = await navigator.serviceWorker?.getRegistrations()
       await Promise.all((regs || []).map((r) => r.unregister()))
@@ -89,6 +91,12 @@ export default function Settings() {
       await Promise.all(keys.map((k) => caches.delete(k)))
     } catch {
       // still reload below
+    }
+    await minWait
+    try {
+      sessionStorage.setItem('justUpdated', '1')
+    } catch {
+      // storage unavailable — the celebration just won't show
     }
     window.location.reload()
   }
@@ -301,6 +309,7 @@ export default function Settings() {
     </PageTransition>
 
       <AnimatePresence>{deleting && <DeletingOverlay />}</AnimatePresence>
+      <AnimatePresence>{refreshing && <UpdatingOverlay />}</AnimatePresence>
     </>
   )
 }

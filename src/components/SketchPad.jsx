@@ -35,6 +35,19 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [strokes])
 
+  // iOS treats a quick tap followed by another touch (the dot of an "i", then an "e") as a
+  // double-tap gesture and swallows the second stroke. Pointer events can't cancel that; native
+  // non-passive touch listeners can.
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const stop = (ev) => ev.preventDefault()
+    const opts = { passive: false }
+    const events = ['touchstart', 'touchmove', 'touchend', 'gesturestart', 'dblclick']
+    events.forEach((n) => canvas.addEventListener(n, stop, opts))
+    return () => events.forEach((n) => canvas.removeEventListener(n, stop, opts))
+  }, [])
+
   function size() {
     const canvas = canvasRef.current
     return { w: canvas.clientWidth, h: canvas.clientHeight }

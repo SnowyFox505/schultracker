@@ -9,6 +9,8 @@ export const CHANGELOG = [
       'Dieselbe Animation nach dem Abmelden',
       'Einführung nach der Einrichtung: Logo-Ausbruch, dann fliegen die fünf Bereiche der App ein',
       'Konto löschen: ruhiger Abschied, das Logo löst sich in Funken auf',
+      'App aktualisieren: Funken strömen ins Logo, danach landest du direkt bei „Was ist neu“, wo der neueste Eintrag aufleuchtet',
+      'Hausaufgabe abhaken und „Gespeichert“ mit kleinen Funken',
       'Bubble erstellen, beitreten und verlassen: glasige Bubble, Funken und die anderen Mitglieder schweben schon darin, wenn du eintauchst',
     ],
   },

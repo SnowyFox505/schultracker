@@ -191,6 +191,35 @@ export default function Hausaufgaben() {
   )
 }
 
+// Little burst around the checkbox the moment a homework gets ticked off.
+function CheckSparks() {
+  return (
+    <>
+      <motion.span
+        className="pointer-events-none absolute h-6 w-6 rounded-full border-2 border-[var(--color-accent-2)]"
+        initial={{ scale: 1, opacity: 0 }}
+        animate={{ scale: [1, 1, 2.6], opacity: [0, 0.9, 0] }}
+        exit={{ opacity: 0, transition: { duration: 0 } }}
+        transition={{ duration: 0.5, ease: 'easeOut', times: [0, 0.01, 1] }}
+      />
+      {Array.from({ length: 9 }).map((_, i) => {
+        const a = (i / 9) * Math.PI * 2 + 0.3
+        const d = 20 + (i % 3) * 6
+        return (
+          <motion.span
+            key={i}
+            className="pointer-events-none absolute h-1 w-1 rounded-full bg-[var(--color-accent-2)]"
+            initial={{ x: 0, y: 0, opacity: 0 }}
+            animate={{ x: Math.cos(a) * d, y: Math.sin(a) * d, opacity: [0, 1, 0], scale: [0.6, 1.2, 0.3] }}
+            exit={{ opacity: 0, transition: { duration: 0 } }}
+            transition={{ duration: 0.55, ease: 'easeOut' }}
+          />
+        )
+      })}
+    </>
+  )
+}
+
 function HomeworkRow({ hw, uid, done, onToggle, onDelete, onEdit }) {
   return (
     <motion.div
@@ -212,6 +241,7 @@ function HomeworkRow({ hw, uid, done, onToggle, onDelete, onEdit }) {
         }`}
       >
         <AnimatePresence>
+          {done && <CheckSparks key="sparks" />}
           {done && (
             <motion.svg
               key="check"

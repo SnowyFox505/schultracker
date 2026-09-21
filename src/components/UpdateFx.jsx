@@ -29,12 +29,33 @@ export function UpdatingOverlay({ seconds = 3 }) {
             transition={{ duration: seconds, ease: 'easeInOut' }}
           />
         </svg>
+        {/* new-version sparks stream into the logo, over and over */}
+        {Array.from({ length: 14 }).map((_, i) => {
+          const a = (i / 14) * Math.PI * 2 + (i % 3) * 0.25
+          const d = 150 + (i % 4) * 30
+          return (
+            <motion.span
+              key={i}
+              className="absolute h-1.5 w-1.5 rounded-full bg-[var(--color-accent-2)] shadow-[0_0_10px_#ff7c3a]"
+              initial={{ x: Math.cos(a) * d, y: Math.sin(a) * d, opacity: 0 }}
+              animate={{ x: 0, y: 0, opacity: [0, 1, 1, 0], scale: [1, 1, 0.4] }}
+              transition={{ duration: 1.3, delay: (i % 7) * 0.2, repeat: Infinity, repeatDelay: 0.1, ease: 'easeIn' }}
+            />
+          )
+        })}
         <motion.img
           src="/icons/icon-192.png"
           alt=""
-          className="h-20 w-20 rounded-[22px] shadow-[0_0_40px_rgba(255,122,48,0.45)]"
+          className="relative h-20 w-20 rounded-[22px] shadow-[0_0_40px_rgba(255,122,48,0.45)]"
           animate={{ scale: [1, 1.08, 1] }}
           transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        {/* the moment the ring closes: flash and shock wave */}
+        <motion.span
+          className="absolute h-24 w-24 rounded-full border-2 border-[#ffb347] shadow-[0_0_30px_#ffb347]"
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: [0.5, 0.5, 3.4], opacity: [0, 0.9, 0] }}
+          transition={{ delay: Math.max(seconds - 0.4, 0), duration: 0.8, ease: 'easeOut', times: [0, 0.01, 1] }}
         />
       </div>
       <p className="mt-8 text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-ink-dim)]">

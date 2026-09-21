@@ -1,6 +1,15 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.1',
+    date: '21.09.2026',
+    title: 'Neue Animationen',
+    items: [
+      'Neuer Start: Funken sammeln sich im Logo, es platzt in Wellen und Funken auf und fliegt nahtlos in den Login-Screen',
+      'Dieselbe Animation nach dem Abmelden',
+    ],
+  },
+  {
     version: '4.0',
     date: '21.09.2026',
     title: 'Das Design-Update',
@@ -8,7 +17,6 @@ export const CHANGELOG = [
       'Bubble-Seite neu: Code groß und übersichtlich, QR-Code auf Knopfdruck',
       'Teilen-Einstellungen als eigene Karten mit Symbolen',
       'Bubble verlassen ganz unten, dezent',
-      'Neuer Start: Funken sammeln sich im Logo, es platzt in Wellen und Funken auf und fliegt in den Login-Screen. Auch nach dem Abmelden',
     ],
   },
   {

@@ -38,6 +38,7 @@ export default function ProjektDetail() {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [lightbox, setLightbox] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [shareError, setShareError] = useState('')
 
   useEffect(() => {
     if (!bubbleId) return
@@ -63,8 +64,16 @@ export default function ProjektDetail() {
 
   async function safe(fn) {
     setBusy(true)
+    setShareError('')
     try {
       await fn()
+    } catch (err) {
+      console.error(err)
+      setShareError(
+        err?.code === 'permission-denied'
+          ? 'Dafür fehlen noch die neuen Firebase-Regeln (Firestore → Regeln). Füge sie ein und veröffentliche sie.'
+          : 'Das Teilen hat nicht geklappt. Versuch es nochmal.'
+      )
     } finally {
       setBusy(false)
     }
@@ -173,6 +182,7 @@ export default function ProjektDetail() {
                   })}
                 </div>
               )}
+              {shareError && <p className="mt-3 text-sm text-[#ff6b81]">{shareError}</p>}
               <p className="mt-3 text-xs text-[var(--color-ink-faint)]">
                 Wer Zugriff hat, kann alles bearbeiten. Nur du kannst das Projekt löschen oder die Freigabe ändern.
               </p>

@@ -57,3 +57,16 @@ input, textarea {
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* iOS 27 paints a Liquid-Glass blur over the status-bar inset wherever the page top isn't a solid
+   colour. An always-opaque strip of exactly that height gives it a solid colour to sample. */
+#status-strip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top);
+  background: var(--color-base);
+  z-index: 2147483647;
+  pointer-events: none;
+}

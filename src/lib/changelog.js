@@ -1,6 +1,12 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '3.8',
+    date: '21.09.2026',
+    title: 'Verwischter Rand oben (iOS 27)',
+    items: ['Versuch, die Verwischung oben am Bildschirmrand unter iOS 27 zu beheben'],
+  },
+  {
     version: '3.7',
     date: '21.09.2026',
     title: 'Teilen, Aufräumen, Stift',

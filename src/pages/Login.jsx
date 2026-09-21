@@ -44,6 +44,12 @@ export default function Login() {
   return (
     <div className="gradient-warm flex min-h-dvh w-full items-center justify-center px-6">
       <PageTransition className="w-full max-w-sm">
+        <img
+          id="login-logo"
+          src="/icons/icon-192.png"
+          alt=""
+          className="mb-6 h-16 w-16 rounded-[18px] shadow-[0_0_30px_rgba(255,122,48,0.35)]"
+        />
         <motion.h1
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}

@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import AuthReveal from './components/AuthReveal'
 import ProtectedRoute, { OnboardingRoute, PublicOnlyRoute } from './components/ProtectedRoute'
 import AppLayout from './components/AppLayout'
 import Login from './pages/Login'
@@ -19,6 +20,8 @@ import SettingsUpdates from './pages/SettingsUpdates'
 
 export default function App() {
   return (
+    <>
+    <AuthReveal />
     <Routes>
       <Route element={<PublicOnlyRoute />}>
         <Route path="/login" element={<Login />} />
@@ -46,5 +49,6 @@ export default function App() {
         </Route>
       </Route>
     </Routes>
+    </>
   )
 }

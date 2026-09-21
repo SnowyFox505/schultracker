@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import Shine, { flyIn } from '../components/Shine'
 import { useAuth } from '../context/AuthContext'
 import PageTransition from '../components/PageTransition'
 import { BubbleIcon } from '../components/navIcons'
@@ -49,7 +51,11 @@ export default function Settings() {
     <PageTransition>
       <h1 className="mb-6 pr-28 font-[var(--font-display)] text-3xl font-extrabold md:pr-0 md:text-4xl">Einstellungen</h1>
 
-      <div className="mb-6 flex items-center gap-3.5 rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+      <motion.div
+        {...flyIn(0)}
+        className="relative mb-6 flex items-center gap-3.5 overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+      >
+        <Shine />
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-2)] text-lg font-extrabold text-black">
           {(profile?.name || '?').charAt(0).toUpperCase()}
         </span>
@@ -57,15 +63,15 @@ export default function Settings() {
           <p className="truncate text-base font-bold" style={{ color: '#ff7c3a' }}>{profile?.name || 'Du'}</p>
           <p className="truncate text-sm text-[var(--color-ink-faint)]">{user?.email}</p>
         </div>
-      </div>
+      </motion.div>
 
       <div className="flex flex-col gap-2.5">
-        <Row to="/einstellungen/faecher" icon={<PaletteIcon />} title="Fächer und Farben" hint={`${subjectCount} ${subjectCount === 1 ? 'Fach' : 'Fächer'}`} />
-        <Row to="/einstellungen/benachrichtigungen" icon={<BellIcon />} title="Benachrichtigungen" hint={pushLabel} />
-        <Row to="/bubble" icon={<BubbleIcon />} title="Bubble" hint={bubbleLabel} />
-        <Row to="/einstellungen/app" icon={<RefreshIcon />} title="App aktualisieren" hint="Neueste Version holen" />
-        <Row to="/einstellungen/neuigkeiten" icon={<SparkIcon />} title="Was ist neu" hint={`Version ${__APP_VERSION__}`} />
-        <Row to="/einstellungen/account" icon={<UserIcon />} title="Account" hint="Abmelden, Konto löschen" />
+        <Row i={0} to="/einstellungen/faecher" icon={<PaletteIcon />} title="Fächer und Farben" hint={`${subjectCount} ${subjectCount === 1 ? 'Fach' : 'Fächer'}`} />
+        <Row i={1} to="/einstellungen/benachrichtigungen" icon={<BellIcon />} title="Benachrichtigungen" hint={pushLabel} />
+        <Row i={2} to="/bubble" icon={<BubbleIcon />} title="Bubble" hint={bubbleLabel} />
+        <Row i={3} to="/einstellungen/app" icon={<RefreshIcon />} title="App aktualisieren" hint="Neueste Version holen" />
+        <Row i={4} to="/einstellungen/neuigkeiten" icon={<SparkIcon />} title="Was ist neu" hint={`Version ${__APP_VERSION__}`} />
+        <Row i={5} to="/einstellungen/account" icon={<UserIcon />} title="Account" hint="Abmelden, Konto löschen" />
       </div>
 
       <p className="mt-10 text-center text-xs text-[var(--color-ink-faint)]">Developer: Leopold N.</p>
@@ -74,8 +80,9 @@ export default function Settings() {
   )
 }
 
-function Row({ to, icon, title, hint }) {
+function Row({ to, icon, title, hint, i = 0 }) {
   return (
+    <motion.div {...flyIn(i + 1)}>
     <Link
       to={to}
       className="flex items-center gap-3.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 transition-transform active:scale-[0.985]"
@@ -91,5 +98,6 @@ function Row({ to, icon, title, hint }) {
         <polyline points="9,5 16,12 9,19" />
       </svg>
     </Link>
+    </motion.div>
   )
 }

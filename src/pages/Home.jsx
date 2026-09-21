@@ -7,6 +7,7 @@ import { useHomework } from '../lib/useHomework'
 import { DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Card from '../components/ui/Card'
+import { flyIn } from '../components/Shine'
 
 export default function Home() {
   const { profile } = useAuth()
@@ -76,14 +77,14 @@ export default function Home() {
           <EmptyNote text="Alles erledigt. Nice." />
         ) : (
           <div className="flex flex-col gap-2">
-            {openHomework.map((h) => (
-              <div key={h.id} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
+            {openHomework.map((h, i) => (
+              <motion.div key={h.id} {...flyIn(i, 0.25)} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
                 <div className="flex-1">
                   {h.subject && <p className="text-xs font-semibold text-[var(--color-accent)]">{h.subject}</p>}
                   <p className="text-[15px]">{h.sketch && h.sketch.length > 0 ? '✍️ Skizze' : h.title}</p>
                 </div>
                 <span className="text-xs text-[var(--color-ink-faint)]">{formatDate(h.dueDate)}</span>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
@@ -94,8 +95,8 @@ export default function Home() {
           <EmptyNote text="Keine Tests in Sicht." />
         ) : (
           <div className="flex flex-col gap-2">
-            {upcomingTests.map((t) => (
-              <div key={t.id} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
+            {upcomingTests.map((t, i) => (
+              <motion.div key={t.id} {...flyIn(i, 0.4)} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
                 <div className="flex-1">
                   <p className="text-[15px] font-semibold">{t.subject || 'Allgemein'}</p>
                   {t.topic && <p className="text-xs text-[var(--color-ink-faint)]">{t.topic}</p>}
@@ -103,7 +104,7 @@ export default function Home() {
                 <span className="rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--color-accent)]">
                   {daysUntil(t.date) === 0 ? 'Heute' : `in ${daysUntil(t.date)}T`}
                 </span>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}

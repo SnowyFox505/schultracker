@@ -12,7 +12,8 @@ import QrScanner from '../components/QrScanner'
 import BubbleOrb from '../components/BubbleOrb'
 import BubbleShare from '../components/BubbleShare'
 import BubbleFx from '../components/BubbleFx'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import Shine, { flyIn } from '../components/Shine'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -112,7 +113,8 @@ export default function Bubble() {
 
       {bubbleId ? (
         <section>
-          <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center">
+          <motion.div {...flyIn(0)} className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center">
+            <Shine delay={0.8} />
             <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">Dein Bubble-Code</p>
             <p className="my-2 font-[var(--font-display)] text-4xl font-extrabold tracking-[0.3em] text-[var(--color-accent)]">{bubbleId}</p>
             <p className="mb-4 text-sm text-[var(--color-ink-dim)]">Neue Hausaufgaben, die du einträgst, sehen alle in deiner Bubble.</p>
@@ -124,7 +126,7 @@ export default function Bubble() {
                 QR-Code
               </Button>
             </div>
-          </div>
+          </motion.div>
 
           {openOld.length > 0 && (
             <button

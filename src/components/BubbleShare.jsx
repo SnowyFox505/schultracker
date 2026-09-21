@@ -8,6 +8,8 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useSchedule } from '../lib/useSchedule'
 import { useBreaks } from '../lib/useBreaks'
+import { motion } from 'framer-motion'
+import { flyIn } from './Shine'
 import Sheet from './Sheet'
 import Button from './ui/Button'
 
@@ -109,6 +111,7 @@ export default function BubbleShare({ bubbleId }) {
       <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">Teilen</h2>
       <div className="flex flex-col gap-2.5">
         <ToggleRow
+          i={0}
           icon="👀"
           label="Geteilte Tests & Termine sehen"
           hint="Du siehst, was die anderen teilen."
@@ -116,6 +119,7 @@ export default function BubbleShare({ bubbleId }) {
           onClick={toggleSee}
         />
         <ToggleRow
+          i={1}
           icon="📤"
           label="Meine Tests & Termine teilen"
           hint="Neue Tests und Termine landen in der Bubble."
@@ -123,6 +127,7 @@ export default function BubbleShare({ bubbleId }) {
           onClick={toggleShare}
         />
         <ToggleRow
+          i={2}
           icon="🗓️"
           label="Meinen Stundenplan teilen"
           hint="Die anderen können ihn importieren (Kopie von jetzt)."
@@ -191,9 +196,10 @@ export default function BubbleShare({ bubbleId }) {
   )
 }
 
-function ToggleRow({ icon, label, hint, on, onClick, disabled }) {
+function ToggleRow({ icon, label, hint, on, onClick, disabled, i = 0 }) {
   return (
-    <button
+    <motion.button
+      {...flyIn(i + 1)}
       type="button"
       onClick={onClick}
       disabled={disabled}
@@ -207,6 +213,6 @@ function ToggleRow({ icon, label, hint, on, onClick, disabled }) {
       <span className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${on ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-surface-2)]'}`}>
         <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all ${on ? 'left-[1.375rem]' : 'left-0.5'}`} />
       </span>
-    </button>
+    </motion.button>
   )
 }

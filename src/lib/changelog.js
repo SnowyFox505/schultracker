@@ -1,6 +1,12 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '3.9',
+    date: '21.09.2026',
+    title: 'Oberer Rand wieder wie vorher',
+    items: ['Der Streifen oben hat nichts gebracht und wurde wieder entfernt'],
+  },
+  {
     version: '3.8',
     date: '21.09.2026',
     title: 'Verwischter Rand oben (iOS 27)',

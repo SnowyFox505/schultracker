@@ -87,7 +87,10 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
     // reliable: while in this mode, only 'pen' (Apple Pencil) and 'mouse' (desktop) draw —
     // touch is ignored outright rather than trying to guess "was that a palm or a finger".
     if (e.pointerType === 'touch') return
+    startStroke(e)
+  }
 
+  function startStroke(e) {
     e.preventDefault()
     try {
       canvasRef.current.setPointerCapture(e.pointerId)
@@ -108,7 +111,13 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
   }
 
   function handlePointerMove(e) {
-    const stroke = activeStrokesRef.current.get(e.pointerId)
+    let stroke = activeStrokesRef.current.get(e.pointerId)
+    // iPadOS sometimes swallows the pointerdown of a quick follow-up stroke while the pen keeps
+    // sending moves with the tip pressed — start the stroke from the first such move instead.
+    if (!stroke && e.pointerType !== 'touch' && (e.buttons & 1 || e.pressure > 0)) {
+      startStroke(e)
+      stroke = activeStrokesRef.current.get(e.pointerId)
+    }
     if (!stroke) return
     e.preventDefault()
     // Fast pen movement is delivered as several coalesced samples per event — use them all.
@@ -159,8 +168,8 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
     <div>
       <canvas
         ref={canvasRef}
-        style={{ height }}
-        className="touch-none w-full rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]"
+        style={{ height, touchAction: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
+        className="select-none touch-none w-full rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}

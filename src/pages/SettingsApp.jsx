@@ -25,7 +25,8 @@ export default function SettingsApp() {
     } catch {
       // storage unavailable — the celebration just won't show
     }
-    window.location.reload()
+    // land on the changelog so the user sees what's new
+    window.location.replace('/einstellungen/neuigkeiten')
   }
 
   return (

@@ -97,6 +97,7 @@ export default function Bubble() {
             mode={fx.mode}
             code={fx.code}
             name={profile?.name || ''}
+            names={Object.values(bubble?.memberNames || {})}
             onDone={() => {
               if (fx.mode !== 'leave') setAskMigrate(true)
               setFx(null)

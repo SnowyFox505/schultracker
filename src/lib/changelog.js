@@ -7,6 +7,7 @@ export const CHANGELOG = [
     items: [
       'Neuer Start: Funken sammeln sich im Logo, es platzt in Wellen und Funken auf und fliegt nahtlos in den Login-Screen',
       'Dieselbe Animation nach dem Abmelden',
+      'Bubble erstellen, beitreten und verlassen: glasige Bubble, Funken und die anderen Mitglieder schweben schon darin, wenn du eintauchst',
     ],
   },
   {

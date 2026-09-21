@@ -23,7 +23,7 @@ export default function SettingsAccount() {
     setDeleting(true)
     try {
       await deleteAccountAndData(user, password, {
-        beforeAuthDelete: () => new Promise((resolve) => setTimeout(resolve, 3350)),
+        beforeAuthDelete: () => new Promise((resolve) => setTimeout(resolve, 4400)),
       })
     } catch (err) {
       if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {

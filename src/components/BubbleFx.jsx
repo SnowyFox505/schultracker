@@ -118,8 +118,8 @@ function Burst({ delay }) {
       <motion.span
         className="absolute h-64 w-64 rounded-full border-2 border-[#ffb347] shadow-[0_0_30px_#ffb347]"
         initial={{ scale: 0.3, opacity: 0 }}
-        animate={{ scale: [0.3, 2.6], opacity: [0.9, 0] }}
-        transition={{ delay, duration: 1.2, ease: 'easeOut' }}
+        animate={{ scale: [0.3, 0.3, 2.6], opacity: [0, 0.9, 0] }}
+        transition={{ delay, duration: 1.2, ease: 'easeOut', times: [0, 0.01, 1] }}
       />
     </>
   )
@@ -147,8 +147,8 @@ function Ripples({ delay, count = 3 }) {
       key={i}
       className="absolute h-72 w-72 rounded-full border-2 border-[var(--color-accent-2)]"
       initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: [0.8, 1.9], opacity: [0.7, 0] }}
-      transition={{ duration: 1.5, delay: delay + i * 0.35, ease: 'easeOut' }}
+      animate={{ scale: [0.8, 0.8, 1.9], opacity: [0, 0.7, 0] }}
+      transition={{ duration: 1.5, delay: delay + i * 0.35, ease: 'easeOut', times: [0, 0.01, 1] }}
     />
   ))
 }
@@ -262,8 +262,8 @@ function LeaveScene({ name }) {
       <motion.span
         className="absolute h-40 w-40 rounded-full border-4 border-[var(--color-accent-2)]"
         initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: [0.5, 3], opacity: [0.9, 0] }}
-        transition={{ duration: 1.1, delay: 1.6, ease: 'easeOut' }}
+        animate={{ scale: [0.5, 0.5, 3], opacity: [0, 0.9, 0] }}
+        transition={{ duration: 1.1, delay: 1.6, ease: 'easeOut', times: [0, 0.01, 1] }}
       />
     </>
   )

@@ -1,87 +1,85 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-const IMPLODE_COUNT = 16
-const EXPLODE_COUNT = 28
+const rand = (a, b) => a + Math.random() * (b - a)
 
+// Calm farewell while the account is really being deleted: the logo slowly dissolves into
+// sparks that drift away like embers. It keeps going gently, so it never looks stuck while the
+// async delete is still running.
 export default function DeletingOverlay() {
-  const implodeParticles = Array.from({ length: IMPLODE_COUNT })
-  const explodeParticles = Array.from({ length: EXPLODE_COUNT })
+  const [sparks] = useState(() =>
+    Array.from({ length: 34 }, (_, i) => ({
+      x0: rand(-38, 38),
+      y0: rand(-38, 38),
+      dx: rand(-120, 120),
+      dy: rand(-260, -90),
+      size: rand(3, 7),
+      delay: 1.5 + (i % 17) * 0.13,
+      dur: rand(2.2, 3.4),
+      pause: rand(0.4, 1.6),
+      warm: i % 3,
+    }))
+  )
+  const colors = ['#ffb347', '#ff7c3a', '#ffd9a8']
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-black"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-[#07060a]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.4 }}
     >
-      <div className="relative flex h-0 w-0 items-center justify-center">
-        {implodeParticles.map((_, i) => {
-          const angle = (i / IMPLODE_COUNT) * Math.PI * 2
-          const dist = 120 + (i % 3) * 50
-          const x = Math.cos(angle) * dist
-          const y = Math.sin(angle) * dist
-          return (
-            <motion.span
-              key={`in-${i}`}
-              className="absolute h-2 w-2 rounded-full bg-[#ff6b81]"
-              initial={{ x, y, opacity: 0, scale: 1 }}
-              animate={{ x: 0, y: 0, opacity: [0, 1, 1], scale: [1, 0.8, 0.3] }}
-              transition={{ duration: 2, delay: 0.2 + (i % 5) * 0.12, ease: [0.6, 0, 0.85, 0.15] }}
-            />
-          )
-        })}
+      <motion.div
+        className="absolute h-[45vh] w-[45vh] rounded-full bg-[var(--color-accent)]/20 blur-[100px]"
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: [0.6, 1.1, 0.9], opacity: [0, 0.6, 0.25] }}
+        transition={{ duration: 4, ease: 'easeInOut' }}
+      />
 
-        <motion.div
-          className="absolute h-16 w-16 rounded-full bg-[#ff6b81]"
-          initial={{ scale: 0.2, opacity: 0, filter: 'blur(14px)' }}
-          animate={{ scale: [0.2, 0.9, 0.1, 0], opacity: [0, 0.9, 1, 0] }}
-          transition={{ duration: 2.4, delay: 0.2, times: [0, 0.72, 0.92, 1], ease: 'easeInOut' }}
+      <div className="relative flex h-24 w-24 items-center justify-center">
+        <motion.img
+          src="/icons/icon-192.png"
+          alt=""
+          className="h-20 w-20 rounded-[22px] shadow-[0_0_40px_rgba(255,122,48,0.4)]"
+          initial={{ opacity: 0, scale: 0.7, filter: 'blur(0px)' }}
+          animate={{
+            opacity: [0, 1, 1, 0.12],
+            scale: [0.7, 1, 1.03, 0.92],
+            filter: ['blur(0px)', 'blur(0px)', 'blur(0px)', 'blur(7px)'],
+          }}
+          transition={{ duration: 4, times: [0, 0.15, 0.38, 1], ease: 'easeInOut' }}
         />
 
-        <motion.div
-          className="absolute h-10 w-10 rounded-full border-2 border-[#ff6b81]"
-          initial={{ scale: 0.4, opacity: 0 }}
-          animate={{ scale: [0.4, 7], opacity: [0, 0.7, 0] }}
-          transition={{ duration: 0.85, delay: 2.5, ease: 'easeOut' }}
-        />
+        {sparks.map((s, i) => (
+          <motion.span
+            key={i}
+            className="absolute rounded-full"
+            style={{ width: s.size, height: s.size, background: colors[s.warm], boxShadow: `0 0 10px ${colors[s.warm]}` }}
+            initial={{ x: s.x0, y: s.y0, opacity: 0 }}
+            animate={{
+              x: [s.x0, s.x0 + s.dx * 0.5, s.x0 + s.dx],
+              y: [s.y0, s.y0 + s.dy * 0.5, s.y0 + s.dy],
+              opacity: [0, 1, 0],
+              scale: [1, 0.9, 0.3],
+            }}
+            transition={{ duration: s.dur, delay: s.delay, ease: 'easeOut', repeat: Infinity, repeatDelay: s.pause }}
+          />
+        ))}
 
-        {explodeParticles.map((_, i) => {
-          const angle = (i / EXPLODE_COUNT) * Math.PI * 2 + (i % 2) * 0.12
-          const dist = 200 + (i % 4) * 85
-          const x = Math.cos(angle) * dist
-          const y = Math.sin(angle) * dist
-          const size = 3 + (i % 3) * 2
-          return (
-            <motion.span
-              key={`out-${i}`}
-              className="absolute rounded-full bg-[#ff6b81]"
-              style={{ width: size, height: size }}
-              initial={{ x: 0, y: 0, opacity: 0, scale: 0.5 }}
-              animate={{ x, y, opacity: [0, 1, 0], scale: [0.5, 1, 0.2] }}
-              transition={{ duration: 0.8, delay: 2.5 + (i % 7) * 0.02, ease: [0.16, 1, 0.3, 1] }}
-            />
-          )
-        })}
-
+        {/* what's left: a small ember that keeps breathing */}
         <motion.div
-          className="absolute h-3 w-3 rounded-full bg-[#ff6b81]"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: [0, 1, 1], opacity: [0, 1, 1] }}
-          transition={{ duration: 0.3, delay: 3.35 }}
-        />
-        <motion.div
-          className="absolute h-3 w-3 rounded-full bg-[#ff6b81]"
-          initial={{ scale: 1, opacity: 0 }}
-          animate={{ scale: [1, 2.6, 1], opacity: [0, 0.8, 0] }}
-          transition={{ duration: 1.5, delay: 3.35, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute h-2.5 w-2.5 rounded-full bg-[var(--color-accent-2)] shadow-[0_0_16px_#ffb347]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0.9, 0.35, 0.9], scale: [1, 1.3, 0.9, 1.3] }}
+          transition={{ delay: 3.4, duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
         />
       </div>
 
       <motion.p
-        className="relative mt-12 text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-ink-dim)]"
+        className="relative mt-16 text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-ink-dim)]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.15, duration: 0.4 }}
+        transition={{ delay: 0.5, duration: 0.6 }}
       >
         Account wird gelöscht
         <motion.span
@@ -90,6 +88,14 @@ export default function DeletingOverlay() {
         >
           …
         </motion.span>
+      </motion.p>
+      <motion.p
+        className="relative mt-2 text-xs text-[var(--color-ink-faint)]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2, duration: 0.8 }}
+      >
+        Deine Daten werden sauber entfernt.
       </motion.p>
     </motion.div>
   )

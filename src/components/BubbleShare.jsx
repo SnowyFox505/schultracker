@@ -9,7 +9,6 @@ import { db } from '../lib/firebase'
 import { useSchedule } from '../lib/useSchedule'
 import { useBreaks } from '../lib/useBreaks'
 import Sheet from './Sheet'
-import Card from './ui/Card'
 import Button from './ui/Button'
 
 export default function BubbleShare({ bubbleId }) {
@@ -107,44 +106,45 @@ export default function BubbleShare({ bubbleId }) {
 
   return (
     <section className="mt-8">
-      <h2 className="mb-3 text-lg font-bold">Teilen</h2>
-      <Card className="!p-4">
+      <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">Teilen</h2>
+      <div className="flex flex-col gap-2.5">
         <ToggleRow
+          icon="👀"
           label="Geteilte Tests & Termine sehen"
-          hint="Du siehst die Tests und Termine, die die anderen mit der Bubble teilen."
+          hint="Du siehst, was die anderen teilen."
           on={seeTests}
           onClick={toggleSee}
         />
-        <div className="my-4 border-t border-[var(--color-border)]" />
         <ToggleRow
+          icon="📤"
           label="Meine Tests & Termine teilen"
-          hint="Neue Tests und Termine von dir landen in der Bubble. Jeder entscheidet beides für sich."
+          hint="Neue Tests und Termine landen in der Bubble."
           on={shareTests}
           onClick={toggleShare}
         />
-        <div className="my-4 border-t border-[var(--color-border)]" />
         <ToggleRow
+          icon="🗓️"
           label="Meinen Stundenplan teilen"
-          hint="Die anderen können ihn importieren. Es ist eine Kopie von jetzt."
+          hint="Die anderen können ihn importieren (Kopie von jetzt)."
           on={!!mySchedule}
           disabled={busy}
           onClick={() => run(() => (mySchedule ? unshareSchedule(user, bubbleId) : pushSchedule()))}
         />
         {mySchedule && (
-          <Button variant="secondary" disabled={busy} onClick={() => run(pushSchedule)} className="mt-3 w-full">
+          <Button variant="secondary" disabled={busy} onClick={() => run(pushSchedule)} className="w-full">
             Geteilten Stundenplan aktualisieren
           </Button>
         )}
         {otherSchedules.map((sc) => (
-          <div key={sc.uid} className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-[var(--color-surface-2)] px-4 py-3">
+          <div key={sc.uid} className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
             <span className="min-w-0 truncate text-[15px] font-medium">Stundenplan von {sc.ownerName}</span>
             <Button variant="secondary" onClick={() => setImportTarget(sc)} className="shrink-0 px-4">
               Importieren
             </Button>
           </div>
         ))}
-        {error && <p className="mt-3 text-sm text-[#ff6b81]">{error}</p>}
-      </Card>
+      </div>
+      {error && <p className="mt-3 text-sm text-[#ff6b81]">{error}</p>}
 
       <Sheet open={!!importTarget} onClose={() => setImportTarget(null)} title="Stundenplan importieren?">
         <p className="mb-5 text-sm text-[var(--color-ink-dim)]">
@@ -191,11 +191,17 @@ export default function BubbleShare({ bubbleId }) {
   )
 }
 
-function ToggleRow({ label, hint, on, onClick, disabled }) {
+function ToggleRow({ icon, label, hint, on, onClick, disabled }) {
   return (
-    <button type="button" onClick={onClick} disabled={disabled} className="flex w-full items-center gap-4 text-left disabled:opacity-60">
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="flex w-full items-center gap-3.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 text-left transition-transform active:scale-[0.985] disabled:opacity-60"
+    >
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-soft)] text-lg">{icon}</span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[15px] font-semibold">{label}</span>
+        <span className="block text-[15px] font-semibold leading-tight">{label}</span>
         <span className="mt-0.5 block text-xs text-[var(--color-ink-faint)]">{hint}</span>
       </span>
       <span className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${on ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-surface-2)]'}`}>

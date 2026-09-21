@@ -25,6 +25,7 @@ export default function Bubble() {
   const [joinCode, setJoinCode] = useState(() => (searchParams.get('code') || '').toUpperCase().slice(0, 6))
   const [qr, setQr] = useState('')
   const [scanning, setScanning] = useState(false)
+  const [showQr, setShowQr] = useState(false)
   const [askMigrate, setAskMigrate] = useState(false)
   const [fx, setFx] = useState(null)
   const { items: personalHomework } = useCollection('homework', { order: 'dueDate', direction: 'asc' })
@@ -108,71 +109,93 @@ export default function Bubble() {
 
       {bubbleId && bubble?.memberNames && <BubbleOrb names={Object.values(bubble.memberNames)} />}
 
-      <section>
-        <Card className="!p-4">
-          {bubbleId ? (
-            <>
-              <p className="mb-3 text-sm text-[var(--color-ink-dim)]">
-                Neue Hausaufgaben, die du einträgst, sehen alle in deiner Bubble.
-              </p>
-              <button
-                type="button"
-                onClick={copyCode}
-                className="mb-3 flex w-full items-center justify-between rounded-2xl bg-[var(--color-surface-2)] px-4 py-3.5 active:opacity-80"
-              >
-                <span className="font-[var(--font-display)] text-2xl font-extrabold tracking-[0.25em]">{bubbleId}</span>
-                <span className="text-sm font-medium text-[var(--color-accent)]">{copied ? 'Kopiert ✓' : 'Kopieren'}</span>
-              </button>
-              {openOld.length > 0 && (
-                <Button variant="secondary" onClick={() => setAskMigrate(true)} className="mb-3 w-full">
-                  Meine alten Hausaufgaben übernehmen ({openOld.length})
-                </Button>
-              )}
-              {qr && (
-                <div className="mb-4 flex flex-col items-center">
-                  <img src={qr} alt="QR-Code zum Beitreten" className="h-44 w-44 rounded-2xl" />
-                  <p className="mt-2 text-xs text-[var(--color-ink-faint)]">Freund scannt das mit der Kamera und tritt bei</p>
-                </div>
-              )}
-              <Button variant="secondary" disabled={bubbleBusy} onClick={() => runBubble(() => leaveBubble(user), 'leave')} className="w-full">
-                Bubble verlassen
+      {bubbleId ? (
+        <section>
+          <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">Dein Bubble-Code</p>
+            <p className="my-2 font-[var(--font-display)] text-4xl font-extrabold tracking-[0.3em] text-[var(--color-accent)]">{bubbleId}</p>
+            <p className="mb-4 text-sm text-[var(--color-ink-dim)]">Neue Hausaufgaben, die du einträgst, sehen alle in deiner Bubble.</p>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={copyCode} className="flex-1">
+                {copied ? 'Kopiert ✓' : 'Kopieren'}
               </Button>
-            </>
-          ) : (
-            <>
-              <p className="mb-4 text-sm text-[var(--color-ink-dim)]">
-                Teile Hausaufgaben mit bis zu 2 Freunden — nur einer muss sie eintragen.
-              </p>
-              <Button disabled={bubbleBusy} onClick={() => runBubble(() => createBubble(user, profile?.name || ''), 'create')} className="mb-4 w-full">
-                Bubble erstellen
+              <Button variant="secondary" onClick={() => setShowQr(true)} className="flex-1">
+                QR-Code
               </Button>
-              <Button variant="secondary" onClick={() => setScanning(true)} className="mb-4 w-full">
-                📷 QR-Code scannen
-              </Button>
-              <div className="flex gap-2">
-                <Input
-                  value={joinCode}
-                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  placeholder="Code eingeben"
-                  maxLength={6}
-                  className="flex-1 tracking-widest"
-                />
-                <Button
-                  variant="secondary"
-                  disabled={bubbleBusy || joinCode.length < 6}
-                  onClick={() => runBubble(() => joinBubble(user, profile?.name || '', joinCode), 'join')}
-                  className="px-4"
-                >
-                  Beitreten
-                </Button>
-              </div>
-            </>
+            </div>
+          </div>
+
+          {openOld.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setAskMigrate(true)}
+              className="mt-3 flex w-full items-center gap-3.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 text-left transition-transform active:scale-[0.985]"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-soft)] text-lg">📚</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-semibold">Alte Hausaufgaben übernehmen</span>
+                <span className="block text-xs text-[var(--color-ink-faint)]">{openOld.length} offen, nur für dich sichtbar</span>
+              </span>
+              <span className="text-[var(--color-ink-faint)]">›</span>
+            </button>
           )}
-          {bubbleError && <p className="mt-3 text-sm text-[#ff6b81]">{bubbleError}</p>}
-        </Card>
-      </section>
+        </section>
+      ) : (
+        <section>
+          <Card className="!p-4">
+            <p className="mb-4 text-sm text-[var(--color-ink-dim)]">
+              Teile Hausaufgaben mit bis zu 2 Freunden — nur einer muss sie eintragen.
+            </p>
+            <Button disabled={bubbleBusy} onClick={() => runBubble(() => createBubble(user, profile?.name || ''), 'create')} className="mb-4 w-full">
+              Bubble erstellen
+            </Button>
+            <Button variant="secondary" onClick={() => setScanning(true)} className="mb-4 w-full">
+              📷 QR-Code scannen
+            </Button>
+            <div className="flex gap-2">
+              <Input
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                placeholder="Code eingeben"
+                maxLength={6}
+                className="flex-1 tracking-widest"
+              />
+              <Button
+                variant="secondary"
+                disabled={bubbleBusy || joinCode.length < 6}
+                onClick={() => runBubble(() => joinBubble(user, profile?.name || '', joinCode), 'join')}
+                className="px-4"
+              >
+                Beitreten
+              </Button>
+            </div>
+            {bubbleError && <p className="mt-3 text-sm text-[#ff6b81]">{bubbleError}</p>}
+          </Card>
+        </section>
+      )}
 
       {bubbleId && <BubbleShare bubbleId={bubbleId} />}
+
+      {bubbleId && (
+        <div className="mt-10 text-center">
+          <button
+            type="button"
+            disabled={bubbleBusy}
+            onClick={() => runBubble(() => leaveBubble(user), 'leave')}
+            className="text-sm font-medium text-[var(--color-ink-faint)] transition-colors active:text-[#ff6b81] disabled:opacity-50"
+          >
+            Bubble verlassen
+          </button>
+          {bubbleError && <p className="mt-2 text-sm text-[#ff6b81]">{bubbleError}</p>}
+        </div>
+      )}
+
+      <Sheet open={showQr} onClose={() => setShowQr(false)} title="Zum Beitreten scannen">
+        <div className="flex flex-col items-center pb-2">
+          {qr && <img src={qr} alt="QR-Code zum Beitreten" className="h-56 w-56 rounded-2xl" />}
+          <p className="mt-3 text-center text-xs text-[var(--color-ink-faint)]">Dein Freund scannt das mit der Kamera und tritt bei.</p>
+        </div>
+      </Sheet>
 
       <Sheet open={askMigrate && !!bubbleId && openOld.length > 0} onClose={() => setAskMigrate(false)} title="Alte Hausaufgaben mitnehmen?">
         <p className="mb-5 text-sm text-[var(--color-ink-dim)]">

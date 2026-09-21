@@ -10,13 +10,21 @@ const BURST_AT = 0.75 // seconds until the burst (login version)
 const rand = (a, b) => a + Math.random() * (b - a)
 
 // Plays once, right after the first auth check. Signed in: a short wave uncovers the app.
-// Not signed in: sparks gather into the logo, it bursts into waves, sparks and rising bubbles that
+// Not signed in: sparks gather into the logo, it bursts into waves and sparks that
 // uncover the login page, then the logo flies into the page's own logo (#login-logo) and lands
 // with a ripple.
 export default function AuthReveal() {
   const { user, loading } = useAuth()
   const [kind, setKind] = useState(null)
+  const [prevUser, setPrevUser] = useState(null)
   const shown = useRef(false)
+
+  // Signing out: the goodbye overlay ends, then the same reveal plays into the login page.
+  // Derived during render so the login page never flashes uncovered for a frame.
+  if (user !== prevUser) {
+    setPrevUser(user)
+    if (prevUser && !user && !loading) setKind('logout')
+  }
 
   useEffect(() => {
     if (loading || shown.current) return
@@ -41,13 +49,6 @@ function makeFx() {
       const d = rand(110, 420)
       return { x: Math.cos(a) * d, y: Math.sin(a) * d, s: rand(4, 9), dur: rand(0.7, 1.2), warm: i % 3 }
     }),
-    bubbles: Array.from({ length: 10 }, () => ({
-      left: rand(4, 92),
-      size: rand(16, 54),
-      delay: rand(0, 0.7),
-      dur: rand(1.7, 2.5),
-      sway: rand(-28, 28),
-    })),
   }
 }
 
@@ -67,12 +68,13 @@ function Reveal({ kind, onDone }) {
   const ringScale = useTransform(r, (v) => Math.max(v, 1) / 100)
   const ringOpacity = useTransform(r, [0, 400, 1200], [0.9, 0.5, 0])
   const logo = useAnimationControls()
+  const fromLogout = kind === 'logout'
   const diag = Math.hypot(window.innerWidth, window.innerHeight)
 
   useEffect(() => {
     let alive = true
     const html = document.documentElement
-    if (kind === 'login') html.dataset.intro = '1'
+    if (kind !== 'app') html.dataset.intro = '1'
 
     async function run() {
       if (kind === 'app') {
@@ -82,6 +84,7 @@ function Reveal({ kind, onDone }) {
         return
       }
       // gather: the logo breathes in while sparks are pulled into it
+      if (fromLogout) await logo.start({ scale: 1, opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } })
       await logo.start({ scale: [1, 0.86, 1.2], transition: { duration: BURST_AT, ease: 'easeInOut' } })
       // burst
       const wave = animate(r, diag, { duration: 1.7, ease: EASE })
@@ -94,8 +97,10 @@ function Reveal({ kind, onDone }) {
         const dy = t.top + t.height / 2 - (window.innerHeight / 2 + OFFSET)
         await logo.start({ x: dx, y: dy, scale: t.width / LOGO, transition: { duration: 0.9, ease: EASE } })
         setLanded({ x: t.left + t.width / 2, y: t.top + t.height / 2 })
+        // hand over without any fade: reveal the real logo, then drop the flying copy a few frames later
         delete html.dataset.intro
-        logo.start({ opacity: 0, transition: { duration: 0.2 } })
+        await sleep(90)
+        logo.set({ opacity: 0 })
         await wave
         await sleep(650)
       } else {
@@ -115,35 +120,17 @@ function Reveal({ kind, onDone }) {
   }, [])
 
   const center = { top: `calc(50% + ${OFFSET}px)` }
-  const login = kind === 'login'
+  const login = kind !== 'app'
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden">
-      <div className="gradient-warm absolute inset-0" style={{ WebkitMaskImage: mask, maskImage: mask }} />
+      <div
+        className={`absolute inset-0 ${fromLogout ? 'bg-[#07060a]' : 'gradient-warm'}`}
+        style={{ WebkitMaskImage: mask, maskImage: mask }}
+      />
 
       {login && (
         <>
-          {/* rising bubbles */}
-          {fx.bubbles.map((b, i) => (
-            <motion.span
-              key={i}
-              className="absolute rounded-full"
-              style={{
-                left: `${b.left}%`,
-                bottom: -70,
-                width: b.size,
-                height: b.size,
-                background:
-                  'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.75), rgba(255,170,100,0.35) 45%, rgba(255,122,48,0.55))',
-                border: '1px solid rgba(255,215,180,0.5)',
-                boxShadow: '0 0 16px rgba(255,122,48,0.35)',
-              }}
-              initial={{ y: 0, opacity: 0 }}
-              animate={{ y: -(window.innerHeight + 140), x: [0, b.sway, -b.sway * 0.6, 0], opacity: [0, 0.9, 0.9, 0] }}
-              transition={{ delay: BURST_AT + b.delay, duration: b.dur, ease: 'easeOut' }}
-            />
-          ))}
-
           {/* staggered waves */}
           {RINGS.map((ring, i) => (
             <motion.div
@@ -208,7 +195,7 @@ function Reveal({ kind, onDone }) {
       <motion.p
         className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--color-ink-faint)]"
         style={{ top: `calc(50% + ${OFFSET + 112}px)` }}
-        initial={{ opacity: 0.7 }}
+        initial={{ opacity: fromLogout ? 0 : 0.7 }}
         animate={{ opacity: 0 }}
         transition={{ duration: 0.35 }}
       >
@@ -219,7 +206,7 @@ function Reveal({ kind, onDone }) {
         src="/icons/icon-192.png"
         alt=""
         animate={logo}
-        initial={{ x: 0, y: 0, scale: 1, opacity: 1 }}
+        initial={{ x: 0, y: 0, scale: fromLogout ? 0.5 : 1, opacity: fromLogout ? 0 : 1 }}
         className="absolute left-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-[22px] shadow-[0_0_40px_rgba(255,122,48,0.45)]"
         style={center}
       />

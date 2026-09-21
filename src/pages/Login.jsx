@@ -48,7 +48,7 @@ export default function Login() {
           id="login-logo"
           src="/icons/icon-192.png"
           alt=""
-          className="mb-6 h-16 w-16 rounded-[18px] shadow-[0_0_30px_rgba(255,122,48,0.35)]"
+          className="mb-6 h-16 w-16 rounded-[18px] shadow-[0_0_40px_rgba(255,122,48,0.45)]"
         />
         <motion.h1
           initial={{ opacity: 0, y: 16 }}

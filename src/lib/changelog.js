@@ -1,6 +1,16 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '3.7',
+    date: '21.09.2026',
+    title: 'Teilen, Aufräumen, Stift',
+    items: [
+      'Bubble: getrennt einstellen, ob du geteilte Tests siehst und ob du deine teilst',
+      'Abgehakte Hausaufgaben verschwinden automatisch am Tag nach dem Fälligkeitsdatum',
+      'Stift: schnelles Schreiben verliert keine Striche mehr',
+    ],
+  },
+  {
     version: '3.6',
     date: '20.09.2026',
     title: 'Neue Bubble-Optik',

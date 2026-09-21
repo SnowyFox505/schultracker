@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-const MIN_DIST_SQ = 0.0000625 // ~0.008 in normalized 0..1 units — thins points while dragging
+const MIN_DIST_SQ = 0.000004 // tiny — only drops exact duplicates; fast writing needs every point
 const MAX_UNDO = 6
 
 export default function SketchPad({ value = [], onChange, height = 180 }) {
@@ -9,6 +9,8 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
   // never clobber a single shared "current stroke".
   const activeStrokesRef = useRef(new Map())
   const [strokes, setStrokes] = useState(value)
+  // Always-current copy so a fast stroke that ends before React re-rendered never commits onto a stale list.
+  const strokesRef = useRef(value)
   const [undosLeft, setUndosLeft] = useState(MAX_UNDO)
   // This is a controlled component: every onChange we fire flows right back down as a new
   // `value` prop. Without this, that echo would look identical to "a different item was
@@ -18,6 +20,7 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
   useEffect(() => {
     if (value === lastEmittedRef.current) return
     lastEmittedRef.current = value
+    strokesRef.current = value
     setStrokes(value)
     setUndosLeft(MAX_UNDO)
   }, [value])
@@ -75,7 +78,7 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
   }
 
   function redrawWithActive() {
-    draw([...strokes, ...activeStrokesRef.current.values()])
+    draw([...strokesRef.current, ...activeStrokesRef.current.values()])
   }
 
   function handlePointerDown(e) {
@@ -94,11 +97,7 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
     activeStrokesRef.current.set(e.pointerId, [pointFromEvent(e)])
   }
 
-  function handlePointerMove(e) {
-    const stroke = activeStrokesRef.current.get(e.pointerId)
-    if (!stroke) return
-    e.preventDefault()
-    const pt = pointFromEvent(e)
+  function addPoint(stroke, pt) {
     const last = stroke[stroke.length - 1]
     if (last) {
       const dx = pt.x - last.x
@@ -106,6 +105,15 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
       if (dx * dx + dy * dy < MIN_DIST_SQ) return
     }
     stroke.push(pt)
+  }
+
+  function handlePointerMove(e) {
+    const stroke = activeStrokesRef.current.get(e.pointerId)
+    if (!stroke) return
+    e.preventDefault()
+    // Fast pen movement is delivered as several coalesced samples per event — use them all.
+    const events = e.getCoalescedEvents?.() || []
+    for (const ev of events.length ? events : [e]) addPoint(stroke, pointFromEvent(ev))
     redrawWithActive()
   }
 
@@ -113,12 +121,15 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
     const stroke = activeStrokesRef.current.get(e.pointerId)
     activeStrokesRef.current.delete(e.pointerId)
     if (!stroke) return
+    if (e.type === 'pointerup') addPoint(stroke, pointFromEvent(e))
+    if (stroke.length === 1) stroke.push({ ...stroke[0] }) // a tap becomes a dot
     const finished = stroke.map((p) => ({
       x: Math.round(p.x * 1000) / 1000,
       y: Math.round(p.y * 1000) / 1000,
     }))
     if (finished.length > 1) {
-      const next = [...strokes, finished]
+      const next = [...strokesRef.current, finished]
+      strokesRef.current = next
       lastEmittedRef.current = next
       setStrokes(next)
       onChange?.(next)
@@ -129,7 +140,8 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
 
   function undo() {
     if (undosLeft <= 0 || strokes.length === 0) return
-    const next = strokes.slice(0, -1)
+    const next = strokesRef.current.slice(0, -1)
+    strokesRef.current = next
     lastEmittedRef.current = next
     setUndosLeft((n) => n - 1)
     setStrokes(next)
@@ -138,6 +150,7 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
 
   function clear() {
     lastEmittedRef.current = []
+    strokesRef.current = []
     setStrokes([])
     onChange?.([])
   }
@@ -152,6 +165,7 @@ export default function SketchPad({ value = [], onChange, height = 180 }) {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       />
       <div className="mt-2 flex items-center justify-between">
         <span className="text-xs text-[var(--color-ink-faint)]">Nur mit dem Stift zeichnen</span>

@@ -57,12 +57,14 @@ async function inLesson(uid, now) {
 async function collect(uid, profile, name, field, value) {
   const personal = await adminDb.collection('users').doc(uid).collection(name).where(field, '==', value).get()
   let items = personal.docs.map((d) => ({ id: d.id, ...d.data() }))
-  if (profile.bubbleId && (name === 'homework' || profile.shareTests)) {
+  const seeTests = profile.seeTests ?? !!profile.shareTests
+  if (profile.bubbleId && (name === 'homework' || seeTests || profile.shareTests)) {
     const shared = await adminDb.collection('bubbles').doc(profile.bubbleId).collection(name).where(field, '==', value).get()
     const states = await adminDb.collection('users').doc(uid).collection('bubbleState').get()
     const st = Object.fromEntries(states.docs.map((d) => [d.id, d.data()]))
     items = items.concat(
       shared.docs
+        .filter((d) => name === 'homework' || seeTests || d.data().addedBy === uid)
         .filter((d) => !st[d.id]?.hidden && !(name === 'homework' && st[d.id]?.done))
         .map((d) => ({ id: d.id, ...d.data() }))
     )

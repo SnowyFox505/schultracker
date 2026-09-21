@@ -14,13 +14,15 @@ import {
 import { db } from './firebase'
 import { useAuth } from '../context/AuthContext'
 
-// A personal list (users/{uid}/{name}) plus, when `shareEnabled` and the user is in a Bubble, the
-// Bubble's shared list (bubbles/{id}/{name}), merged. New entries go to the Bubble when sharing is on.
+// A personal list (users/{uid}/{name}) plus the Bubble's shared list (bubbles/{id}/{name}), merged.
+// `shareEnabled`: new entries go to the Bubble. `viewEnabled`: see the others' shared entries (own shared ones always show).
 // Editing is shared; deleting (and checking off, if `withDone`) is per-user via users/{uid}/bubbleState.
-export function useSharedList(name, { order, shareEnabled = true, withDone = false }) {
+export function useSharedList(name, { order, shareEnabled = true, viewEnabled = shareEnabled, withDone = false }) {
   const { user, profile } = useAuth()
   const bubbleId = profile?.bubbleId || null
   const sharing = !!bubbleId && shareEnabled
+  const viewing = !!bubbleId && viewEnabled
+  const listening = sharing || viewing
   const [personal, setPersonal] = useState([])
   const [shared, setShared] = useState([])
   const [states, setStates] = useState({})
@@ -43,7 +45,7 @@ export function useSharedList(name, { order, shareEnabled = true, withDone = fal
   }, [user])
 
   useEffect(() => {
-    if (!user || !sharing) return
+    if (!user || !listening) return
     const q = query(collection(db, 'bubbles', bubbleId, name), orderBy(order, 'asc'))
     const unsub = onSnapshot(
       q,
@@ -54,16 +56,17 @@ export function useSharedList(name, { order, shareEnabled = true, withDone = fal
       unsub()
       setShared([])
     }
-  }, [user, sharing, bubbleId, name, order])
+  }, [user, listening, bubbleId, name, order])
 
   const items = useMemo(() => {
-    const visibleShared = sharing
+    const visibleShared = listening
       ? shared
+          .filter((h) => viewing || h.addedBy === user?.uid)
           .filter((h) => !states[h.id]?.hidden)
           .map((h) => (withDone ? { ...h, done: !!states[h.id]?.done } : h))
       : []
     return [...personal, ...visibleShared].sort((a, b) => (a[order] || '').localeCompare(b[order] || ''))
-  }, [personal, shared, states, sharing, order, withDone])
+  }, [personal, shared, states, listening, viewing, user, order, withDone])
 
   function colFor(isShared) {
     return isShared ? collection(db, 'bubbles', bubbleId, name) : collection(db, 'users', user.uid, name)

@@ -29,7 +29,10 @@ export default function BubbleShare({ bubbleId }) {
   const mySchedule = schedules.find((x) => x.uid === user?.uid)
   const otherSchedules = schedules.filter((x) => x.uid !== user?.uid)
   const shareTests = !!profile?.shareTests
+  const seeTests = profile?.seeTests ?? shareTests
   const todayIso = new Date().toISOString().slice(0, 10)
+  const lostTests = askKeep === 'see' && shareTests ? sharedVisible.filter((t) => t.addedBy !== user?.uid) : sharedVisible
+  const keepCount = lostTests.length
   const upcomingOld = personalTests.filter((t) => t.date >= todayIso)
 
   async function run(action) {
@@ -43,16 +46,18 @@ export default function BubbleShare({ bubbleId }) {
     setBusy(false)
   }
 
+  // Turning off "sehen" hides the others' tests (offer to keep copies); turning off "teilen" while
+  // "sehen" is off would hide the user's own shared tests too.
   async function turnOffTests(keep) {
     setBusy(true)
     try {
       if (keep) {
         const target = collection(db, 'users', user.uid, 'tests')
-        for (const { subject, topic, date, photos } of sharedVisible) {
+        for (const { subject, topic, date, photos } of lostTests) {
           await addDoc(target, { subject: subject ?? '', topic: topic ?? '', date, photos: photos ?? [], createdAt: serverTimestamp() })
         }
       }
-      await updateUserProfile({ shareTests: false })
+      await updateUserProfile(askKeep === 'share' ? { shareTests: false, seeTests } : { seeTests: false })
     } catch {
       setError('Das hat nicht geklappt. Versuch es nochmal.')
     }
@@ -60,15 +65,24 @@ export default function BubbleShare({ bubbleId }) {
     setAskKeep(false)
   }
 
-  async function toggleTests() {
+  async function toggleShare() {
     if (shareTests) {
-      if (sharedVisible.length > 0) setAskKeep(true)
-      else await updateUserProfile({ shareTests: false })
+      if (!seeTests && sharedVisible.length > 0) setAskKeep('share')
+      else await updateUserProfile({ shareTests: false, seeTests })
       return
     }
-    const next = !shareTests
-    await updateUserProfile({ shareTests: next })
-    if (next && upcomingOld.length > 0) setAskTests(true)
+    await updateUserProfile({ shareTests: true, seeTests })
+    if (upcomingOld.length > 0) setAskTests(true)
+  }
+
+  async function toggleSee() {
+    if (seeTests) {
+      const lost = shareTests ? sharedVisible.filter((t) => t.addedBy !== user?.uid) : sharedVisible
+      if (lost.length > 0) setAskKeep('see')
+      else await updateUserProfile({ seeTests: false })
+      return
+    }
+    await updateUserProfile({ seeTests: true })
   }
 
   function pushSchedule() {
@@ -96,10 +110,17 @@ export default function BubbleShare({ bubbleId }) {
       <h2 className="mb-3 text-lg font-bold">Teilen</h2>
       <Card className="!p-4">
         <ToggleRow
-          label="Tests & Termine teilen"
-          hint="Neue Tests teilst du mit der Bubble. Jeder stellt das für sich ein: Nur wer es angeschaltet hat, sieht die geteilten Tests."
+          label="Geteilte Tests & Termine sehen"
+          hint="Du siehst die Tests und Termine, die die anderen mit der Bubble teilen."
+          on={seeTests}
+          onClick={toggleSee}
+        />
+        <div className="my-4 border-t border-[var(--color-border)]" />
+        <ToggleRow
+          label="Meine Tests & Termine teilen"
+          hint="Neue Tests und Termine von dir landen in der Bubble. Jeder entscheidet beides für sich."
           on={shareTests}
-          onClick={toggleTests}
+          onClick={toggleShare}
         />
         <div className="my-4 border-t border-[var(--color-border)]" />
         <ToggleRow
@@ -139,9 +160,9 @@ export default function BubbleShare({ bubbleId }) {
         </div>
       </Sheet>
 
-      <Sheet open={askKeep} onClose={() => setAskKeep(false)} title="Tests behalten?">
+      <Sheet open={!!askKeep} onClose={() => setAskKeep(false)} title="Tests behalten?">
         <p className="mb-5 text-sm text-[var(--color-ink-dim)]">
-          Du siehst gerade {sharedVisible.length} geteilte{sharedVisible.length === 1 ? 'n Test' : ' Tests'}. Wenn du das Teilen ausschaltest, sind sie bei dir sonst nicht mehr sichtbar. Sollen sie als private Kopien bei dir bleiben?
+          Du siehst gerade {keepCount} geteilte{keepCount === 1 ? 'n Test' : ' Tests'}. Wenn du das ausschaltest, sind sie bei dir sonst nicht mehr sichtbar. Sollen sie als private Kopien bei dir bleiben?
         </p>
         <div className="flex gap-3">
           <Button variant="secondary" type="button" disabled={busy} onClick={() => turnOffTests(false)} className="flex-1">

@@ -8,7 +8,7 @@ export const CHANGELOG = [
       'Bubble-Seite neu: Code groß und übersichtlich, QR-Code auf Knopfdruck',
       'Teilen-Einstellungen als eigene Karten mit Symbolen',
       'Bubble verlassen ganz unten, dezent',
-      'Neuer Start: eine Welle geht vom Logo aus, und das Logo fliegt in den Login-Screen',
+      'Neuer Start: Funken sammeln sich im Logo, es platzt in Wellen, Funken und aufsteigende Blasen auf und fliegt in den Login-Screen',
     ],
   },
   {

@@ -47,7 +47,7 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 - [x] (4.0, kurze Version auch angemeldet) Lade-Animation: überlegen, ob sie bei jedem App-Öffnen erscheint, nicht nur nach komplettem Schließen (Loader selbst ist schon neu in 3.5)
 - [ ] (Versuch 1 in 3.8, opaker Streifen: hat nichts gebracht, in 3.9 entfernt) iOS 27 Top-Bar-Blur (Liquid-Glass-Verwischung oben in installierten PWAs): bekannter iOS-Bug, kein sicherer Fix. Möglicher Workaround: `black-translucent` → `default` in index.html + 1px-Sampler-Element mit Hintergrundfarbe oben (Nachteil: Statusleiste nicht mehr randlos, App muss neu zum Home-Bildschirm hinzugefügt werden). Zuerst abwarten/testen
 - [x] (3.7) Tests/Termine in der Bubble: den einen Toggle in zwei aufteilen — "Geteilte Termine sehen" und "Meine Termine teilen", jeder entscheidet beides für sich
-- [ ] Push-Einstellungen pro Gerät statt pro Account (z. B. Handy andere Zeiten als iPad) — aktuell pro Account
+- [x] (4.3) Push-Einstellungen pro Gerät statt pro Account (z. B. Handy andere Zeiten als iPad) — aktuell pro Account
 - [x] (4.2) Neuer "Projekte"-Tab: abgetrennter Bereich pro Schulprojekt (z. B. Deutsch-Präsentation, Film) mit eigenen Notizen, ein paar wichtigen Daten und Links
 - [x] (3.7) Abgehakte Hausaufgaben verschwinden automatisch ab 0 Uhr am Tag NACH dem Fälligkeitsdatum (Fach ist heute → ab morgen weg); nur für die eigene Ansicht, unabgehakte bleiben
 - [x] (3.7) Stift/Handschrift überarbeiten: bei schnellem Schreiben fehlt oft jeder zweite Strich

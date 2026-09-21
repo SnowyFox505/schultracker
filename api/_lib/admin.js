@@ -12,16 +12,22 @@ export const adminMessaging = getMessaging()
 export const adminAuth = getAuth()
 
 // Sends a data-only push to all of a user's devices and prunes tokens that are no longer valid.
-export async function sendToUser(uid, { title, body, url = '/' }) {
-  const devices = await adminDb.collection('users').doc(uid).collection('devices').get()
-  const tokens = devices.docs.map((d) => d.data().token).filter(Boolean)
-  if (!tokens.length) return 0
-  const res = await adminMessaging.sendEachForMulticast({ tokens, data: { title, body, url } })
+export async function sendToUser(uid, { title, body, url = '/' }, onlyDeviceId = null) {
+  const snap = await adminDb.collection('users').doc(uid).collection('devices').get()
+  const docs = snap.docs.filter((d) => (onlyDeviceId ? d.id === onlyDeviceId : true))
+  return sendToDevices(docs, { title, body, url })
+}
+
+// Sends to specific device documents and prunes tokens that are no longer valid.
+export async function sendToDevices(docs, { title, body, url = '/' }) {
+  const list = docs.filter((d) => d.data().token)
+  if (!list.length) return 0
+  const res = await adminMessaging.sendEachForMulticast({ tokens: list.map((d) => d.data().token), data: { title, body, url } })
   await Promise.all(
     res.responses.map((r, i) => {
       const code = r.error?.code
       if (code === 'messaging/registration-token-not-registered' || code === 'messaging/invalid-registration-token') {
-        return devices.docs[i].ref.delete()
+        return list[i].ref.delete()
       }
       return null
     })

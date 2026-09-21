@@ -1,4 +1,4 @@
-import { adminDb, sendToUser } from './_lib/admin.js'
+import { adminDb, sendToDevices } from './_lib/admin.js'
 
 const TZ = 'Europe/Berlin'
 const PERIODS = [
@@ -72,6 +72,15 @@ async function collect(uid, profile, name, field, value) {
   return items
 }
 
+// Per-device settings (users/{uid}/devices/{id}.prefs) override the account defaults (users/{uid}.push).
+function prefsFor(accountPush = {}, devicePrefs = {}) {
+  return {
+    homework: { on: true, time: '18:00', ...accountPush.homework, ...devicePrefs.homework },
+    tests: { on: true, time: '18:00', days: [5, 1], ...accountPush.tests, ...devicePrefs.tests },
+    skipSchool: (devicePrefs.skipSchool ?? accountPush.skipSchool) !== false,
+  }
+}
+
 export default async function handler(req, res) {
   if (req.query.secret !== process.env.CRON_SECRET) return res.status(401).json({ error: 'unauthorized' })
 
@@ -82,59 +91,65 @@ export default async function handler(req, res) {
   for (const userDoc of users.docs) {
     const uid = userDoc.id
     const profile = userDoc.data()
-    const prefs = profile.push || {}
-    const already = profile.pushSent || {}
-    const marks = {}
-    let lessonNow = null
+    const devices = await userDoc.ref.collection('devices').get()
+    const lessonCache = {}
+    const itemsCache = {}
+    const inLessonNow = async () => (lessonCache.v ??= await inLesson(uid, now))
+    const items = async (name, field, value) => (itemsCache[`${name}|${value}`] ??= await collect(uid, profile, name, field, value))
 
-    // A notification is "due" once its time has passed today (catch-up, so a 15-min cron
-    // granularity never misses it) and, if enabled, only while no lesson is running.
-    const due = async (time) => {
-      if (now.minutes < toMin(time || '18:00') || now.minutes > LATEST_MINUTES) return false
-      if (prefs.skipSchool !== false) {
-        lessonNow ??= await inLesson(uid, now)
-        if (lessonNow) return false
+    for (const deviceDoc of devices.docs) {
+      const device = deviceDoc.data()
+      // devices from before per-device settings have no `enabled` flag: they follow the account switch
+      if (!device.token || (device.enabled ?? !!profile.push?.enabled) === false) continue
+      const prefs = prefsFor(profile.push, device.prefs)
+      const already = device.pushSent || profile.pushSent || {}
+      const marks = {}
+
+      // A notification is "due" once its time has passed today (catch-up, so a 15-min cron
+      // granularity never misses it) and, if enabled, only while no lesson is running.
+      const due = async (time) => {
+        if (now.minutes < toMin(time || '18:00') || now.minutes > LATEST_MINUTES) return false
+        if (prefs.skipSchool && (await inLessonNow())) return false
+        return true
       }
-      return true
-    }
+      const send = (payload) => sendToDevices([deviceDoc], payload)
 
-    if (prefs.homework?.on !== false) {
-      const key = `hw-${now.date}`
-      if (!already[key] && (await due(prefs.homework?.time))) {
-        const items = await collect(uid, profile, 'homework', 'dueDate', addDays(now.date, 1))
-        const open = items.filter((h) => !h.done)
-        if (open.length) {
-          sent += await sendToUser(uid, {
-            title: 'Hausaufgaben für morgen',
-            body: open.length === 1 ? '1 Hausaufgabe ist noch offen.' : `${open.length} Hausaufgaben sind noch offen.`,
-            url: '/hausaufgaben',
-          })
+      if (prefs.homework.on) {
+        const key = `hw-${now.date}`
+        if (!already[key] && (await due(prefs.homework.time))) {
+          const open = (await items('homework', 'dueDate', addDays(now.date, 1))).filter((h) => !h.done)
+          if (open.length) {
+            sent += await send({
+              title: 'Hausaufgaben für morgen',
+              body: open.length === 1 ? '1 Hausaufgabe ist noch offen.' : `${open.length} Hausaufgaben sind noch offen.`,
+              url: '/hausaufgaben',
+            })
+          }
+          marks[key] = true
         }
-        marks[key] = true
       }
-    }
 
-    if (prefs.tests?.on !== false) {
-      for (const days of prefs.tests?.days || [5, 1]) {
-        const key = `t${days}-${now.date}`
-        if (already[key] || !(await due(prefs.tests?.time))) continue
-        const tests = await collect(uid, profile, 'tests', 'date', addDays(now.date, days))
-        for (const t of tests) {
-          sent += await sendToUser(uid, {
-            title: days === 1 ? 'Morgen: Test' : `Test in ${days} Tagen`,
-            body: `${t.subject || 'Termin'}${t.topic ? ` – ${t.topic}` : ''}`,
-            url: '/pruefungen',
-          })
+      if (prefs.tests.on) {
+        for (const days of prefs.tests.days) {
+          const key = `t${days}-${now.date}`
+          if (already[key] || !(await due(prefs.tests.time))) continue
+          for (const t of await items('tests', 'date', addDays(now.date, days))) {
+            sent += await send({
+              title: days === 1 ? 'Morgen: Test' : `Test in ${days} Tagen`,
+              body: `${t.subject || 'Termin'}${t.topic ? ` – ${t.topic}` : ''}`,
+              url: '/pruefungen',
+            })
+          }
+          marks[key] = true
         }
-        marks[key] = true
       }
-    }
 
-    if (Object.keys(marks).length) {
-      // keep only the last 14 days of marks so the map doesn't grow forever
-      const cutoff = addDays(now.date, -14)
-      const kept = Object.fromEntries(Object.entries(already).filter(([k]) => k.slice(-10) >= cutoff))
-      await userDoc.ref.update({ pushSent: { ...kept, ...marks } })
+      if (Object.keys(marks).length) {
+        // keep only the last 14 days of marks so the map doesn't grow forever
+        const cutoff = addDays(now.date, -14)
+        const kept = Object.fromEntries(Object.entries(already).filter(([k]) => k.slice(-10) >= cutoff))
+        await deviceDoc.ref.update({ pushSent: { ...kept, ...marks } })
+      }
     }
   }
 

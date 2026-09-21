@@ -1,6 +1,16 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.3',
+    date: '21.09.2026',
+    title: 'Benachrichtigungen pro Gerät',
+    items: [
+      'Jedes Gerät hat seine eigenen Einstellungen: an oder aus, Uhrzeiten und Test-Tage',
+      'Du siehst deine anderen Geräte und kannst sie ein- oder ausschalten',
+      'Die Test-Nachricht geht nur an das Gerät, auf dem du gerade bist',
+    ],
+  },
+  {
     version: '4.2',
     date: '21.09.2026',
     title: 'Projekte',

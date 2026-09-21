@@ -1,11 +1,11 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
-    version: '3.8',
+    version: '4.0',
     date: '21.09.2026',
-    title: 'Neue Bubble-Seite',
+    title: 'Das Design-Update',
     items: [
-      'Bubble-Code groß und übersichtlich, QR-Code auf Knopfdruck',
+      'Bubble-Seite neu: Code groß und übersichtlich, QR-Code auf Knopfdruck',
       'Teilen-Einstellungen als eigene Karten mit Symbolen',
       'Bubble verlassen ganz unten, dezent',
     ],

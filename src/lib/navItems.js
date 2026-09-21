@@ -1,4 +1,4 @@
-import { BubbleIcon, ClockIcon, GridIcon, HomeIcon, NoteIcon, SettingsIcon, TaskIcon } from '../components/navIcons'
+import { BubbleIcon, ClockIcon, GridIcon, HomeIcon, NoteIcon, ProjectIcon, SettingsIcon, TaskIcon } from '../components/navIcons'
 
 export const NAV_ITEMS = [
   { to: '/', label: 'Heute', icon: HomeIcon },
@@ -6,6 +6,7 @@ export const NAV_ITEMS = [
   { to: '/hausaufgaben', label: 'Aufgaben', icon: TaskIcon },
   { to: '/pruefungen', label: 'Tests / Termine', icon: ClockIcon },
   { to: '/notizen', label: 'Notizen', icon: NoteIcon },
+  { to: '/projekte', label: 'Projekte', icon: ProjectIcon },
   { to: '/bubble', label: 'Bubble', icon: BubbleIcon },
 ]
 

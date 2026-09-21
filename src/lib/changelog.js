@@ -1,6 +1,17 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.2',
+    date: '21.09.2026',
+    title: 'Projekte',
+    items: [
+      'Neuer Bereich „Projekte“ für Schulprojekte, mit Aufgaben, wichtigen Daten, Links, einem Foto und Notizen',
+      'Projekte mit der ganzen Bubble oder nur mit bestimmten Leuten teilen, Abhaken gilt für alle',
+      'Wenn du eine Bubble verlässt, bleiben fremde Projekte als Archiv (nur lesen) bei dir',
+      'Abgaben erscheinen auf der Startseite bei den anstehenden Terminen',
+    ],
+  },
+  {
     version: '4.1',
     date: '21.09.2026',
     title: 'Neue Animationen',

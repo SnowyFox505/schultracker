@@ -103,6 +103,10 @@ If this plan file is gone, re-derive the design from this section plus the data-
 
 **Later extension ideas for Bubble** (not in the v1 scope above, collected in `TODO.md` under 🔴): joining via a scanned QR code instead of typing the code manually; explicitly verifying the realtime sync experience (the `onSnapshot`-based design already gives this "for free," just needs highlighting/testing when v1 is built); push notifications (evening reminder for open homework due tomorrow, staged test-countdown reminders, per-device-token targeted sends) — this last one needs Firebase Cloud Messaging plus a scheduled backend (Cloud Functions or similar), which this repo doesn't have yet, so it's a bigger infra addition than anything else here.
 
+### Projekte
+
+`/projekte` (list) and `/projekte/:id` (detail, `ProjektDetail.jsx`). One doc per project: `name, emoji, color, dueDate, tasks[], dates[], links[], notes, photo (1 compressed data URL), ownerUid, ownerName`. Private ones in `users/{uid}/projects`, shared ones in `bubbles/{id}/projects` with `toAll` + `visibleTo[]` (queried with two `where`s so the rules can prove access). Everyone with access edits everything incl. task check-off (shared progress, unlike homework); only the owner deletes or changes sharing; others hide it via `bubbleState`. `leaveBubble` first settles projects: own ones go back to private, others' visible ones become `archived: true` read-only copies. `useProjects` in `src/lib/projects.js`. Desktop: SideNav entry; mobile: not in the BottomNav, reachable from Home and Settings.
+
 ### Settings structure
 
 `/einstellungen` (`Settings.jsx`) is an overview list (profile card + one row per area, each showing its current state); the areas are subpages under `/einstellungen/{faecher,benachrichtigungen,app,account}` (`SettingsSubjects/Notifications/App/Account.jsx`) wrapped in `SubPage` (back link + title). The Bubble row just links to `/bubble`. Add new settings areas as a new subpage plus a row, not as another card on one long page.

@@ -17,6 +17,8 @@ import SettingsNotifications from './pages/SettingsNotifications'
 import SettingsApp from './pages/SettingsApp'
 import SettingsAccount from './pages/SettingsAccount'
 import SettingsUpdates from './pages/SettingsUpdates'
+import Projekte from './pages/Projekte'
+import ProjektDetail from './pages/ProjektDetail'
 
 export default function App() {
   return (
@@ -40,6 +42,8 @@ export default function App() {
           <Route path="/pruefungen" element={<Pruefungen />} />
           <Route path="/notizen" element={<Notizen />} />
           <Route path="/bubble" element={<Bubble />} />
+          <Route path="/projekte" element={<Projekte />} />
+          <Route path="/projekte/:id" element={<ProjektDetail />} />
           <Route path="/einstellungen" element={<Settings />} />
           <Route path="/einstellungen/faecher" element={<SettingsSubjects />} />
           <Route path="/einstellungen/benachrichtigungen" element={<SettingsNotifications />} />

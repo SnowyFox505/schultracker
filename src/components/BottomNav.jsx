@@ -6,7 +6,7 @@ export default function BottomNav() {
   return (
     <nav className="safe-bottom shrink-0 border-t border-[var(--color-border)] bg-[var(--color-base)]/90 backdrop-blur-xl md:hidden">
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-2 py-2">
-        {NAV_ITEMS.filter((item) => item.to !== '/bubble').map(({ to, label, icon: Icon }) => (
+        {NAV_ITEMS.filter((item) => item.to !== '/bubble' && item.to !== '/projekte').map(({ to, label, icon: Icon }) => (
           <li key={to} className="flex-1">
             <NavLink to={to} end={to === '/'} className="relative flex flex-col items-center gap-1 py-2">
               {({ isActive }) => (

@@ -39,6 +39,26 @@ service cloud.firestore {
           && request.auth.uid in get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members;
       }
 
+      match /projects/{projectId} {
+        allow read: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members
+          && (resource.data.toAll == true || request.auth.uid in resource.data.visibleTo);
+        allow create: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members
+          && request.resource.data.ownerUid == request.auth.uid;
+        allow update: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members
+          && request.resource.data.ownerUid == resource.data.ownerUid
+          && (resource.data.ownerUid == request.auth.uid
+            || ((resource.data.toAll == true || request.auth.uid in resource.data.visibleTo)
+              && request.resource.data.toAll == resource.data.toAll
+              && request.resource.data.visibleTo == resource.data.visibleTo));
+        allow delete: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members
+          && (resource.data.ownerUid == request.auth.uid
+            || get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members.size() == 1);
+      }
+
       match /schedules/{ownerId} {
         allow read: if request.auth != null
           && request.auth.uid in get(/databases/$(database)/documents/bubbles/$(bubbleId)).data.members;

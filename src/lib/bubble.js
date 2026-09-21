@@ -8,6 +8,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
+  where,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -62,6 +64,24 @@ export async function joinBubble(user, name, rawCode) {
 }
 
 // Removes the user from the bubble's members; the last member out deletes the bubble and its homework.
+// Before leaving: own shared projects go back to being private; other people's projects you could see
+// stay as read-only archived copies.
+async function settleProjects(user, bubbleId) {
+  const col = collection(db, 'bubbles', bubbleId, 'projects')
+  const found = new Map()
+  for (const q of [query(col, where('toAll', '==', true)), query(col, where('visibleTo', 'array-contains', user.uid))]) {
+    ;(await getDocs(q)).docs.forEach((d) => found.set(d.id, d))
+  }
+  for (const d of found.values()) {
+    const data = d.data()
+    // eslint-disable-next-line no-unused-vars
+    const { toAll, visibleTo, ...rest } = data
+    const mine = data.ownerUid === user.uid
+    await setDoc(doc(db, 'users', user.uid, 'projects', d.id), mine ? rest : { ...rest, archived: true, archivedFrom: data.ownerName || '' })
+    if (mine) await deleteDoc(d.ref)
+  }
+}
+
 export async function leaveBubble(user) {
   const userRef = doc(db, 'users', user.uid)
   const bubbleId = (await getDoc(userRef)).data()?.bubbleId
@@ -69,8 +89,9 @@ export async function leaveBubble(user) {
     const ref = doc(db, 'bubbles', bubbleId)
     const snap = await getDoc(ref)
     if (snap.exists()) {
+      await settleProjects(user, bubbleId)
       if (snap.data().members.length <= 1) {
-        for (const sub of ['homework', 'tests', 'schedules']) {
+        for (const sub of ['homework', 'tests', 'schedules', 'projects']) {
           const items = await getDocs(collection(ref, sub))
           await Promise.all(items.docs.map((d) => deleteDoc(d.ref)))
         }

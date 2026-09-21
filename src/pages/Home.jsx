@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useSchedule } from '../lib/useSchedule'
 import { useTests } from '../lib/useTests'
 import { useHomework } from '../lib/useHomework'
+import { dueLabel, progress, useProjects } from '../lib/projects'
 import { DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Card from '../components/ui/Card'
@@ -15,6 +16,7 @@ export default function Home() {
   const { lessons } = useSchedule()
   const { items: homework } = useHomework()
   const { items: tests } = useTests()
+  const { items: projects } = useProjects()
 
   const now = new Date()
   const todayKeyRaw = JS_DAY_TO_WEEKDAY[now.getDay()]
@@ -32,7 +34,14 @@ export default function Home() {
   const heuteLabel = showTomorrow ? 'Morgen' : 'Heute'
 
   const openHomework = homework.filter((h) => !h.done).slice(0, 4)
-  const upcomingTests = tests.filter((t) => daysUntil(t.date) >= 0 && daysUntil(t.date) <= 21).slice(0, 3)
+  const projectDeadlines = projects
+    .filter((p) => !p.archived && p.dueDate && daysUntil(p.dueDate) >= 0 && daysUntil(p.dueDate) <= 21)
+    .map((p) => ({ id: `p-${p.id}`, subject: p.name, topic: 'Projekt-Abgabe', date: p.dueDate }))
+  const upcomingTests = [...tests, ...projectDeadlines]
+    .filter((t) => daysUntil(t.date) >= 0 && daysUntil(t.date) <= 21)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 3)
+  const activeProjects = projects.filter((p) => !p.archived).slice(0, 3)
 
   return (
     <PageTransition>
@@ -106,6 +115,34 @@ export default function Home() {
                 </span>
               </motion.div>
             ))}
+          </div>
+        )}
+      </Section>
+
+      <Section title="Projekte" linkTo="/projekte">
+        {activeProjects.length === 0 ? (
+          <EmptyNote text="Noch kein Projekt." />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {activeProjects.map((p, i) => {
+              const { total, done } = progress(p)
+              return (
+                <motion.div key={p.id} {...flyIn(i, 0.5)}>
+                  <Link to={`/projekte/${p.id}`} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
+                    <span className="text-xl">{p.emoji || '📁'}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[15px] font-semibold">{p.name}</p>
+                      <p className="text-xs text-[var(--color-ink-faint)]">{dueLabel(p.dueDate)}</p>
+                    </div>
+                    {total > 0 && (
+                      <span className="rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--color-accent)]">
+                        {done}/{total}
+                      </span>
+                    )}
+                  </Link>
+                </motion.div>
+              )
+            })}
           </div>
         )}
       </Section>

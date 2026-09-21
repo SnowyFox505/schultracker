@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Shine, { flyIn } from '../components/Shine'
+import { ProjectIcon } from '../components/navIcons'
 import { useAuth } from '../context/AuthContext'
 import PageTransition from '../components/PageTransition'
 import { BubbleIcon } from '../components/navIcons'
@@ -68,10 +69,11 @@ export default function Settings() {
       <div className="flex flex-col gap-2.5">
         <Row i={0} to="/einstellungen/faecher" icon={<PaletteIcon />} title="Fächer und Farben" hint={`${subjectCount} ${subjectCount === 1 ? 'Fach' : 'Fächer'}`} />
         <Row i={1} to="/einstellungen/benachrichtigungen" icon={<BellIcon />} title="Benachrichtigungen" hint={pushLabel} />
-        <Row i={2} to="/bubble" icon={<BubbleIcon />} title="Bubble" hint={bubbleLabel} />
-        <Row i={3} to="/einstellungen/app" icon={<RefreshIcon />} title="App aktualisieren" hint="Neueste Version holen" />
-        <Row i={4} to="/einstellungen/neuigkeiten" icon={<SparkIcon />} title="Was ist neu" hint={`Version ${__APP_VERSION__}`} />
-        <Row i={5} to="/einstellungen/account" icon={<UserIcon />} title="Account" hint="Abmelden, Konto löschen" />
+        <Row i={2} to="/projekte" icon={<ProjectIcon />} title="Projekte" hint="Eigener Bereich pro Schulprojekt" />
+        <Row i={3} to="/bubble" icon={<BubbleIcon />} title="Bubble" hint={bubbleLabel} />
+        <Row i={4} to="/einstellungen/app" icon={<RefreshIcon />} title="App aktualisieren" hint="Neueste Version holen" />
+        <Row i={5} to="/einstellungen/neuigkeiten" icon={<SparkIcon />} title="Was ist neu" hint={`Version ${__APP_VERSION__}`} />
+        <Row i={6} to="/einstellungen/account" icon={<UserIcon />} title="Account" hint="Abmelden, Konto löschen" />
       </div>
 
       <p className="mt-10 text-center text-xs text-[var(--color-ink-faint)]">Developer: Leopold N.</p>

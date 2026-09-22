@@ -1,10 +1,39 @@
 import { motion } from 'framer-motion'
+import { useState } from 'react'
 import SubPage from '../components/SubPage'
+import Button from '../components/ui/Button'
+import { useAuth } from '../context/AuthContext'
+import { ADMIN_EMAIL, announceRelease, useRollout } from '../lib/rollout'
 import { CHANGELOG } from '../lib/changelog'
 
 export default function SettingsUpdates() {
+  const { user } = useAuth()
+  const rollout = useRollout()
+  const [busy, setBusy] = useState(false)
+  const isAdmin = user?.email === ADMIN_EMAIL
+
+  async function release() {
+    setBusy(true)
+    try {
+      await announceRelease()
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <SubPage title="Was ist neu">
+      {isAdmin && (
+        <div className="mb-6 rounded-2xl border border-dashed border-[var(--color-border)] p-4">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">Entwickler</p>
+          <p className="mb-3 text-sm text-[var(--color-ink-dim)]">
+            Diese Version: <strong>{__APP_VERSION__}</strong> · Für Nutzer freigegeben: <strong>{rollout?.version || 'noch keine'}</strong>
+          </p>
+          <Button variant="secondary" onClick={release} disabled={busy || rollout?.version === __APP_VERSION__} className="w-full">
+            {rollout?.version === __APP_VERSION__ ? 'Bereits freigegeben' : busy ? 'Wird freigegeben…' : 'Dieses Update jetzt ankündigen'}
+          </Button>
+        </div>
+      )}
       <div className="flex flex-col gap-3">
         {CHANGELOG.map((entry, i) => (
           <motion.div

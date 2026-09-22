@@ -1,6 +1,15 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.4',
+    date: '22.09.2026',
+    title: 'Update-Hinweis',
+    items: [
+      'Neues kleines Banner: erscheint, sobald ein Update von mir offiziell freigegeben ist',
+      'Warst du schon automatisch drauf, bekommst du nur eine kurze Info statt eines Knopfs',
+    ],
+  },
+  {
     version: '4.3.3',
     date: '22.09.2026',
     title: 'Kurzer Willkommens-Effekt öfter',

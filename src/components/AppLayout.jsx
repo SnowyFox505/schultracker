@@ -9,6 +9,7 @@ import Sheet from './Sheet'
 import Button from './ui/Button'
 import { BubbleIcon, SettingsIcon } from './navIcons'
 import { UpdatedBurst } from './UpdateFx'
+import UpdateBanner from './UpdateBanner'
 import { useAuth } from '../context/AuthContext'
 import { useSpinNavigate } from '../lib/useSpinNavigate'
 
@@ -91,6 +92,8 @@ export default function AppLayout() {
       </Sheet>
 
       <AnimatePresence>{justUpdated && <UpdatedBurst />}</AnimatePresence>
+
+      {!justUpdated && <UpdateBanner />}
 
       <AnimatePresence>
         {logoutFlow === 'running' && <LoggingOutOverlay name={profile?.name} onDone={logout} />}

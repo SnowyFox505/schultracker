@@ -10,12 +10,17 @@ export default function SettingsUpdates() {
   const { user } = useAuth()
   const rollout = useRollout()
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   const isAdmin = user?.email === ADMIN_EMAIL
 
   async function release() {
     setBusy(true)
+    setError('')
     try {
       await announceRelease()
+    } catch (err) {
+      console.error(err)
+      setError(`Hat nicht geklappt: ${err?.code || err?.message || 'unbekannter Fehler'}`)
     } finally {
       setBusy(false)
     }
@@ -28,10 +33,13 @@ export default function SettingsUpdates() {
           <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">Entwickler</p>
           <p className="mb-3 text-sm text-[var(--color-ink-dim)]">
             Diese Version: <strong>{__APP_VERSION__}</strong> · Für Nutzer freigegeben: <strong>{rollout?.version || 'noch keine'}</strong>
+            <br />
+            Angemeldet als: <strong>{user?.email}</strong>
           </p>
           <Button variant="secondary" onClick={release} disabled={busy || rollout?.version === __APP_VERSION__} className="w-full">
             {rollout?.version === __APP_VERSION__ ? 'Bereits freigegeben' : busy ? 'Wird freigegeben…' : 'Dieses Update jetzt ankündigen'}
           </Button>
+          {error && <p className="mt-2 text-sm text-[#ff6b81]">{error}</p>}
         </div>
       )}
       <div className="flex flex-col gap-3">

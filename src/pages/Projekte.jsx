@@ -51,6 +51,7 @@ export default function Projekte() {
   }
 
   return (
+    <>
     <PageTransition>
       <h1 className="mb-6 pr-28 font-[var(--font-display)] text-3xl font-extrabold md:pr-0 md:text-4xl">Projekte</h1>
 
@@ -72,6 +73,8 @@ export default function Projekte() {
           </div>
         </section>
       )}
+
+    </PageTransition>
 
       <Fab onClick={openNew} label="Neues Projekt" />
 
@@ -116,7 +119,7 @@ export default function Projekte() {
           </Button>
         </form>
       </Sheet>
-    </PageTransition>
+    </>
   )
 }
 

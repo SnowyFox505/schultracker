@@ -52,6 +52,8 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 - [x] (3.7) Abgehakte Hausaufgaben verschwinden automatisch ab 0 Uhr am Tag NACH dem Fälligkeitsdatum (Fach ist heute → ab morgen weg); nur für die eigene Ansicht, unabgehakte bleiben
 - [x] (3.7) Stift/Handschrift überarbeiten: bei schnellem Schreiben fehlt oft jeder zweite Strich
 
+- [x] (4.3.1) Neues Heute-Dashboard: Hero-Karte für die aktuelle/nächste Stunde, Statistik-Kacheln, kombinierte "Steht an"-Liste statt Projekte immer ganz unten
+
 ## Sonstiges
 
 - Bubble v1 ist gebaut (Hausaufgaben teilen per Code); Verlassen/Account-Löschen räumen auf; QR-Beitritt gebaut; Migration alter Hausaufgaben gebaut.

@@ -1,6 +1,17 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.3.1',
+    date: '22.09.2026',
+    title: 'Neues Heute-Dashboard',
+    items: [
+      'Große Karte zeigt die laufende oder nächste Stunde statt einer langen Liste',
+      'Aufgaben, nächster Test und Projekte als schnelle Zahlen',
+      '"Steht an": Aufgaben, Tests und Projekt-Abgaben zusammen, nach Dringlichkeit sortiert',
+      'Fix: der Plus-Knopf bei Projekte "backte" beim Öffnen kurz oben rechts, jetzt wie überall',
+    ],
+  },
+  {
     version: '4.3',
     date: '21.09.2026',
     title: 'Benachrichtigungen pro Gerät',

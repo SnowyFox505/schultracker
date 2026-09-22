@@ -8,7 +8,14 @@ import { dueLabel, progress, useProjects } from '../lib/projects'
 import { DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Card from '../components/ui/Card'
+import { TaskIcon, ClockIcon, GridIcon } from '../components/navIcons'
 import { flyIn } from '../components/Shine'
+
+const toMin = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
+const periodRange = (period) => {
+  const [start, end] = DEFAULT_PERIODS.find((p) => p.period === period).time.split('–')
+  return { start: toMin(start), end: toMin(end) }
+}
 
 export default function Home() {
   const { profile } = useAuth()
@@ -19,147 +26,194 @@ export default function Home() {
   const { items: projects } = useProjects()
 
   const now = new Date()
+  const nowMin = now.getHours() * 60 + now.getMinutes()
   const todayKeyRaw = JS_DAY_TO_WEEKDAY[now.getDay()]
-  const todaysPeriods = todayKeyRaw
-    ? DEFAULT_PERIODS.filter(({ period }) => lessons[`${todayKeyRaw}-${period}`]).map(({ period }) => period)
+  const todaysLessons = todayKeyRaw
+    ? DEFAULT_PERIODS.map(({ period }) => lessons[`${todayKeyRaw}-${period}`]).filter(Boolean)
     : []
-  const lastPeriodToday = todaysPeriods.length ? Math.max(...todaysPeriods) : null
-  const showTomorrow = lastPeriodToday !== null && isPast(endTimeForPeriod(lastPeriodToday), now)
 
+  const lastPeriodToday = todaysLessons.length ? Math.max(...todaysLessons.map((l) => l.period)) : null
+  const dayOver = lastPeriodToday !== null && nowMin >= periodRange(lastPeriodToday).end
+  const showTomorrow = todayKeyRaw ? dayOver : true
   const displayDate = showTomorrow ? new Date(now.getTime() + 86400000) : now
-  const todayKey = JS_DAY_TO_WEEKDAY[displayDate.getDay()]
-  const todayLessons = todayKey
-    ? DEFAULT_PERIODS.map(({ period }) => lessons[`${todayKey}-${period}`]).filter(Boolean)
-    : []
   const heuteLabel = showTomorrow ? 'Morgen' : 'Heute'
+  const heuteKey = JS_DAY_TO_WEEKDAY[displayDate.getDay()]
+  const heuteLessons = heuteKey ? DEFAULT_PERIODS.map(({ period }) => lessons[`${heuteKey}-${period}`]).filter(Boolean) : []
 
-  const openHomework = homework.filter((h) => !h.done).slice(0, 4)
-  const projectDeadlines = projects
-    .filter((p) => !p.archived && p.dueDate && daysUntil(p.dueDate) >= 0 && daysUntil(p.dueDate) <= 21)
-    .map((p) => ({ id: `p-${p.id}`, subject: p.name, topic: 'Projekt-Abgabe', date: p.dueDate }))
-  const upcomingTests = [...tests, ...projectDeadlines]
-    .filter((t) => daysUntil(t.date) >= 0 && daysUntil(t.date) <= 21)
+  const runningNow = !showTomorrow ? todaysLessons.find((l) => nowMin >= periodRange(l.period).start && nowMin < periodRange(l.period).end) : null
+  const nextToday = !showTomorrow && !runningNow ? todaysLessons.find((l) => nowMin < periodRange(l.period).start) : null
+  const hero = runningNow ? { kind: 'now', lesson: runningNow } : nextToday ? { kind: 'next', lesson: nextToday } : heuteLessons[0] ? { kind: 'day', lesson: heuteLessons[0] } : null
+
+  const openHomework = homework.filter((h) => !h.done)
+  const upcoming = [
+    ...openHomework.map((h) => ({
+      id: `h-${h.id}`,
+      kind: 'homework',
+      title: h.sketch?.length > 0 ? '✍️ Skizze' : h.title,
+      subject: h.subject,
+      date: h.dueDate,
+    })),
+    ...tests.map((t) => ({ id: `t-${t.id}`, kind: 'test', title: t.subject || 'Allgemein', subject: t.topic, date: t.date })),
+    ...projects
+      .filter((p) => !p.archived && p.dueDate)
+      .map((p) => ({ id: `p-${p.id}`, kind: 'project', title: p.name, subject: 'Projekt-Abgabe', date: p.dueDate, to: `/projekte/${p.id}` })),
+  ]
+    .filter((i) => daysUntil(i.date) >= 0)
     .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 3)
-  const activeProjects = projects.filter((p) => !p.archived).slice(0, 3)
+    .slice(0, 7)
+
+  const activeProjects = projects.filter((p) => !p.archived)
 
   return (
     <PageTransition>
       <p className="text-base font-semibold text-[var(--color-ink-dim)] md:text-lg">{greeting()}</p>
-      <h1 className="mb-7 font-[var(--font-display)] text-4xl font-extrabold leading-tight md:mb-10 md:text-5xl">
+      <h1 className="mb-6 font-[var(--font-display)] text-4xl font-extrabold leading-tight md:mb-8 md:text-5xl">
         {profile?.name?.split(' ')[0] || 'Hey'}
       </h1>
 
-      <div className="md:grid md:grid-cols-3 md:items-start md:gap-6">
-      <Section title={heuteLabel} linkTo="/stundenplan">
-        {!todayKey ? (
-          <EmptyNote text={`${heuteLabel} ist Wochenende 🎉`} />
-        ) : todayLessons.length === 0 ? (
-          <EmptyNote text="Keine Stunden eingetragen." />
-        ) : (
-          <div className="flex flex-col gap-2">
-            {todayLessons.map((l, i) => {
-              const color = colorFor(l.color, customColors)
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                  className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5"
-                >
-                  <span className="h-9 w-1 rounded-full" style={{ background: color.bg }} />
-                  <div className="flex-1">
-                    <p className="text-[15px] font-semibold">{l.subject}</p>
-                    {l.room && <p className="text-xs text-[var(--color-ink-faint)]">{l.room}</p>}
-                  </div>
-                  <span className="text-xs font-medium text-[var(--color-ink-faint)]">{l.period}. Stunde</span>
-                </motion.div>
-              )
-            })}
-          </div>
-        )}
-      </Section>
+      <div className="md:grid md:grid-cols-[1.1fr_1fr] md:items-start md:gap-6">
+        <div>
+          <HeroCard hero={hero} heuteLabel={heuteLabel} weekend={!heuteKey} customColors={customColors} />
 
-      <Section title="Fällige Aufgaben" linkTo="/hausaufgaben">
-        {openHomework.length === 0 ? (
-          <EmptyNote text="Alles erledigt. Nice." />
-        ) : (
-          <div className="flex flex-col gap-2">
-            {openHomework.map((h, i) => (
-              <motion.div key={h.id} {...flyIn(i, 0.25)} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
-                <div className="flex-1">
-                  {h.subject && <p className="text-xs font-semibold text-[var(--color-accent)]">{h.subject}</p>}
-                  <p className="text-[15px]">{h.sketch && h.sketch.length > 0 ? '✍️ Skizze' : h.title}</p>
-                </div>
-                <span className="text-xs text-[var(--color-ink-faint)]">{formatDate(h.dueDate)}</span>
-              </motion.div>
-            ))}
+          <div className="mb-7 grid grid-cols-3 gap-2.5 md:mb-0">
+            <StatChip to="/hausaufgaben" i={0} label={openHomework.length === 1 ? 'Aufgabe' : 'Aufgaben'} value={String(openHomework.length)} />
+            <StatChip
+              to="/pruefungen"
+              i={1}
+              label="Nächster Test"
+              value={tests.length === 0 ? '—' : daysUntil(tests[0]?.date) === 0 ? 'Heute' : `${daysUntil(tests[0]?.date)}T`}
+            />
+            <StatChip
+              to="/projekte"
+              i={2}
+              label={activeProjects.length === 1 ? 'Projekt' : 'Projekte'}
+              value={String(activeProjects.length)}
+            />
           </div>
-        )}
-      </Section>
+        </div>
 
-      <Section title="Anstehende Tests" linkTo="/pruefungen">
-        {upcomingTests.length === 0 ? (
-          <EmptyNote text="Keine Tests in Sicht." />
-        ) : (
-          <div className="flex flex-col gap-2">
-            {upcomingTests.map((t, i) => (
-              <motion.div key={t.id} {...flyIn(i, 0.4)} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
-                <div className="flex-1">
-                  <p className="text-[15px] font-semibold">{t.subject || 'Allgemein'}</p>
-                  {t.topic && <p className="text-xs text-[var(--color-ink-faint)]">{t.topic}</p>}
-                </div>
-                <span className="rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--color-accent)]">
-                  {daysUntil(t.date) === 0 ? 'Heute' : `in ${daysUntil(t.date)}T`}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      <Section title="Projekte" linkTo="/projekte">
-        {activeProjects.length === 0 ? (
-          <EmptyNote text="Noch kein Projekt." />
-        ) : (
-          <div className="flex flex-col gap-2">
-            {activeProjects.map((p, i) => {
-              const { total, done } = progress(p)
-              return (
-                <motion.div key={p.id} {...flyIn(i, 0.5)}>
-                  <Link to={`/projekte/${p.id}`} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
-                    <span className="text-xl">{p.emoji || '📁'}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[15px] font-semibold">{p.name}</p>
-                      <p className="text-xs text-[var(--color-ink-faint)]">{dueLabel(p.dueDate)}</p>
-                    </div>
-                    {total > 0 && (
-                      <span className="rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--color-accent)]">
-                        {done}/{total}
-                      </span>
-                    )}
-                  </Link>
-                </motion.div>
-              )
-            })}
-          </div>
-        )}
-      </Section>
+        <Section title="Steht an">
+          {upcoming.length === 0 ? (
+            <EmptyNote text="Nichts Dringendes in Sicht." />
+          ) : (
+            <div className="flex flex-col gap-2">
+              {upcoming.map((item, i) => (
+                <UpcomingRow key={item.id} item={item} i={i} />
+              ))}
+            </div>
+          )}
+        </Section>
       </div>
     </PageTransition>
   )
 }
 
-function Section({ title, linkTo, children }) {
+function HeroCard({ hero, heuteLabel, weekend, customColors }) {
+  if (!hero) {
+    const title = weekend
+      ? heuteLabel === 'Heute'
+        ? 'Kein Schultag heute'
+        : 'Kein Schultag morgen'
+      : heuteLabel === 'Heute'
+        ? 'Für heute nichts mehr'
+        : 'Noch keine Stunden für morgen'
+    const sub = weekend ? 'Genieß die freie Zeit.' : heuteLabel === 'Heute' ? 'Der Unterricht ist für heute vorbei.' : 'Im Stundenplan noch nichts eingetragen.'
+    return (
+      <motion.div {...flyIn(0)} className="mb-5">
+        <Card className="!p-5">
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl">{weekend ? '🎉' : '📭'}</span>
+            <div>
+              <p className="text-[15px] font-semibold">{title}</p>
+              <p className="text-xs text-[var(--color-ink-faint)]">{sub}</p>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    )
+  }
+  const { kind, lesson } = hero
+  const color = colorFor(lesson.color, customColors)
+  const range = periodRange(lesson.period)
+  const label = kind === 'now' ? 'Läuft gerade' : kind === 'next' ? 'Nächste Stunde' : `${heuteLabel} als Erstes`
+  const sub =
+    kind === 'now'
+      ? `noch bis ${String(range.end / 60 | 0).padStart(2, '0')}:${String(range.end % 60).padStart(2, '0')} Uhr`
+      : `${lesson.period}. Stunde${lesson.room ? ` · ${lesson.room}` : ''}`
+
   return (
-    <div className="mb-7 md:mb-0">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-bold">{title}</h2>
-        <Link to={linkTo} className="text-sm font-medium text-[var(--color-ink-faint)]">
-          Alle →
-        </Link>
-      </div>
+    <motion.div {...flyIn(0)} className="mb-5">
+      <Link to="/stundenplan" className="block">
+        <div
+          className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] p-5"
+          style={{ background: `linear-gradient(135deg, ${color.soft}, var(--color-surface))` }}
+        >
+          <p className="mb-2.5 text-xs font-semibold uppercase tracking-widest" style={{ color: color.bg }}>
+            {label}
+          </p>
+          <div className="flex items-center gap-3.5">
+            <span className="h-11 w-1.5 shrink-0 rounded-full" style={{ background: color.bg }} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-2xl font-extrabold leading-tight">{lesson.subject}</p>
+              <p className="mt-0.5 text-sm text-[var(--color-ink-faint)]">{sub}</p>
+            </div>
+            {kind === 'now' && (
+              <motion.span
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ background: color.bg }}
+                animate={{ opacity: [1, 0.35, 1], scale: [1, 1.3, 1] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            )}
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  )
+}
+
+function StatChip({ to, label, value, i }) {
+  return (
+    <motion.div {...flyIn(i, 0.15)}>
+      <Link to={to} className="flex flex-col items-center gap-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-3.5 text-center">
+        <span className="font-[var(--font-display)] text-xl font-extrabold text-[var(--color-accent)]">{value}</span>
+        <span className="text-[11px] leading-tight text-[var(--color-ink-faint)]">{label}</span>
+      </Link>
+    </motion.div>
+  )
+}
+
+const KIND_ICON = { homework: TaskIcon, test: ClockIcon, project: GridIcon }
+const KIND_TO = { homework: '/hausaufgaben', test: '/pruefungen' }
+
+function UpcomingRow({ item, i }) {
+  const Icon = KIND_ICON[item.kind]
+  const d = daysUntil(item.date)
+  return (
+    <motion.div {...flyIn(i, 0.3)}>
+      <Link
+        to={item.to || KIND_TO[item.kind]}
+        className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5"
+      >
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
+          <Icon />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[15px] font-semibold">{item.title}</p>
+          {item.subject && <p className="truncate text-xs text-[var(--color-ink-faint)]">{item.subject}</p>}
+        </div>
+        <span className="shrink-0 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--color-accent)]">
+          {d === 0 ? 'Heute' : d === 1 ? 'Morgen' : `in ${d}T`}
+        </span>
+      </Link>
+    </motion.div>
+  )
+}
+
+function Section({ title, children }) {
+  return (
+    <div>
+      <h2 className="mb-3 text-lg font-bold">{title}</h2>
       {children}
     </div>
   )
@@ -187,28 +241,10 @@ function greeting() {
   return 'Guten Abend'
 }
 
-function endTimeForPeriod(period) {
-  const entry = DEFAULT_PERIODS.find((p) => p.period === period)
-  if (!entry) return null
-  const [, end] = entry.time.split('–')
-  const [h, m] = end.split(':').map(Number)
-  return { h, m }
-}
-
-function isPast(time, now) {
-  if (!time) return false
-  return now.getHours() > time.h || (now.getHours() === time.h && now.getMinutes() >= time.m)
-}
-
 function daysUntil(iso) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const target = new Date(iso)
   target.setHours(0, 0, 0, 0)
   return Math.round((target - today) / 86400000)
-}
-
-function formatDate(iso) {
-  if (!iso) return ''
-  return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
 }

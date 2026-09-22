@@ -87,7 +87,7 @@ export default function Home() {
               label="Nächster Test in"
               value={tests.length === 0 ? '—' : daysUntil(tests[0]?.date) === 0 ? 'Heute' : `${daysUntil(tests[0]?.date)}T`}
             />
-            <StatChip i={2} label="Diese Woche" value={String(weekCount)} />
+            <StatChip i={2} label="Fällig diese Woche" value={String(weekCount)} />
           </div>
         </div>
 

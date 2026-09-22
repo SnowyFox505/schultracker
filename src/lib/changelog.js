@@ -1,6 +1,17 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.3.2',
+    date: '22.09.2026',
+    title: 'Dashboard-Feinschliff',
+    items: [
+      'Kacheln umbenannt: Hausaufgaben, Nächster Test in, Diese Woche (statt der oft leeren Projekt-Zahl)',
+      'Die große Karte zeigt jetzt immer die nächste Stunde, auch während des Unterrichts; bei Doppelstunden die übernächste',
+      '"Steht an" zeigt nur noch die nächsten 2 Wochen',
+      'Hausaufgabe, Test und Projekt sind jetzt farblich und mit Label unterscheidbar',
+    ],
+  },
+  {
     version: '4.3.1',
     date: '22.09.2026',
     title: 'Neues Heute-Dashboard',

@@ -32,17 +32,21 @@ export default function Home() {
     ? DEFAULT_PERIODS.map(({ period }) => lessons[`${todayKeyRaw}-${period}`]).filter(Boolean)
     : []
 
-  const lastPeriodToday = todaysLessons.length ? Math.max(...todaysLessons.map((l) => l.period)) : null
-  const dayOver = lastPeriodToday !== null && nowMin >= periodRange(lastPeriodToday).end
-  const showTomorrow = todayKeyRaw ? dayOver : true
+  // The lesson happening right now (if any) — only used to skip straight past a Doppelstunde's
+  // second half, never shown itself: while sitting in a lesson you already know you're in it,
+  // what's useful on the dashboard is what comes next.
+  const currentLesson = todaysLessons.find((l) => nowMin >= periodRange(l.period).start && nowMin < periodRange(l.period).end) || null
+  const futureToday = todaysLessons.filter((l) => periodRange(l.period).start > nowMin).sort((a, b) => a.period - b.period)
+  const skipDoppelstunde = currentLesson && futureToday[0]?.subject === currentLesson.subject ? 1 : 0
+  const nextTodayLesson = futureToday[skipDoppelstunde] || null
+
+  const showTomorrow = !nextTodayLesson
   const displayDate = showTomorrow ? new Date(now.getTime() + 86400000) : now
   const heuteLabel = showTomorrow ? 'Morgen' : 'Heute'
   const heuteKey = JS_DAY_TO_WEEKDAY[displayDate.getDay()]
   const heuteLessons = heuteKey ? DEFAULT_PERIODS.map(({ period }) => lessons[`${heuteKey}-${period}`]).filter(Boolean) : []
 
-  const runningNow = !showTomorrow ? todaysLessons.find((l) => nowMin >= periodRange(l.period).start && nowMin < periodRange(l.period).end) : null
-  const nextToday = !showTomorrow && !runningNow ? todaysLessons.find((l) => nowMin < periodRange(l.period).start) : null
-  const hero = runningNow ? { kind: 'now', lesson: runningNow } : nextToday ? { kind: 'next', lesson: nextToday } : heuteLessons[0] ? { kind: 'day', lesson: heuteLessons[0] } : null
+  const hero = nextTodayLesson ? { kind: 'next', lesson: nextTodayLesson } : heuteLessons[0] ? { kind: 'day', lesson: heuteLessons[0] } : null
 
   const openHomework = homework.filter((h) => !h.done)
   const upcoming = [
@@ -58,11 +62,11 @@ export default function Home() {
       .filter((p) => !p.archived && p.dueDate)
       .map((p) => ({ id: `p-${p.id}`, kind: 'project', title: p.name, subject: 'Projekt-Abgabe', date: p.dueDate, to: `/projekte/${p.id}` })),
   ]
-    .filter((i) => daysUntil(i.date) >= 0)
+    .filter((i) => daysUntil(i.date) >= 0 && daysUntil(i.date) <= 13) // nur die nächsten 2 Wochen
     .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 7)
+    .slice(0, 8)
 
-  const activeProjects = projects.filter((p) => !p.archived)
+  const weekCount = upcoming.filter((i) => daysUntil(i.date) <= 6).length
 
   return (
     <PageTransition>
@@ -76,19 +80,14 @@ export default function Home() {
           <HeroCard hero={hero} heuteLabel={heuteLabel} weekend={!heuteKey} customColors={customColors} />
 
           <div className="mb-7 grid grid-cols-3 gap-2.5 md:mb-0">
-            <StatChip to="/hausaufgaben" i={0} label={openHomework.length === 1 ? 'Aufgabe' : 'Aufgaben'} value={String(openHomework.length)} />
+            <StatChip to="/hausaufgaben" i={0} label="Hausaufgaben" value={String(openHomework.length)} />
             <StatChip
               to="/pruefungen"
               i={1}
-              label="Nächster Test"
+              label="Nächster Test in"
               value={tests.length === 0 ? '—' : daysUntil(tests[0]?.date) === 0 ? 'Heute' : `${daysUntil(tests[0]?.date)}T`}
             />
-            <StatChip
-              to="/projekte"
-              i={2}
-              label={activeProjects.length === 1 ? 'Projekt' : 'Projekte'}
-              value={String(activeProjects.length)}
-            />
+            <StatChip i={2} label="Diese Woche" value={String(weekCount)} />
           </div>
         </div>
 
@@ -134,12 +133,8 @@ function HeroCard({ hero, heuteLabel, weekend, customColors }) {
   }
   const { kind, lesson } = hero
   const color = colorFor(lesson.color, customColors)
-  const range = periodRange(lesson.period)
-  const label = kind === 'now' ? 'Läuft gerade' : kind === 'next' ? 'Nächste Stunde' : `${heuteLabel} als Erstes`
-  const sub =
-    kind === 'now'
-      ? `noch bis ${String(range.end / 60 | 0).padStart(2, '0')}:${String(range.end % 60).padStart(2, '0')} Uhr`
-      : `${lesson.period}. Stunde${lesson.room ? ` · ${lesson.room}` : ''}`
+  const label = kind === 'next' ? 'Nächste Stunde' : `${heuteLabel} als Erstes`
+  const sub = `${lesson.period}. Stunde${lesson.room ? ` · ${lesson.room}` : ''}`
 
   return (
     <motion.div {...flyIn(0)} className="mb-5">
@@ -157,14 +152,6 @@ function HeroCard({ hero, heuteLabel, weekend, customColors }) {
               <p className="truncate text-2xl font-extrabold leading-tight">{lesson.subject}</p>
               <p className="mt-0.5 text-sm text-[var(--color-ink-faint)]">{sub}</p>
             </div>
-            {kind === 'now' && (
-              <motion.span
-                className="h-2.5 w-2.5 shrink-0 rounded-full"
-                style={{ background: color.bg }}
-                animate={{ opacity: [1, 0.35, 1], scale: [1, 1.3, 1] }}
-                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-              />
-            )}
           </div>
         </div>
       </Link>
@@ -173,36 +160,52 @@ function HeroCard({ hero, heuteLabel, weekend, customColors }) {
 }
 
 function StatChip({ to, label, value, i }) {
+  const inner = (
+    <>
+      <span className="font-[var(--font-display)] text-xl font-extrabold text-[var(--color-accent)]">{value}</span>
+      <span className="text-[11px] leading-tight text-[var(--color-ink-faint)]">{label}</span>
+    </>
+  )
   return (
     <motion.div {...flyIn(i, 0.15)}>
-      <Link to={to} className="flex flex-col items-center gap-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-3.5 text-center">
-        <span className="font-[var(--font-display)] text-xl font-extrabold text-[var(--color-accent)]">{value}</span>
-        <span className="text-[11px] leading-tight text-[var(--color-ink-faint)]">{label}</span>
-      </Link>
+      {to ? (
+        <Link to={to} className="flex flex-col items-center gap-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-3.5 text-center">
+          {inner}
+        </Link>
+      ) : (
+        <div className="flex flex-col items-center gap-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-3.5 text-center">
+          {inner}
+        </div>
+      )}
     </motion.div>
   )
 }
 
-const KIND_ICON = { homework: TaskIcon, test: ClockIcon, project: GridIcon }
-const KIND_TO = { homework: '/hausaufgaben', test: '/pruefungen' }
+// Each kind gets its own icon, color and label so a row is recognizable at a glance, not just by icon.
+const KIND_META = {
+  homework: { icon: TaskIcon, label: 'Hausaufgabe', to: '/hausaufgaben', bg: 'var(--color-accent)', soft: 'var(--color-accent-soft)' },
+  test: { icon: ClockIcon, label: 'Test', to: '/pruefungen', bg: '#60c7ff', soft: '#60c7ff26' },
+  project: { icon: GridIcon, label: 'Projekt', bg: '#a78bfa', soft: '#a78bfa26' },
+}
 
 function UpcomingRow({ item, i }) {
-  const Icon = KIND_ICON[item.kind]
+  const meta = KIND_META[item.kind]
+  const Icon = meta.icon
   const d = daysUntil(item.date)
   return (
     <motion.div {...flyIn(i, 0.3)}>
-      <Link
-        to={item.to || KIND_TO[item.kind]}
-        className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5"
-      >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
+      <Link to={item.to || meta.to} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: meta.soft, color: meta.bg }}>
           <Icon />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[15px] font-semibold">{item.title}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: meta.bg }}>
+            {meta.label}
+          </p>
+          <p className="truncate text-[15px] font-semibold leading-tight">{item.title}</p>
           {item.subject && <p className="truncate text-xs text-[var(--color-ink-faint)]">{item.subject}</p>}
         </div>
-        <span className="shrink-0 rounded-full bg-[var(--color-accent-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--color-accent)]">
+        <span className="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold" style={{ background: meta.soft, color: meta.bg }}>
           {d === 0 ? 'Heute' : d === 1 ? 'Morgen' : `in ${d}T`}
         </span>
       </Link>

@@ -1,6 +1,15 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.3.3',
+    date: '22.09.2026',
+    title: 'Kurzer Willkommens-Effekt öfter',
+    items: [
+      'Der kurze Funken-Effekt beim App-Öffnen erscheint jetzt auch, wenn du die App nur in den Hintergrund geschickt hattest (z. B. Home-Bildschirm), nicht nur nach komplettem Schließen',
+      'Kurze Unterbrechungen (kurz weggeschaut, ein Dialog) lösen ihn nicht aus',
+    ],
+  },
+  {
     version: '4.3.2',
     date: '22.09.2026',
     title: 'Dashboard-Feinschliff',

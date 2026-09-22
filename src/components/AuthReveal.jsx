@@ -8,16 +8,22 @@ const LOGO = 80 // px, same as the Loader logo
 const OFFSET = -20 // the Loader's logo sits 20px above screen center
 const BURST_AT = 0.75 // seconds until the burst (login version)
 const rand = (a, b) => a + Math.random() * (b - a)
+// On iOS, tapping the home-screen icon again after just backgrounding the app (not force-quitting
+// it) resumes the same JS session instead of reloading it — visibilitychange is the only signal we
+// get for "the app was reopened" there. Ignore brief interruptions (a permission dialog, switching
+// to type something and back) and only treat it as a reopen past this many ms hidden.
+const REOPEN_AFTER_MS = 20_000
 
-// Plays once, right after the first auth check. Signed in: a short wave uncovers the app.
-// Not signed in: sparks gather into the logo, it bursts into waves and sparks that
-// uncover the login page, then the logo flies into the page's own logo (#login-logo) and lands
-// with a ripple.
+// Plays right after the first auth check, and again each time the app is reopened (see above).
+// Signed in: a short wave uncovers the app. Not signed in: sparks gather into the logo, it bursts
+// into waves and sparks that uncover the login page, then the logo flies into the page's own logo
+// (#login-logo) and lands with a ripple.
 export default function AuthReveal() {
   const { user, loading } = useAuth()
   const [kind, setKind] = useState(null)
   const [prevUser, setPrevUser] = useState(null)
   const shown = useRef(false)
+  const hiddenAt = useRef(null)
 
   // Signing out: the goodbye overlay ends, then the same reveal plays into the login page.
   // Derived during render so the login page never flashes uncovered for a frame.
@@ -30,6 +36,22 @@ export default function AuthReveal() {
     if (loading || shown.current) return
     shown.current = true
     setKind(user ? 'app' : 'login')
+  }, [loading, user])
+
+  useEffect(() => {
+    function onVisibility() {
+      if (document.visibilityState === 'hidden') {
+        hiddenAt.current = Date.now()
+        return
+      }
+      const wasHiddenFor = hiddenAt.current ? Date.now() - hiddenAt.current : 0
+      hiddenAt.current = null
+      if (wasHiddenFor < REOPEN_AFTER_MS) return
+      if (loading || !user || !shown.current) return // only the short "app" version, once signed in
+      setKind((k) => k ?? 'app')
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
   }, [loading, user])
 
   if (!kind) return null

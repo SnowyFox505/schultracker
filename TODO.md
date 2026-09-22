@@ -44,7 +44,8 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 ## Neu aus den App-Notizen (21.09.2026)
 
 - [x] (4.0) Login-Screen-Übergang: beim ersten Öffnen ohne Anmeldung z. B. schwarzer Bildschirm, der wie eine Wasserwelle weggeht und in ein bestehendes Element des Login-Screens übergeht (Logo/Karte) — allgemein: Übergänge sollen in ein vorhandenes Objekt übergehen statt nur wegzufaden
-- [x] (4.0, kurze Version auch angemeldet) Lade-Animation: überlegen, ob sie bei jedem App-Öffnen erscheint, nicht nur nach komplettem Schließen (Loader selbst ist schon neu in 3.5)
+- [x] (4.3.3) Lade-Animation bei jedem App-Öffnen: löst jetzt auch beim Zurückkehren aus dem Hintergrund aus (Page-Visibility-API, ab 20s weg), nicht nur nach komplettem Schließen
+- [ ] Update-Popup für Nutzer: beim App-Öffnen anzeigen, wenn eine neue Version verfügbar ist. Dazu ein Weg für den Entwickler, den Rollout selbst auszulösen statt dass er sofort mit jedem Deploy an alle geht — damit Zeit zum Testen vor dem Live-Schalten bleibt
 - [ ] (Versuch 1 in 3.8, opaker Streifen: hat nichts gebracht, in 3.9 entfernt) iOS 27 Top-Bar-Blur (Liquid-Glass-Verwischung oben in installierten PWAs): bekannter iOS-Bug, kein sicherer Fix. Möglicher Workaround: `black-translucent` → `default` in index.html + 1px-Sampler-Element mit Hintergrundfarbe oben (Nachteil: Statusleiste nicht mehr randlos, App muss neu zum Home-Bildschirm hinzugefügt werden). Zuerst abwarten/testen
 - [x] (3.7) Tests/Termine in der Bubble: den einen Toggle in zwei aufteilen — "Geteilte Termine sehen" und "Meine Termine teilen", jeder entscheidet beides für sich
 - [x] (4.3) Push-Einstellungen pro Gerät statt pro Account (z. B. Handy andere Zeiten als iPad) — aktuell pro Account

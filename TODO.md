@@ -58,7 +58,7 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 
 ## Neu aus den App-Notizen (25.09.2026)
 
-- [ ] Schulschluss-Zeit konfigurierbar machen, evtl. pro Wochentag — soll auch für Erinnerungen (Push) und für die "nächste Stunde"-Karte auf Home verwendet werden (aktuell wird "Schultag vorbei" nur implizit aus der letzten eingetragenen Stunde abgeleitet)
+- [x] (4.6) Schulschluss-Zeit pro Wochentag im Stundenplan (Bearbeiten) einstellbar — ersetzt die abgeleitete Logik für Home-Karte und Push-Erinnerungen, wenn gesetzt
 
 ## Sonstiges
 

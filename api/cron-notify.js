@@ -106,10 +106,19 @@ export default async function handler(req, res) {
       const marks = {}
 
       // A notification is "due" once its time has passed today (catch-up, so a 15-min cron
-      // granularity never misses it) and, if enabled, only while no lesson is running.
+      // granularity never misses it) and, if enabled, only while no lesson is running. A configured
+      // Schulschluss time (see Stundenplan) for today, if set, is trusted over the schedule — it
+      // also covers free periods within the school day that `inLesson` alone wouldn't catch.
+      const schoolEndToday = profile.schoolEnd?.[now.weekday]
       const due = async (time) => {
         if (now.minutes < toMin(time || '18:00') || now.minutes > LATEST_MINUTES) return false
-        if (prefs.skipSchool && (await inLessonNow())) return false
+        if (prefs.skipSchool) {
+          if (schoolEndToday) {
+            if (now.minutes < toMin(schoolEndToday)) return false
+          } else if (await inLessonNow()) {
+            return false
+          }
+        }
         return true
       }
       const send = (payload) => sendToDevices([deviceDoc], payload)

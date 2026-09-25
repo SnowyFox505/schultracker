@@ -12,7 +12,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 
 export default function Stundenplan() {
-  const { profile } = useAuth()
+  const { profile, updateUserProfile } = useAuth()
   const { lessons, setLesson, clearLesson } = useSchedule()
   const { breaks, setBreak, clearBreak } = useBreaks()
   const [editMode, setEditMode] = useState(false)
@@ -21,10 +21,13 @@ export default function Stundenplan() {
   const [room, setRoom] = useState('')
   const [activeBreak, setActiveBreak] = useState(null)
   const [breakDuration, setBreakDuration] = useState('')
+  const [activeEndDay, setActiveEndDay] = useState(null)
+  const [endTime, setEndTime] = useState('')
   const [showSaved, triggerSaved] = useSavedToast()
 
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
+  const schoolEnd = profile?.schoolEnd || {}
 
   function openCell(day, period) {
     if (!editMode) return
@@ -76,6 +79,31 @@ export default function Stundenplan() {
     if (!activeBreak) return
     await clearBreak(activeBreak)
     setActiveBreak(null)
+  }
+
+  function openEndEdit(day) {
+    if (!editMode) return
+    setEndTime(schoolEnd[day] || '')
+    setActiveEndDay(day)
+  }
+
+  async function handleSaveEnd(e) {
+    e.preventDefault()
+    if (!activeEndDay) return
+    const next = { ...schoolEnd }
+    if (endTime) next[activeEndDay] = endTime
+    else delete next[activeEndDay]
+    await updateUserProfile({ schoolEnd: next })
+    triggerSaved()
+    setActiveEndDay(null)
+  }
+
+  async function handleRemoveEnd() {
+    if (!activeEndDay) return
+    const next = { ...schoolEnd }
+    delete next[activeEndDay]
+    await updateUserProfile({ schoolEnd: next })
+    setActiveEndDay(null)
   }
 
   return (
@@ -187,6 +215,38 @@ export default function Stundenplan() {
         </p>
       )}
 
+      {(editMode || Object.keys(schoolEnd).length > 0) && (
+        <div className="mt-6">
+          <p className="mb-2.5 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">Schulschluss</p>
+          <div className="grid grid-cols-5 gap-1.5 md:gap-2.5">
+            {WEEKDAYS.map((day) => {
+              const time = schoolEnd[day]
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => openEndEdit(day)}
+                  disabled={!editMode}
+                  className={`flex flex-col items-center gap-0.5 rounded-xl border p-2 text-center ${
+                    time ? 'border-transparent bg-[var(--color-accent-soft)]' : 'border-dashed border-[var(--color-border)]'
+                  }`}
+                >
+                  <span className="text-[11px] font-semibold text-[var(--color-ink-faint)]">{day}</span>
+                  <span className={`text-xs font-semibold ${time ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'}`}>
+                    {time || (editMode ? '+' : '–')}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          {editMode && (
+            <p className="mt-2 text-xs text-[var(--color-ink-faint)]">
+              Legt fest, wann dein Schultag spätestens vorbei ist — wird für die "Nächste Stunde"-Karte auf Heute und für Erinnerungen verwendet, statt nur die letzte eingetragene Stunde zu nehmen.
+            </p>
+          )}
+        </div>
+      )}
+
       <Sheet open={!!activeCell} onClose={() => setActiveCell(null)} title={activeCell ? `${activeCell.day} · Stunde ${activeCell.period}` : ''}>
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           {subjects.length > 0 && (
@@ -236,6 +296,25 @@ export default function Stundenplan() {
           <div className="mt-2 flex gap-3">
             {activeBreak && breaks[String(activeBreak)] && (
               <Button type="button" variant="secondary" onClick={handleRemoveBreak} className="flex-1">
+                Entfernen
+              </Button>
+            )}
+            <Button type="submit" className="flex-1">
+              Speichern
+            </Button>
+          </div>
+        </form>
+      </Sheet>
+
+      <Sheet open={!!activeEndDay} onClose={() => setActiveEndDay(null)} title={activeEndDay ? `Schulschluss: ${activeEndDay}` : ''}>
+        <form onSubmit={handleSaveEnd} className="flex flex-col gap-4">
+          <p className="text-sm text-[var(--color-ink-dim)]">
+            Ab wann bist du an diesem Tag spätestens frei? Leer lassen, um wieder die letzte eingetragene Stunde zu verwenden.
+          </p>
+          <Input label="Uhrzeit" type="time" autoFocus value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+          <div className="mt-2 flex gap-3">
+            {activeEndDay && schoolEnd[activeEndDay] && (
+              <Button type="button" variant="secondary" onClick={handleRemoveEnd} className="flex-1">
                 Entfernen
               </Button>
             )}

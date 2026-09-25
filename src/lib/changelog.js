@@ -1,6 +1,16 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.6',
+    date: '25.09.2026',
+    title: 'Schulschluss festlegen',
+    items: [
+      'Im Stundenplan (Bearbeiten) kannst du pro Wochentag eine feste Schulschluss-Zeit eintragen',
+      'Wird verwendet, wenn nicht jede Stunde im Plan steht: die Heute-Karte weiß dann trotzdem, wann dein Tag vorbei ist',
+      'Push-Erinnerungen ("nur außerhalb der Schulzeit") nutzen die Zeit jetzt ebenfalls, auch für Freistunden',
+    ],
+  },
+  {
     version: '4.5',
     date: '25.09.2026',
     title: 'Home-Dashboard-Fixes',

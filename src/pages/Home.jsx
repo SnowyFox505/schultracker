@@ -41,6 +41,7 @@ export default function Home() {
   const { profile } = useAuth()
   const customColors = profile?.customColors || []
   const { lessons, loading: scheduleLoading } = useSchedule()
+  const schoolEnd = profile?.schoolEnd || {}
   const { items: homework } = useHomework()
   const { items: tests } = useTests()
   const { items: projects } = useProjects()
@@ -68,13 +69,23 @@ export default function Home() {
   const skipDoppelstunde = futureToday[0] && nextIsSecondHalf(futureToday[0]) ? 1 : 0
   const nextTodayLesson = futureToday[skipDoppelstunde] || null
 
-  const showTomorrow = !nextTodayLesson
+  // A configured Schulschluss time for today (see Stundenplan) overrides the derived "day over"
+  // check entirely — trusted over whatever is or isn't entered in the schedule for the rest of today.
+  const todayEnd = todayKeyRaw && schoolEnd[todayKeyRaw]
+  const dayOverByEnd = todayEnd ? nowMin >= toMin(todayEnd) : null
+  const showTomorrow = dayOverByEnd !== null ? dayOverByEnd : !nextTodayLesson
   const displayDate = showTomorrow ? new Date(now.getTime() + 86400000) : now
   const heuteLabel = showTomorrow ? 'Morgen' : 'Heute'
   const heuteKey = JS_DAY_TO_WEEKDAY[displayDate.getDay()]
   const heuteLessons = heuteKey ? DEFAULT_PERIODS.map(({ period }) => lessons[`${heuteKey}-${period}`]).filter(Boolean) : []
 
-  const hero = nextTodayLesson ? { kind: 'next', lesson: nextTodayLesson } : heuteLessons[0] ? { kind: 'day', lesson: heuteLessons[0] } : null
+  const hero = nextTodayLesson
+    ? { kind: 'next', lesson: nextTodayLesson }
+    : showTomorrow && heuteLessons[0]
+      ? { kind: 'day', lesson: heuteLessons[0] }
+      : null
+  // Nothing entered for the rest of today, but a Schulschluss override says we're not done yet.
+  const notOverYet = !hero && !showTomorrow && todayEnd
 
   const openHomework = homework.filter((h) => !h.done)
   const upcoming = [
@@ -105,7 +116,15 @@ export default function Home() {
 
       <div className="md:grid md:grid-cols-[1.1fr_1fr] md:items-start md:gap-6">
         <div>
-          <HeroCard hero={hero} heuteLabel={heuteLabel} weekend={!heuteKey} customColors={customColors} loading={scheduleLoading} />
+          <HeroCard
+            hero={hero}
+            heuteLabel={heuteLabel}
+            weekend={!heuteKey}
+            notOverYet={notOverYet}
+            todayEnd={todayEnd}
+            customColors={customColors}
+            loading={scheduleLoading}
+          />
 
           <div className="mb-7 grid grid-cols-3 gap-2.5 md:mb-0">
             <StatChip to="/hausaufgaben" i={0} label="Hausaufgaben" value={String(openHomework.length)} />
@@ -135,7 +154,7 @@ export default function Home() {
   )
 }
 
-function HeroCard({ hero, heuteLabel, weekend, customColors, loading }) {
+function HeroCard({ hero, heuteLabel, weekend, notOverYet, todayEnd, customColors, loading }) {
   if (loading) {
     // The schedule hasn't arrived from Firestore yet (common for a moment right after opening the
     // app) — showing "kein Schultag"/"nichts mehr heute" here would be actively wrong whenever
@@ -156,19 +175,27 @@ function HeroCard({ hero, heuteLabel, weekend, customColors, loading }) {
     )
   }
   if (!hero) {
-    const title = weekend
-      ? heuteLabel === 'Heute'
-        ? 'Kein Schultag heute'
-        : 'Kein Schultag morgen'
-      : heuteLabel === 'Heute'
-        ? 'Für heute nichts mehr'
-        : 'Noch keine Stunden für morgen'
-    const sub = weekend ? 'Genieß die freie Zeit.' : heuteLabel === 'Heute' ? 'Der Unterricht ist für heute vorbei.' : 'Im Stundenplan noch nichts eingetragen.'
+    const title = notOverYet
+      ? 'Keine weiteren Stunden heute eingetragen'
+      : weekend
+        ? heuteLabel === 'Heute'
+          ? 'Kein Schultag heute'
+          : 'Kein Schultag morgen'
+        : heuteLabel === 'Heute'
+          ? 'Für heute nichts mehr'
+          : 'Noch keine Stunden für morgen'
+    const sub = notOverYet
+      ? `Laut deiner Einstellung hast du noch bis ${todayEnd} Uhr Schule.`
+      : weekend
+        ? 'Genieß die freie Zeit.'
+        : heuteLabel === 'Heute'
+          ? 'Der Unterricht ist für heute vorbei.'
+          : 'Im Stundenplan noch nichts eingetragen.'
     return (
       <motion.div {...flyIn(0)} className="mb-5">
         <Card className="!p-5">
           <div className="flex items-center gap-2.5">
-            <span className="text-2xl">{weekend ? '🎉' : '📭'}</span>
+            <span className="text-2xl">{notOverYet ? '⏳' : weekend ? '🎉' : '📭'}</span>
             <div>
               <p className="text-[15px] font-semibold">{title}</p>
               <p className="text-xs text-[var(--color-ink-faint)]">{sub}</p>

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { colorFor } from '../lib/constants'
 import { BubbleIcon, ClockIcon, GridIcon, NoteIcon, TaskIcon } from './navIcons'
 
@@ -18,10 +18,15 @@ const SECTIONS = [
 // Big moment right after the setup: sparks gather into the logo, it bursts, the wordmark spells out,
 // then the app's five areas fly in from all sides, land with a little ripple and become a row.
 export default function IntroReveal({ name, subjects = [], customColors = [], onDone }) {
+  // Mount-once timer: `onDone` (clearJustOnboarded from AuthContext) is a fresh function on every
+  // AuthProvider re-render (e.g. any profile field changing), which would restart this countdown
+  // and could leave the overlay stuck forever if renders ever came faster than DURATION.
+  const onDoneRef = useRef(onDone)
+  onDoneRef.current = onDone
   useEffect(() => {
-    const t = setTimeout(onDone, DURATION * 1000)
+    const t = setTimeout(() => onDoneRef.current(), DURATION * 1000)
     return () => clearTimeout(t)
-  }, [onDone])
+  }, [])
 
   return (
     <motion.div

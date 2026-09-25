@@ -7,6 +7,8 @@ export const CHANGELOG = [
     items: [
       'Doppelstunden-Bug behoben: die große Karte zeigte am Übergang zwischen den beiden Hälften (z. B. genau um 10:40) kurz die falsche nächste Stunde',
       'Die Karte aktualisiert sich jetzt jede Minute von selbst, auch wenn die Seite offen bleibt',
+      'Fix: kurz nach dem Öffnen der App konnte die Karte fälschlich "Wochenende"/"nichts mehr heute" zeigen, weil der Stundenplan noch nachlud',
+      'Fix: die Start-Animationen (Einrichtung, Willkommen, Abmelden, Bubble) konnten sich in seltenen Fällen selbst verlängern und hängen bleiben',
     ],
   },
   {

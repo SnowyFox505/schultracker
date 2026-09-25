@@ -40,7 +40,7 @@ function useNow() {
 export default function Home() {
   const { profile } = useAuth()
   const customColors = profile?.customColors || []
-  const { lessons } = useSchedule()
+  const { lessons, loading: scheduleLoading } = useSchedule()
   const { items: homework } = useHomework()
   const { items: tests } = useTests()
   const { items: projects } = useProjects()
@@ -105,7 +105,7 @@ export default function Home() {
 
       <div className="md:grid md:grid-cols-[1.1fr_1fr] md:items-start md:gap-6">
         <div>
-          <HeroCard hero={hero} heuteLabel={heuteLabel} weekend={!heuteKey} customColors={customColors} />
+          <HeroCard hero={hero} heuteLabel={heuteLabel} weekend={!heuteKey} customColors={customColors} loading={scheduleLoading} />
 
           <div className="mb-7 grid grid-cols-3 gap-2.5 md:mb-0">
             <StatChip to="/hausaufgaben" i={0} label="Hausaufgaben" value={String(openHomework.length)} />
@@ -135,7 +135,26 @@ export default function Home() {
   )
 }
 
-function HeroCard({ hero, heuteLabel, weekend, customColors }) {
+function HeroCard({ hero, heuteLabel, weekend, customColors, loading }) {
+  if (loading) {
+    // The schedule hasn't arrived from Firestore yet (common for a moment right after opening the
+    // app) — showing "kein Schultag"/"nichts mehr heute" here would be actively wrong whenever
+    // there actually are lessons today, so wait for real data instead of guessing.
+    return (
+      <div className="mb-5">
+        <Card className="!p-5">
+          <div className="flex items-center gap-2.5">
+            <motion.span
+              className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-ink-faint)]"
+              animate={{ opacity: [0.3, 0.75, 0.3], scale: [1, 1.35, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <span className="text-sm text-[var(--color-ink-faint)]">Lädt deinen Stundenplan …</span>
+          </div>
+        </Card>
+      </div>
+    )
+  }
   if (!hero) {
     const title = weekend
       ? heuteLabel === 'Heute'

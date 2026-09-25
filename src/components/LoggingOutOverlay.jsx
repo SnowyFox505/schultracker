@@ -1,14 +1,19 @@
 import { motion } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 const DURATION = 6
 const SPECK_COUNT = 14
 
 export default function LoggingOutOverlay({ name, onDone }) {
+  // Mount-once timer — see the identical comment in IntroReveal.jsx: `onDone` (logout, from
+  // AuthContext) is a fresh function on every AuthProvider re-render, which would otherwise
+  // restart this countdown and could leave the overlay stuck forever.
+  const onDoneRef = useRef(onDone)
+  onDoneRef.current = onDone
   useEffect(() => {
-    const t = setTimeout(onDone, DURATION * 1000)
+    const t = setTimeout(() => onDoneRef.current(), DURATION * 1000)
     return () => clearTimeout(t)
-  }, [onDone])
+  }, [])
 
   const specks = Array.from({ length: SPECK_COUNT })
 

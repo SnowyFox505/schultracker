@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 const GLASS_BG =
@@ -14,10 +14,14 @@ const DURATION = { create: 4, join: 4.4, leave: 4.6 }
 export default function BubbleFx({ mode, code = '', name = '', names = [], onDone }) {
   const duration = DURATION[mode]
 
+  // Mount-once timer — see the identical comment in IntroReveal.jsx: an inline `onDone` at the call
+  // site would otherwise restart this countdown on every re-render while it's showing.
+  const onDoneRef = useRef(onDone)
+  onDoneRef.current = onDone
   useEffect(() => {
-    const t = setTimeout(onDone, duration * 1000)
+    const t = setTimeout(() => onDoneRef.current(), duration * 1000)
     return () => clearTimeout(t)
-  }, [onDone, duration])
+  }, [duration])
 
   const title =
     mode === 'create' ? 'Deine Bubble ist bereit!' : mode === 'join' ? 'Willkommen in der Bubble!' : `Bis bald${name ? `, ${name.split(' ')[0]}` : ''}!`

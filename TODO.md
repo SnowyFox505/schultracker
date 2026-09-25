@@ -54,6 +54,11 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 - [x] (3.7) Stift/Handschrift überarbeiten: bei schnellem Schreiben fehlt oft jeder zweite Strich
 
 - [x] (4.3.1) Neues Heute-Dashboard: Hero-Karte für die aktuelle/nächste Stunde, Statistik-Kacheln, kombinierte "Steht an"-Liste statt Projekte immer ganz unten
+- [x] (4.5) Doppelstunden-Grenzfall auf Home behoben (falsche nächste Stunde exakt am Übergang zweier Hälften) + Karte aktualisiert sich jetzt minütlich von selbst
+
+## Neu aus den App-Notizen (25.09.2026)
+
+- [ ] Schulschluss-Zeit konfigurierbar machen, evtl. pro Wochentag — soll auch für Erinnerungen (Push) und für die "nächste Stunde"-Karte auf Home verwendet werden (aktuell wird "Schultag vorbei" nur implizit aus der letzten eingetragenen Stunde abgeleitet)
 
 ## Sonstiges
 

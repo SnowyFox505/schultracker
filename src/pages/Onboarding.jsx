@@ -1,5 +1,5 @@
 import PushSettings from '../components/PushSettings'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -275,10 +275,15 @@ const INTRO_STEPS = [
 const INTRO_DURATION = 9.5
 
 function OnboardingIntro({ onDone }) {
+  // Mount-once timer: `onDone` is a fresh inline function on every Onboarding render (e.g. each
+  // keystroke while typing the name), and depending on it would restart the 9.5s countdown on
+  // every one of those renders — if they ever came faster than that, the intro would never finish.
+  const onDoneRef = useRef(onDone)
+  onDoneRef.current = onDone
   useEffect(() => {
-    const t = setTimeout(onDone, INTRO_DURATION * 1000)
+    const t = setTimeout(() => onDoneRef.current(), INTRO_DURATION * 1000)
     return () => clearTimeout(t)
-  }, [onDone])
+  }, [])
 
   return (
     <motion.div

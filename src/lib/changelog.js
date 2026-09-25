@@ -1,6 +1,15 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.5',
+    date: '25.09.2026',
+    title: 'Home-Dashboard-Fixes',
+    items: [
+      'Doppelstunden-Bug behoben: die große Karte zeigte am Übergang zwischen den beiden Hälften (z. B. genau um 10:40) kurz die falsche nächste Stunde',
+      'Die Karte aktualisiert sich jetzt jede Minute von selbst, auch wenn die Seite offen bleibt',
+    ],
+  },
+  {
     version: '4.4',
     date: '22.09.2026',
     title: 'Update-Hinweis',

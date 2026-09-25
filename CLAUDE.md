@@ -19,6 +19,8 @@ npm run preview   # preview a production build locally
 
 No automated test suite exists in this repo. Verification is manual (see "How this project gets tested" below).
 
+First-time local setup (creating the Firebase project, enabling email/password auth + Firestore, getting the `VITE_FIREBASE_*` env vars into `.env`) is documented in `README.md`, not repeated here. Node is pinned to `22.x` via `package.json`'s `engines` (relevant for the `api/` Vercel functions — see the `firebase-admin` version gotcha under Push notifications below).
+
 **Deploy:** `npx vercel --prod --yes` from the repo root deploys the frontend to the linked Vercel project (aliases to schultracker.vercel.app). There is no `firebase.json`/`.firebaserc` in this repo, so **`firestore.rules` is never deployed by this command** — after editing it, the new rules must be pasted into the Firebase Console (Firestore → Rules) by hand, or the deployed frontend silently runs against stale rules.
 
 ## Architecture

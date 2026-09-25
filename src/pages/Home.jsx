@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -17,6 +18,25 @@ const periodRange = (period) => {
   return { start: toMin(start), end: toMin(end) }
 }
 
+// A `Date` that updates itself once a minute (aligned to the next minute boundary, then every 60s)
+// so time-dependent UI re-renders on its own instead of only when something else changes.
+function useNow() {
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    let interval
+    const msToNextMinute = 60000 - (Date.now() % 60000)
+    const align = setTimeout(() => {
+      setNow(new Date())
+      interval = setInterval(() => setNow(new Date()), 60000)
+    }, msToNextMinute)
+    return () => {
+      clearTimeout(align)
+      clearInterval(interval)
+    }
+  }, [])
+  return now
+}
+
 export default function Home() {
   const { profile } = useAuth()
   const customColors = profile?.customColors || []
@@ -25,19 +45,27 @@ export default function Home() {
   const { items: tests } = useTests()
   const { items: projects } = useProjects()
 
-  const now = new Date()
+  // The hero card depends on the clock, not just on data changes — re-render every minute so it
+  // keeps itself current (next lesson, "day over", …) without the user having to leave and reopen.
+  const now = useNow()
   const nowMin = now.getHours() * 60 + now.getMinutes()
   const todayKeyRaw = JS_DAY_TO_WEEKDAY[now.getDay()]
   const todaysLessons = todayKeyRaw
     ? DEFAULT_PERIODS.map(({ period }) => lessons[`${todayKeyRaw}-${period}`]).filter(Boolean)
     : []
+  const byPeriod = Object.fromEntries(todaysLessons.map((l) => [l.period, l]))
 
-  // The lesson happening right now (if any) — only used to skip straight past a Doppelstunde's
-  // second half, never shown itself: while sitting in a lesson you already know you're in it,
-  // what's useful on the dashboard is what comes next.
-  const currentLesson = todaysLessons.find((l) => nowMin >= periodRange(l.period).start && nowMin < periodRange(l.period).end) || null
   const futureToday = todaysLessons.filter((l) => periodRange(l.period).start > nowMin).sort((a, b) => a.period - b.period)
-  const skipDoppelstunde = currentLesson && futureToday[0]?.subject === currentLesson.subject ? 1 : 0
+  // Skip straight past a Doppelstunde's second half: if the period right before the next upcoming
+  // one is the same subject AND has already started (so we're in it, or just came out of it —
+  // covers the exact-boundary/gap moment between the two halves too), show the one after instead.
+  // Never shown itself: while sitting in a lesson you already know you're in it, what's useful on
+  // the dashboard is what comes next.
+  const nextIsSecondHalf = (l) => {
+    const prev = byPeriod[l.period - 1]
+    return prev && prev.subject === l.subject && nowMin >= periodRange(prev.period).start
+  }
+  const skipDoppelstunde = futureToday[0] && nextIsSecondHalf(futureToday[0]) ? 1 : 0
   const nextTodayLesson = futureToday[skipDoppelstunde] || null
 
   const showTomorrow = !nextTodayLesson

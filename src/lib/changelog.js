@@ -1,6 +1,15 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.8',
+    date: '29.09.2026',
+    title: 'Bubble-Feinschliff',
+    items: [
+      'Die schwebenden Namen in der Bubble bewegen sich jetzt auf individuelleren, runderen Bahnen statt alle auf derselben Linie hin und her',
+      'Fix: Bubble verlassen als letztes Mitglied ist jetzt zuverlässig möglich (schlug vorher an einer Firestore-Regel fehl und brach den Aufräum-Vorgang ab)',
+    ],
+  },
+  {
     version: '4.7',
     date: '29.09.2026',
     title: 'Tests / Termine & echte Stundenzeiten',

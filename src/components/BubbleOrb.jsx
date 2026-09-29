@@ -1,10 +1,27 @@
 import { motion } from 'framer-motion'
 
-const SPOTS = [
-  { x: [-38, 26, -38], y: [-30, -8, -30], d: 7 },
-  { x: [30, -24, 30], y: [26, 4, 26], d: 8.5 },
-  { x: [-8, 34, -8], y: [34, 48, 34], d: 6.5 },
-]
+// Each name orbits its own little ellipse instead of swinging back and forth on one fixed line —
+// index-derived (not Math.random()) so it's stable across re-renders, but spread out via the
+// golden angle so nearby indices still look visibly different from each other. Same rough speed
+// range as before (7–8.8s), just a rounder, more varied path per name.
+function nameOrbit(i) {
+  const golden = 137.508
+  const angle0 = ((i * golden) % 360) * (Math.PI / 180)
+  const dir = i % 2 === 0 ? 1 : -1
+  const radiusX = 22 + ((i * 11) % 18)
+  const radiusY = 14 + ((i * 7) % 14)
+  const cx = ((i * 13) % 11) - 5
+  const cy = ((i * 17) % 11) - 5
+  const steps = 6
+  const x = []
+  const y = []
+  for (let s = 0; s <= steps; s++) {
+    const a = angle0 + dir * (s / steps) * Math.PI * 2
+    x.push(Math.round(cx + Math.cos(a) * radiusX))
+    y.push(Math.round(cy + Math.sin(a) * radiusY))
+  }
+  return { x, y, d: 7 + (i % 4) * 0.6 }
+}
 
 // kleine Bläschen außerhalb: Position in %, Größe in px
 const MINI = [
@@ -82,7 +99,7 @@ export default function BubbleOrb({ names = [] }) {
       ))}
 
       {names.map((name, i) => {
-        const spot = SPOTS[i % SPOTS.length]
+        const spot = nameOrbit(i)
         return (
           <motion.span
             key={name + i}

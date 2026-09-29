@@ -89,9 +89,16 @@ export async function leaveBubble(user) {
     const ref = doc(db, 'bubbles', bubbleId)
     const snap = await getDoc(ref)
     if (snap.exists()) {
+      // Settles (moves to private, or archives) every project the leaving member owns or can see —
+      // when they're the last member this is necessarily every project in the bubble, since nothing
+      // else could exist without someone to have created/shared it with them.
       await settleProjects(user, bubbleId)
       if (snap.data().members.length <= 1) {
-        for (const sub of ['homework', 'tests', 'schedules', 'projects']) {
+        // 'projects' deliberately excluded here: its read rule requires a per-document condition
+        // (toAll or visibleTo), so an unfiltered collection read like the others below is rejected
+        // by Firestore outright — regardless of whether any docs remain — and settleProjects above
+        // already deleted every one the last member could reach.
+        for (const sub of ['homework', 'tests', 'schedules']) {
           const items = await getDocs(collection(ref, sub))
           await Promise.all(items.docs.map((d) => deleteDoc(d.ref)))
         }

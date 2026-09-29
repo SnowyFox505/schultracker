@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useHomework } from '../lib/useHomework'
 import { useSchedule } from '../lib/useSchedule'
 import { useSavedToast } from '../lib/useSavedToast'
-import { DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
+import { PERIOD_NUMBERS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
@@ -307,7 +307,7 @@ function nextLessonDate(subject, lessons) {
     d.setDate(d.getDate() + i)
     const weekday = JS_DAY_TO_WEEKDAY[d.getDay()]
     if (!weekday) continue
-    const hasLesson = DEFAULT_PERIODS.some(({ period }) => lessons[`${weekday}-${period}`]?.subject === subject)
+    const hasLesson = PERIOD_NUMBERS.some((period) => lessons[`${weekday}-${period}`]?.subject === subject)
     if (hasLesson) {
       const y = d.getFullYear()
       const m = String(d.getMonth() + 1).padStart(2, '0')

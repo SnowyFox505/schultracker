@@ -3,8 +3,10 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useSchedule } from '../lib/useSchedule'
 import { useBreaks } from '../lib/useBreaks'
+import { usePeriods } from '../lib/usePeriods'
+import { DEFAULT_SCHOOL_START } from '../lib/periods'
 import { useSavedToast } from '../lib/useSavedToast'
-import { WEEKDAYS, DEFAULT_PERIODS, colorFor } from '../lib/constants'
+import { WEEKDAYS, PERIOD_NUMBERS, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Sheet from '../components/Sheet'
 import SavedToast from '../components/SavedToast'
@@ -15,6 +17,7 @@ export default function Stundenplan() {
   const { profile, updateUserProfile } = useAuth()
   const { lessons, setLesson, clearLesson } = useSchedule()
   const { breaks, setBreak, clearBreak } = useBreaks()
+  const { periods } = usePeriods()
   const [editMode, setEditMode] = useState(false)
   const [activeCell, setActiveCell] = useState(null)
   const [subject, setSubject] = useState('')
@@ -23,11 +26,15 @@ export default function Stundenplan() {
   const [breakDuration, setBreakDuration] = useState('')
   const [activeEndDay, setActiveEndDay] = useState(null)
   const [endTime, setEndTime] = useState('')
+  const [startEditing, setStartEditing] = useState(false)
+  const [startTime, setStartTime] = useState('')
   const [showSaved, triggerSaved] = useSavedToast()
 
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
   const schoolEnd = profile?.schoolEnd || {}
+  const schoolStart = profile?.schoolStart || DEFAULT_SCHOOL_START
+  const periodByNum = Object.fromEntries(periods.map((p) => [p.period, p]))
 
   function openCell(day, period) {
     if (!editMode) return
@@ -106,6 +113,20 @@ export default function Stundenplan() {
     setActiveEndDay(null)
   }
 
+  function openStartEdit() {
+    if (!editMode) return
+    setStartTime(schoolStart)
+    setStartEditing(true)
+  }
+
+  async function handleSaveStart(e) {
+    e.preventDefault()
+    if (!startTime) return
+    await updateUserProfile({ schoolStart: startTime })
+    triggerSaved()
+    setStartEditing(false)
+  }
+
   return (
     <PageTransition>
       <AnimatePresence>{showSaved && <SavedToast text="Gespeichert" />}</AnimatePresence>
@@ -121,6 +142,21 @@ export default function Stundenplan() {
         </button>
       </div>
 
+      <button
+        type="button"
+        onClick={openStartEdit}
+        disabled={!editMode}
+        className="mb-4 flex w-full items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left"
+      >
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">Schulstart</p>
+          <p className="text-sm font-semibold">{schoolStart} Uhr</p>
+        </div>
+        {editMode && (
+          <span className="rounded-full bg-[var(--color-surface-2)] px-3.5 py-1.5 text-xs font-semibold text-[var(--color-ink-dim)]">Ändern</span>
+        )}
+      </button>
+
       <div className="touch-pan-x touch-pan-y overflow-x-auto overscroll-x-contain pb-2">
         <div className="grid min-w-[560px] grid-cols-[44px_repeat(5,1fr)] gap-1.5 md:min-w-0 md:grid-cols-[64px_repeat(5,1fr)] md:gap-2.5">
           <div />
@@ -130,13 +166,15 @@ export default function Stundenplan() {
             </div>
           ))}
 
-          {DEFAULT_PERIODS.map(({ period }, idx) => {
+          {PERIOD_NUMBERS.map((period, idx) => {
             const brk = breaks[String(period)]
-            const isLast = idx === DEFAULT_PERIODS.length - 1
+            const isLast = idx === PERIOD_NUMBERS.length - 1
+            const p = periodByNum[period]
             return (
               <Fragment key={`p-${period}`}>
-                <div className="flex items-center justify-center text-xs font-semibold text-[var(--color-ink-faint)]">
-                  {period}
+                <div className="flex flex-col items-center justify-center text-center text-xs font-semibold text-[var(--color-ink-faint)]">
+                  <span>{period}</span>
+                  {p && <span className="text-[9px] font-normal text-[var(--color-ink-faint)]/70 md:text-[10px]">{p.start}</span>}
                 </div>
                 {WEEKDAYS.map((day) => {
                   const lesson = lessons[`${day}-${period}`]
@@ -322,6 +360,19 @@ export default function Stundenplan() {
               Speichern
             </Button>
           </div>
+        </form>
+      </Sheet>
+
+      <Sheet open={startEditing} onClose={() => setStartEditing(false)} title="Schulstart">
+        <form onSubmit={handleSaveStart} className="flex flex-col gap-4">
+          <p className="text-sm text-[var(--color-ink-dim)]">
+            Wann beginnt bei dir die 1. Stunde? Daraus berechnet die App alle weiteren Stundenzeiten (45 Minuten pro Stunde, plus
+            deine eingetragenen Pausen) — für die "Nächste Stunde"-Karte auf Heute und für Erinnerungen.
+          </p>
+          <Input label="Uhrzeit" type="time" autoFocus required value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+          <Button type="submit" className="mt-2 w-full">
+            Speichern
+          </Button>
         </form>
       </Sheet>
     </PageTransition>

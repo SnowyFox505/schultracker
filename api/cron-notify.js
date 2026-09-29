@@ -1,16 +1,13 @@
 import { adminDb, sendToDevices } from './_lib/admin.js'
 
 const TZ = 'Europe/Berlin'
-const PERIODS = [
-  ['08:00', '08:45'],
-  ['08:50', '09:35'],
-  ['09:55', '10:40'],
-  ['10:45', '11:30'],
-  ['11:45', '12:30'],
-  ['12:35', '13:20'],
-  ['13:30', '14:15'],
-  ['14:20', '15:05'],
-]
+// Real per-period times, computed from the user's school start time + 45 min/lesson + their
+// configured breaks (users/{uid}/breaks) — mirrors src/lib/periods.js (duplicated, not imported:
+// no precedent in this repo for api/ functions importing from src/lib, and it's a small pure
+// function, see the DEFAULT_PERIODS removal in that commit for context).
+const PERIOD_COUNT = 8
+const LESSON_MINUTES = 45
+const DEFAULT_SCHOOL_START = '08:00'
 const DAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
 const LATEST_MINUTES = 23 * 60 // never send later than 23:00
 
@@ -45,11 +42,28 @@ function addDays(iso, n) {
 
 const toMin = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
 
-async function inLesson(uid, now) {
-  const snap = await adminDb.collection('users').doc(uid).collection('schedule').where('day', '==', now.weekday).get()
-  return snap.docs.some((d) => {
-    const range = PERIODS[d.data().period - 1]
-    return range && now.minutes >= toMin(range[0]) && now.minutes < toMin(range[1])
+function computePeriods(schoolStart, breaksMap) {
+  let startMin = toMin(schoolStart || DEFAULT_SCHOOL_START)
+  const periods = []
+  for (let period = 1; period <= PERIOD_COUNT; period++) {
+    const endMin = startMin + LESSON_MINUTES
+    periods.push({ period, startMin, endMin })
+    startMin = endMin + (breaksMap[String(period)]?.duration || 0)
+  }
+  return periods
+}
+
+async function inLesson(uid, profile, now) {
+  const [scheduleSnap, breaksSnap] = await Promise.all([
+    adminDb.collection('users').doc(uid).collection('schedule').where('day', '==', now.weekday).get(),
+    adminDb.collection('users').doc(uid).collection('breaks').get(),
+  ])
+  const breaksMap = Object.fromEntries(breaksSnap.docs.map((d) => [d.id, d.data()]))
+  const periods = computePeriods(profile.schoolStart, breaksMap)
+  const byPeriod = Object.fromEntries(periods.map((p) => [p.period, p]))
+  return scheduleSnap.docs.some((d) => {
+    const range = byPeriod[d.data().period]
+    return range && now.minutes >= range.startMin && now.minutes < range.endMin
   })
 }
 
@@ -94,7 +108,7 @@ export default async function handler(req, res) {
     const devices = await userDoc.ref.collection('devices').get()
     const lessonCache = {}
     const itemsCache = {}
-    const inLessonNow = async () => (lessonCache.v ??= await inLesson(uid, now))
+    const inLessonNow = async () => (lessonCache.v ??= await inLesson(uid, profile, now))
     const items = async (name, field, value) => (itemsCache[`${name}|${value}`] ??= await collect(uid, profile, name, field, value))
 
     for (const deviceDoc of devices.docs) {

@@ -5,18 +5,15 @@ import { useAuth } from '../context/AuthContext'
 import { useSchedule } from '../lib/useSchedule'
 import { useTests } from '../lib/useTests'
 import { useHomework } from '../lib/useHomework'
+import { usePeriods } from '../lib/usePeriods'
 import { dueLabel, progress, useProjects } from '../lib/projects'
-import { DEFAULT_PERIODS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
+import { PERIOD_NUMBERS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Card from '../components/ui/Card'
 import { TaskIcon, ClockIcon, GridIcon } from '../components/navIcons'
 import { flyIn } from '../components/Shine'
 
 const toMin = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
-const periodRange = (period) => {
-  const [start, end] = DEFAULT_PERIODS.find((p) => p.period === period).time.split('–')
-  return { start: toMin(start), end: toMin(end) }
-}
 
 // A `Date` that updates itself once a minute (aligned to the next minute boundary, then every 60s)
 // so time-dependent UI re-renders on its own instead of only when something else changes.
@@ -41,6 +38,8 @@ export default function Home() {
   const { profile } = useAuth()
   const customColors = profile?.customColors || []
   const { lessons, loading: scheduleLoading } = useSchedule()
+  const { periods } = usePeriods()
+  const periodRange = (period) => periods.find((p) => p.period === period)
   const schoolEnd = profile?.schoolEnd || {}
   const { items: homework } = useHomework()
   const { items: tests } = useTests()
@@ -55,11 +54,11 @@ export default function Home() {
   const nowMin = now.getHours() * 60 + now.getMinutes()
   const todayKeyRaw = JS_DAY_TO_WEEKDAY[now.getDay()]
   const todaysLessons = todayKeyRaw
-    ? DEFAULT_PERIODS.map(({ period }) => lessons[`${todayKeyRaw}-${period}`]).filter(Boolean)
+    ? PERIOD_NUMBERS.map((period) => lessons[`${todayKeyRaw}-${period}`]).filter(Boolean)
     : []
   const byPeriod = Object.fromEntries(todaysLessons.map((l) => [l.period, l]))
 
-  const futureToday = todaysLessons.filter((l) => periodRange(l.period).start > nowMin).sort((a, b) => a.period - b.period)
+  const futureToday = todaysLessons.filter((l) => periodRange(l.period).startMin > nowMin).sort((a, b) => a.period - b.period)
   // Skip straight past a Doppelstunde's second half: if the period right before the next upcoming
   // one is the same subject AND has already started (so we're in it, or just came out of it —
   // covers the exact-boundary/gap moment between the two halves too), show the one after instead.
@@ -67,26 +66,37 @@ export default function Home() {
   // the dashboard is what comes next.
   const nextIsSecondHalf = (l) => {
     const prev = byPeriod[l.period - 1]
-    return prev && prev.subject === l.subject && nowMin >= periodRange(prev.period).start
+    return prev && prev.subject === l.subject && nowMin >= periodRange(prev.period).startMin
   }
   const skipDoppelstunde = futureToday[0] && nextIsSecondHalf(futureToday[0]) ? 1 : 0
   const nextTodayLesson = futureToday[skipDoppelstunde] || null
+  // The lesson actually running right now, if any — shown as the hero only once there's no more
+  // "next" lesson left today (e.g. sitting in the last entered lesson of the day); while something
+  // is still coming up, "next" is more useful than "you already know you're in this one".
+  const currentLesson =
+    todaysLessons.find((l) => {
+      const r = periodRange(l.period)
+      return nowMin >= r.startMin && nowMin < r.endMin
+    }) || null
 
   // A configured Schulschluss time for today (see Stundenplan) overrides the derived "day over"
   // check entirely — trusted over whatever is or isn't entered in the schedule for the rest of today.
   const todayEnd = todayKeyRaw && schoolEnd[todayKeyRaw]
   const dayOverByEnd = todayEnd ? nowMin >= toMin(todayEnd) : null
-  const showTomorrow = dayOverByEnd !== null ? dayOverByEnd : !nextTodayLesson
+  const doneForToday = dayOverByEnd !== null ? dayOverByEnd : !nextTodayLesson && !currentLesson
+  const showTomorrow = doneForToday
   const displayDate = showTomorrow ? new Date(now.getTime() + 86400000) : now
   const heuteLabel = showTomorrow ? 'Morgen' : 'Heute'
   const heuteKey = JS_DAY_TO_WEEKDAY[displayDate.getDay()]
-  const heuteLessons = heuteKey ? DEFAULT_PERIODS.map(({ period }) => lessons[`${heuteKey}-${period}`]).filter(Boolean) : []
+  const heuteLessons = heuteKey ? PERIOD_NUMBERS.map((period) => lessons[`${heuteKey}-${period}`]).filter(Boolean) : []
 
   const hero = nextTodayLesson
     ? { kind: 'next', lesson: nextTodayLesson }
-    : showTomorrow && heuteLessons[0]
-      ? { kind: 'day', lesson: heuteLessons[0] }
-      : null
+    : currentLesson && !doneForToday
+      ? { kind: 'current', lesson: currentLesson }
+      : showTomorrow && heuteLessons[0]
+        ? { kind: 'day', lesson: heuteLessons[0] }
+        : null
   // Nothing entered for the rest of today, but a Schulschluss override says we're not done yet.
   const notOverYet = !hero && !showTomorrow && todayEnd
 
@@ -216,7 +226,7 @@ function HeroCard({ hero, heuteLabel, weekend, notOverYet, todayEnd, customColor
   }
   const { kind, lesson } = hero
   const color = colorFor(lesson.color, customColors)
-  const label = kind === 'next' ? 'Nächste Stunde' : `${heuteLabel} als Erstes`
+  const label = kind === 'next' ? 'Nächste Stunde' : kind === 'current' ? 'Läuft gerade' : `${heuteLabel} als Erstes`
   const sub = `${lesson.period}. Stunde${lesson.room ? ` · ${lesson.room}` : ''}`
 
   return (

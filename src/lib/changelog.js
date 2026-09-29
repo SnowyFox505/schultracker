@@ -1,6 +1,16 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.8',
+    date: '29.09.2026',
+    title: 'Echte Stundenzeiten',
+    items: [
+      'Neu im Stundenplan (Bearbeiten): "Schulstart" einstellbar — die App berechnet daraus zusammen mit deinen Pausen alle Stundenzeiten selbst (45 Min. pro Stunde), statt eine feste Zeittabelle zu raten',
+      'Fix: die Heute-Karte zeigte "nichts mehr heute", obwohl der Unterricht noch lief — passiert genau in der letzten eingetragenen Stunde des Tages. Zeigt jetzt "Läuft gerade" statt fälschlich auf morgen zu springen',
+      'Betrifft auch die Push-Erinnerungen (nur außerhalb der Schulzeit senden)',
+    ],
+  },
+  {
     version: '4.7',
     date: '29.09.2026',
     title: 'Tests / Termine',

@@ -34,13 +34,7 @@ export function makeCustomColor(hex) {
   return { id, bg: hex, soft: `${hex}26` }
 }
 
-export const DEFAULT_PERIODS = [
-  { period: 1, time: '08:00–08:45' },
-  { period: 2, time: '08:50–09:35' },
-  { period: 3, time: '09:55–10:40' },
-  { period: 4, time: '10:45–11:30' },
-  { period: 5, time: '11:45–12:30' },
-  { period: 6, time: '12:35–13:20' },
-  { period: 7, time: '13:30–14:15' },
-  { period: 8, time: '14:20–15:05' },
-]
+// Real per-period times are computed (see src/lib/periods.js) from the user's school start time
+// and breaks, not fixed here — this is just the period numbers themselves (how many periods a day
+// can have).
+export const PERIOD_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8]

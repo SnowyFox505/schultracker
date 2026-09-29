@@ -1,6 +1,16 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.7',
+    date: '29.09.2026',
+    title: 'Tests / Termine',
+    items: [
+      'Beim Hinzufügen wählbar: "Test" oder "Termin" (z. B. für Ausflüge, Abgaben, allgemeine Ereignisse)',
+      'Die "Nächster Test in"-Kachel auf dem Home-Dashboard zählt jetzt nur noch echte Tests, keine allgemeinen Termine mehr',
+      'Bestehende Einträge gelten automatisch weiter als Test',
+    ],
+  },
+  {
     version: '4.6',
     date: '25.09.2026',
     title: 'Schulschluss festlegen',

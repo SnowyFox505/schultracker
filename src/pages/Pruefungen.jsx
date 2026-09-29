@@ -21,6 +21,7 @@ export default function Pruefungen() {
   const { items, add, update, remove } = useTests()
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
+  const [kind, setKind] = useState('test')
   const [subject, setSubject] = useState('')
   const [topic, setTopic] = useState('')
   const [date, setDate] = useState('')
@@ -34,6 +35,7 @@ export default function Pruefungen() {
 
   function openAdd() {
     setEditingId(null)
+    setKind('test')
     setSubject('')
     setTopic('')
     setDate('')
@@ -43,6 +45,7 @@ export default function Pruefungen() {
 
   function openEdit(test) {
     setEditingId(test.id)
+    setKind(test.kind || 'test')
     setSubject(test.subject || '')
     setTopic(test.topic || '')
     setDate(test.date)
@@ -54,10 +57,11 @@ export default function Pruefungen() {
     e.preventDefault()
     if (!date) return
     if (editingId) {
-      await update(items.find((i) => i.id === editingId), { subject, topic: topic.trim(), date, photos })
+      await update(items.find((i) => i.id === editingId), { kind, subject, topic: topic.trim(), date, photos })
     } else {
-      await add({ subject, topic: topic.trim(), date, photos })
+      await add({ kind, subject, topic: topic.trim(), date, photos })
     }
+    setKind('test')
     setSubject('')
     setTopic('')
     setDate('')
@@ -84,10 +88,10 @@ export default function Pruefungen() {
   return (
     <>
     <PageTransition>
-      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Tests</h1>
+      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Tests / Termine</h1>
 
       {items.length === 0 && (
-        <EmptyState className="mt-6" text="Keine anstehenden Tests. Trag welche ein, sobald sie angesagt werden." />
+        <EmptyState className="mt-6" text="Keine anstehenden Tests oder Termine. Trag welche ein, sobald sie anstehen." />
       )}
 
       <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
@@ -99,12 +103,40 @@ export default function Pruefungen() {
       </div>
     </PageTransition>
 
-      <AnimatePresence>{showSaved && <SavedToast text="Test gespeichert" />}</AnimatePresence>
+      <AnimatePresence>{showSaved && <SavedToast text="Gespeichert" />}</AnimatePresence>
 
-      <Fab onClick={openAdd} label="Test hinzufügen" />
+      <Fab onClick={openAdd} label="Test/Termin hinzufügen" />
 
-      <Sheet open={open} onClose={() => setOpen(false)} title={editingId ? 'Test bearbeiten' : 'Neuer Test'}>
+      <Sheet
+        open={open}
+        onClose={() => setOpen(false)}
+        title={editingId ? (kind === 'termin' ? 'Termin bearbeiten' : 'Test bearbeiten') : kind === 'termin' ? 'Neuer Termin' : 'Neuer Test'}
+      >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setKind('test')}
+              className="flex-1 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-transform active:scale-95"
+              style={{
+                background: kind === 'test' ? 'var(--color-accent)' : 'var(--color-surface-2)',
+                color: kind === 'test' ? '#0a0a0f' : 'var(--color-ink-dim)',
+              }}
+            >
+              📝 Test
+            </button>
+            <button
+              type="button"
+              onClick={() => setKind('termin')}
+              className="flex-1 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-transform active:scale-95"
+              style={{
+                background: kind === 'termin' ? 'var(--color-accent)' : 'var(--color-surface-2)',
+                color: kind === 'termin' ? '#0a0a0f' : 'var(--color-ink-dim)',
+              }}
+            >
+              📅 Termin
+            </button>
+          </div>
           {subjects.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               <button
@@ -164,7 +196,7 @@ export default function Pruefungen() {
             <p className="mt-1.5 text-xs text-[var(--color-ink-faint)]">Bis zu {MAX_PHOTOS} Fotos, werden verkleinert gespeichert.</p>
           </div>
           <Button type="submit" className="mt-2 w-full">
-            {editingId ? 'Speichern' : 'Hinzufügen'}
+            {editingId ? 'Speichern' : kind === 'termin' ? 'Termin hinzufügen' : 'Test hinzufügen'}
           </Button>
         </form>
       </Sheet>
@@ -210,7 +242,10 @@ function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto }) {
         </span>
       </div>
       <button type="button" onClick={onEdit} className="min-w-0 flex-1 text-left">
-        <p className="text-[15px] font-semibold">{test.subject || 'Allgemein'}</p>
+        <p className="text-[15px] font-semibold">
+          {test.subject || 'Allgemein'}
+          {test.kind === 'termin' && <span className="ml-1.5 text-[11px] font-medium text-[var(--color-ink-faint)]">· Termin</span>}
+        </p>
         {test.topic && <p className="truncate text-sm text-[var(--color-ink-dim)]">{test.topic}</p>}
         {test.photos?.length > 0 && (
           <div className="mt-1.5 flex gap-1.5" onClick={(e) => e.stopPropagation()}>

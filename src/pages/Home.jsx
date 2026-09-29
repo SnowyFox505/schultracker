@@ -45,6 +45,9 @@ export default function Home() {
   const { items: homework } = useHomework()
   const { items: tests } = useTests()
   const { items: projects } = useProjects()
+  // Only real Tests count toward the "Nächster Test" chip — general Termine (kind === 'termin')
+  // shouldn't inflate/skew that number. Entries from before the split have no `kind` and count as tests.
+  const realTests = tests.filter((t) => (t.kind || 'test') === 'test')
 
   // The hero card depends on the clock, not just on data changes — re-render every minute so it
   // keeps itself current (next lesson, "day over", …) without the user having to leave and reopen.
@@ -96,7 +99,13 @@ export default function Home() {
       subject: h.subject,
       date: h.dueDate,
     })),
-    ...tests.map((t) => ({ id: `t-${t.id}`, kind: 'test', title: t.subject || 'Allgemein', subject: t.topic, date: t.date })),
+    ...tests.map((t) => ({
+      id: `t-${t.id}`,
+      kind: (t.kind || 'test') === 'termin' ? 'termin' : 'test',
+      title: t.subject || 'Allgemein',
+      subject: t.topic,
+      date: t.date,
+    })),
     ...projects
       .filter((p) => !p.archived && p.dueDate)
       .map((p) => ({ id: `p-${p.id}`, kind: 'project', title: p.name, subject: 'Projekt-Abgabe', date: p.dueDate, to: `/projekte/${p.id}` })),
@@ -132,7 +141,7 @@ export default function Home() {
               to="/pruefungen"
               i={1}
               label="Nächster Test in"
-              value={tests.length === 0 ? '—' : daysUntil(tests[0]?.date) === 0 ? 'Heute' : `${daysUntil(tests[0]?.date)}T`}
+              value={realTests.length === 0 ? '—' : daysUntil(realTests[0]?.date) === 0 ? 'Heute' : `${daysUntil(realTests[0]?.date)}T`}
             />
             <StatChip i={2} label="Fällig diese Woche" value={String(weekCount)} />
           </div>
@@ -259,6 +268,7 @@ function StatChip({ to, label, value, i }) {
 const KIND_META = {
   homework: { icon: TaskIcon, label: 'Hausaufgabe', to: '/hausaufgaben', bg: 'var(--color-accent)', soft: 'var(--color-accent-soft)' },
   test: { icon: ClockIcon, label: 'Test', to: '/pruefungen', bg: '#60c7ff', soft: '#60c7ff26' },
+  termin: { icon: ClockIcon, label: 'Termin', to: '/pruefungen', bg: '#60c7ff', soft: '#60c7ff26' },
   project: { icon: GridIcon, label: 'Projekt', bg: '#a78bfa', soft: '#a78bfa26' },
 }
 

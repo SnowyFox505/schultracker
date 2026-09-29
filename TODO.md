@@ -60,6 +60,10 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 
 - [x] (4.6) Schulschluss-Zeit pro Wochentag im Stundenplan (Bearbeiten) einstellbar — ersetzt die abgeleitete Logik für Home-Karte und Push-Erinnerungen, wenn gesetzt
 
+## Neu aus den App-Notizen (29.09.2026)
+
+- [x] (4.7) Bei Tests/Terminen auswählbar: "Test" oder "Termin" — die "Nächster Test in"-Kachel auf Home zählt jetzt nur noch echte Tests, keine allgemeinen Termine mehr
+
 ## Sonstiges
 
 - Bubble v1 ist gebaut (Hausaufgaben teilen per Code); Verlassen/Account-Löschen räumen auf; QR-Beitritt gebaut; Migration alter Hausaufgaben gebaut.

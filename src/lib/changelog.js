@@ -1,7 +1,7 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
-    version: '4.8',
+    version: '4.8.0',
     date: '29.09.2026',
     title: 'Bubble-Feinschliff',
     items: [
@@ -10,7 +10,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '4.7',
+    version: '4.7.0',
     date: '29.09.2026',
     title: 'Tests / Termine & echte Stundenzeiten',
     items: [
@@ -23,7 +23,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '4.6',
+    version: '4.6.0',
     date: '25.09.2026',
     title: 'Schulschluss festlegen',
     items: [
@@ -33,7 +33,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '4.5',
+    version: '4.5.0',
     date: '25.09.2026',
     title: 'Home-Dashboard-Fixes',
     items: [
@@ -44,7 +44,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '4.4',
+    version: '4.4.0',
     date: '22.09.2026',
     title: 'Update-Hinweis',
     items: [
@@ -84,7 +84,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '4.3',
+    version: '4.3.0',
     date: '21.09.2026',
     title: 'Benachrichtigungen pro Gerät',
     items: [
@@ -94,7 +94,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '4.2',
+    version: '4.2.0',
     date: '21.09.2026',
     title: 'Projekte',
     items: [
@@ -105,7 +105,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '4.1',
+    version: '4.1.0',
     date: '21.09.2026',
     title: 'Neue Animationen',
     items: [
@@ -120,7 +120,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '4.0',
+    version: '4.0.0',
     date: '21.09.2026',
     title: 'Das Design-Update',
     items: [
@@ -130,7 +130,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '3.7',
+    version: '3.7.0',
     date: '21.09.2026',
     title: 'Teilen, Aufräumen, Stift',
     items: [
@@ -140,13 +140,13 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '3.6',
+    version: '3.6.0',
     date: '20.09.2026',
     title: 'Neue Bubble-Optik',
     items: ['Die Bubble sieht jetzt aus wie eine echte, schimmernde Luftblase'],
   },
   {
-    version: '3.5',
+    version: '3.5.0',
     date: '20.09.2026',
     title: 'Neue Einstellungen und Versionsanzeige',
     items: [
@@ -156,7 +156,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '3.4',
+    version: '3.4.0',
     date: '20.09.2026',
     title: 'Animationen',
     items: [
@@ -165,7 +165,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '3.3',
+    version: '3.3.0',
     date: '20.09.2026',
     title: 'Push-Benachrichtigungen',
     items: [
@@ -176,7 +176,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '3.2',
+    version: '3.2.0',
     date: '19.09.2026',
     title: 'Bubble teilen',
     items: [
@@ -187,7 +187,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '3.0',
+    version: '3.0.0',
     date: '19.09.2026',
     title: 'Die Bubble',
     items: [
@@ -197,7 +197,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '2.0',
+    version: '2.0.0',
     title: 'Mehr Komfort',
     items: [
       'Bearbeiten für Hausaufgaben, Tests und Notizen',
@@ -208,7 +208,7 @@ export const CHANGELOG = [
     ],
   },
   {
-    version: '1.0',
+    version: '1.0.0',
     title: 'Die Grundapp',
     items: ['Stundenplan, Hausaufgaben, Tests und Notizen', 'Fächer mit eigenen Farben', 'Anmeldung und Einrichtung'],
   },

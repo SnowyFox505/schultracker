@@ -5,8 +5,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
-// version lives in package.json: bump the minor part on every release, the major part only when the user says so
-const APP_VERSION = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')).version.replace(/\.0$/, '')
+// version lives in package.json, always shown in full (X.Y.Z): bump the patch part for a fix to
+// what was just shipped, the minor part for a new release, the major part only when the user says so
+const APP_VERSION = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')).version
 const BUILD_LABEL = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 
 export default defineConfig({

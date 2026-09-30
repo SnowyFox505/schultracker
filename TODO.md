@@ -66,6 +66,10 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 - [x] (4.7) Echte Stundenzeiten statt geratener fester Zeittabelle: Schulstart im Stundenplan einstellbar, Zeiten werden daraus + den Pausen berechnet. Zusätzlich Fix: Heute-Karte zeigte fälschlich "nichts mehr heute"/sprang auf morgen, obwohl man noch in der letzten Stunde des Tages saß
 - [x] (4.8) Schwebende Namen in der Bubble bewegen sich individueller statt alle auf derselben Linie; Fix: Bubble als letztes Mitglied verlassen schlug an einer Firestore-Regel fehl
 
+## Neu aus den App-Notizen (30.09.2026)
+
+- [ ] Vertretungsplan automatisch in die App holen — Quelle ist `schueler.schule-infoportal.de` (Login: E-Mail + Passwort + Schulkürzel), vermutlich das Produkt "Schüler-Portal" von art soft and more GmbH. Keine offizielle API/Export gefunden — ginge nur per Scraping (Schul-Zugangsdaten speichern + serverseitiger Login-Job). Deutlich größerer Schritt als bisherige Features (fremde Zugangsdaten, Nutzungsbedingungen prüfen, fragil gegen Layout-Änderungen) — erst planen + absprechen, bevor das umgesetzt wird. Nächster Schritt: Screenshot/Text der echten Vertretungstabelle nach Login, damit der Scraper gezielt gebaut werden kann.
+
 ## Sonstiges
 
 - Bubble v1 ist gebaut (Hausaufgaben teilen per Code); Verlassen/Account-Löschen räumen auf; QR-Beitritt gebaut; Migration alter Hausaufgaben gebaut.

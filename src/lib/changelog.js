@@ -1,6 +1,14 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.8.1',
+    date: '30.09.2026',
+    title: 'Stundenzeiten übersichtlicher',
+    items: [
+      'Im Stundenplan steht jetzt bei jeder Stunde auch die Endzeit (z. B. "07:50–08:35"), nicht nur der Start — dadurch ist auf einen Blick klar, warum nach einer Pause eine größere Zeitlücke entsteht',
+    ],
+  },
+  {
     version: '4.8.0',
     date: '29.09.2026',
     title: 'Bubble-Feinschliff',

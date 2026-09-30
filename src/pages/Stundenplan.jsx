@@ -174,7 +174,12 @@ export default function Stundenplan() {
               <Fragment key={`p-${period}`}>
                 <div className="flex flex-col items-center justify-center text-center text-xs font-semibold text-[var(--color-ink-faint)]">
                   <span>{period}</span>
-                  {p && <span className="text-[9px] font-normal text-[var(--color-ink-faint)]/70 md:text-[10px]">{p.start}</span>}
+                  {p && (
+                    <span className="text-[9px] font-normal leading-tight text-[var(--color-ink-faint)]/70 md:text-[10px]">
+                      {p.start}
+                      <br />–{p.end}
+                    </span>
+                  )}
                 </div>
                 {WEEKDAYS.map((day) => {
                   const lesson = lessons[`${day}-${period}`]

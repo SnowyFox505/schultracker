@@ -65,6 +65,7 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 - [x] (4.7) Bei Tests/Terminen auswählbar: "Test" oder "Termin" — die "Nächster Test in"-Kachel auf Home zählt jetzt nur noch echte Tests, keine allgemeinen Termine mehr
 - [x] (4.7) Echte Stundenzeiten statt geratener fester Zeittabelle: Schulstart im Stundenplan einstellbar, Zeiten werden daraus + den Pausen berechnet. Zusätzlich Fix: Heute-Karte zeigte fälschlich "nichts mehr heute"/sprang auf morgen, obwohl man noch in der letzten Stunde des Tages saß
 - [x] (4.8) Schwebende Namen in der Bubble bewegen sich individueller statt alle auf derselben Linie; Fix: Bubble als letztes Mitglied verlassen schlug an einer Firestore-Regel fehl
+- [x] (4.8.1) Stundenplan zeigt bei jeder Stunde jetzt auch die Endzeit — war rechnerisch schon immer richtig, aber ohne Endzeit sah die Lücke nach einer Pause aus wie ein Rechenfehler
 
 ## Neu aus den App-Notizen (30.09.2026)
 

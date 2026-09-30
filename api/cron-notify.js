@@ -7,7 +7,7 @@ const TZ = 'Europe/Berlin'
 // function, see the DEFAULT_PERIODS removal in that commit for context).
 const PERIOD_COUNT = 8
 const LESSON_MINUTES = 45
-const DEFAULT_SCHOOL_START = '08:00'
+const DEFAULT_SCHOOL_START = '07:50'
 const DAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
 const LATEST_MINUTES = 23 * 60 // never send later than 23:00
 

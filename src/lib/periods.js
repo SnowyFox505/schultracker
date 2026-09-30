@@ -5,7 +5,7 @@ import { PERIOD_NUMBERS } from './constants'
 // a fixed, school-specific time table. Mirrored (not imported — see the duplication note on
 // api/cron-notify.js's own copy) so the server-side push cron can compute the same times.
 export const LESSON_MINUTES = 45
-export const DEFAULT_SCHOOL_START = '08:00'
+export const DEFAULT_SCHOOL_START = '07:50'
 
 const toMin = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
 const toTime = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`

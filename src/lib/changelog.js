@@ -6,6 +6,7 @@ export const CHANGELOG = [
     title: 'Stundenzeiten übersichtlicher',
     items: [
       'Im Stundenplan steht jetzt bei jeder Stunde auch die Endzeit (z. B. "07:50–08:35"), nicht nur der Start — dadurch ist auf einen Blick klar, warum nach einer Pause eine größere Zeitlücke entsteht',
+      'Voreingestellter Schulstart (falls noch nicht selbst gesetzt) ist jetzt 07:50 statt 08:00',
     ],
   },
   {

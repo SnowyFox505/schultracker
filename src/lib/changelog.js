@@ -1,6 +1,15 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.11.0',
+    date: '01.10.2026',
+    title: 'Termine exportieren',
+    items: [
+      'Neu bei Tests/Termine: "Auswählen" antippen, beliebige Einträge markieren, dann "In Kalender exportieren"',
+      'Öffnet den Teilen-Dialog (iPhone/iPad) bzw. lädt eine Datei herunter (Desktop) — einmal in deinen Kalender importieren, fertig',
+    ],
+  },
+  {
     version: '4.10.0',
     date: '01.10.2026',
     title: 'Update-Animation im Banner',

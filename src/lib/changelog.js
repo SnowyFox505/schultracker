@@ -3,9 +3,10 @@ export const CHANGELOG = [
   {
     version: '4.11.1',
     date: '01.10.2026',
-    title: 'Kalender-Export: "Zum Kalender hinzufügen" fehlte',
+    title: 'Kalender-Export-Fix + wichtiger Hintergrund-Fix',
     items: [
       'Fix: beim Export fehlte auf dem iPhone/iPad die Option, die Termine direkt in den Kalender zu übernehmen — lag an einer iOS-Eigenheit (verlangt eine echte Serverantwort statt einer im Browser erzeugten Datei, gerade bei installierten Apps). Jetzt zeigt iOS "Alle hinzufügen" direkt an',
+      'Dabei gefunden und mitbehoben: eine zu weit gefasste Weiterleitungsregel hat seit dem 14.09. alle /api-Aufrufe (inkl. der Push-Erinnerungen) ins Leere laufen lassen, statt sie an die eigentliche Funktion weiterzugeben — Push-Benachrichtigungen dürften seitdem nicht zuverlässig gelaufen sein',
     ],
   },
   {

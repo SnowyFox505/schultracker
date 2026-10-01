@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,4 +13,12 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
-export const db = getFirestore(app)
+// Persistent (IndexedDB) local cache: without this, every cold start of the installed PWA has to
+// wait for a fresh network round-trip before any onSnapshot listener fires its first result — on
+// iOS, reopening after the OS suspended the background tab's connection for a while (overnight,
+// a network change) could leave that initial round-trip hanging long enough for the "Lädt..."
+// placeholders (useSchedule() etc.) to sit there seemingly forever. With a local cache, the first
+// snapshot resolves instantly from disk while the live connection reconnects in the background.
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+})

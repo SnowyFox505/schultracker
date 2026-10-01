@@ -1,6 +1,15 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.9.0',
+    date: '01.10.2026',
+    title: 'App startet zuverlässiger',
+    items: [
+      'Fix: nach längerer Pause (App über Nacht offen, Netzwerkwechsel) konnte "Lädt deinen Stundenplan …" auf iPhone/iPad ewig hängen bleiben, bis man einmal auf eine andere Seite und zurück ging',
+      'Die App merkt sich deine Daten jetzt lokal auf dem Gerät, sodass beim Öffnen sofort etwas angezeigt wird, während sie sich im Hintergrund neu verbindet',
+    ],
+  },
+  {
     version: '4.8.1',
     date: '30.09.2026',
     title: 'Stundenzeiten übersichtlicher',

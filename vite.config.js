@@ -18,6 +18,12 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
+      // Without this, the service worker's default SPA navigation fallback intercepts every
+      // full-page navigation — including a window.location.href to /api/ics or /api/cron-notify —
+      // and serves the cached index.html instead of letting the request reach the real function.
+      workbox: {
+        navigateFallbackDenylist: [/^\/api\//],
+      },
       manifest: {
         name: 'Schultracker',
         short_name: 'Schultracker',

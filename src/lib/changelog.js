@@ -1,6 +1,14 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.10.0',
+    date: '01.10.2026',
+    title: 'Update-Animation im Banner',
+    items: [
+      'Tippst du im Update-Banner auf "Aktualisieren", läuft jetzt dieselbe Lade-Animation wie beim manuellen "App aktualisieren" in den Einstellungen, statt dass scheinbar nichts passiert, bis die App ein paar Sekunden später von selbst neu lädt',
+    ],
+  },
+  {
     version: '4.9.0',
     date: '01.10.2026',
     title: 'App startet zuverlässiger',

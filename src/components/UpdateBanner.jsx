@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useRollout } from '../lib/rollout'
 import { refreshApp } from '../lib/refreshApp'
+import { UpdatingOverlay } from './UpdateFx'
 
 function seen(version) {
   try {
@@ -46,6 +47,7 @@ export default function UpdateBanner() {
   }
 
   return (
+    <>
     <motion.div
       className="fixed inset-x-4 top-[calc(env(safe-area-inset-top)+4.5rem)] z-40 mx-auto flex max-w-sm items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 shadow-xl shadow-black/40 md:left-auto md:right-5 md:mx-0"
       initial={{ opacity: 0, y: -16, scale: 0.95 }}
@@ -89,5 +91,7 @@ export default function UpdateBanner() {
         </div>
       )}
     </motion.div>
+    <AnimatePresence>{refreshing && <UpdatingOverlay />}</AnimatePresence>
+    </>
   )
 }

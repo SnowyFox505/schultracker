@@ -25,22 +25,20 @@ export function buildIcs(items) {
   return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Schultracker//DE', ...events, 'END:VCALENDAR'].join('\r\n')
 }
 
-// Native share sheet (iOS/Android, installed PWA) when it can take a file, otherwise a plain
-// download link (desktop browsers).
-export async function shareOrDownloadIcs(filename, text) {
-  const file = new File([text], filename, { type: 'text/calendar' })
-  if (navigator.canShare?.({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file] })
-      return
-    } catch {
-      // user cancelled the share sheet, or it failed — fall through to download
-    }
-  }
-  const url = URL.createObjectURL(new Blob([text], { type: 'text/calendar' }))
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
+function toBase64Url(text) {
+  const bytes = new TextEncoder().encode(text)
+  let binary = ''
+  bytes.forEach((b) => {
+    binary += String.fromCharCode(b)
+  })
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+// iOS only offers "Zum Kalender hinzufügen" when the browser navigates directly to a URL serving
+// text/calendar — a client-built Blob (download link or Web Share API file) doesn't trigger it,
+// and that's even more true for an installed PWA in standalone mode. So instead of generating a
+// local file, hand the built .ics text to api/ics.js (a stateless passthrough) and navigate there;
+// it re-serves the exact same text with the right Content-Type/-Disposition so Safari recognizes it.
+export function openIcsImport(text) {
+  window.location.href = `/api/ics?data=${toBase64Url(text)}`
 }

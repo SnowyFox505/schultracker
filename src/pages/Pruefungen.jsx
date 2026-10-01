@@ -5,7 +5,7 @@ import { useTests } from '../lib/useTests'
 import { useSavedToast } from '../lib/useSavedToast'
 import { colorFor } from '../lib/constants'
 import { compressImage } from '../lib/imageCompress'
-import { buildIcs, shareOrDownloadIcs } from '../lib/ics'
+import { buildIcs, openIcsImport } from '../lib/ics'
 import PageTransition from '../components/PageTransition'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
@@ -49,10 +49,10 @@ export default function Pruefungen() {
     })
   }
 
-  async function exportSelected() {
+  function exportSelected() {
     const toExport = items.filter((i) => selected.has(i.id))
     if (!toExport.length) return
-    await shareOrDownloadIcs('schultracker-termine.ics', buildIcs(toExport))
+    openIcsImport(buildIcs(toExport))
     setSelectMode(false)
     setSelected(new Set())
   }

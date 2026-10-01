@@ -1,6 +1,14 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.11.1',
+    date: '01.10.2026',
+    title: 'Kalender-Export: "Zum Kalender hinzufügen" fehlte',
+    items: [
+      'Fix: beim Export fehlte auf dem iPhone/iPad die Option, die Termine direkt in den Kalender zu übernehmen — lag an einer iOS-Eigenheit (verlangt eine echte Serverantwort statt einer im Browser erzeugten Datei, gerade bei installierten Apps). Jetzt zeigt iOS "Alle hinzufügen" direkt an',
+    ],
+  },
+  {
     version: '4.11.0',
     date: '01.10.2026',
     title: 'Termine exportieren',

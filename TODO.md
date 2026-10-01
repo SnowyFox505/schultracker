@@ -71,6 +71,13 @@ Gesammelt aus mehreren Tagen Notizen in der App selbst (Notizen-Tab), am 2026-09
 
 - [ ] Vertretungsplan automatisch in die App holen — Quelle ist `schueler.schule-infoportal.de` (Login: E-Mail + Passwort + Schulkürzel), vermutlich das Produkt "Schüler-Portal" von art soft and more GmbH. Keine offizielle API/Export gefunden — ginge nur per Scraping (Schul-Zugangsdaten speichern + serverseitiger Login-Job). Deutlich größerer Schritt als bisherige Features (fremde Zugangsdaten, Nutzungsbedingungen prüfen, fragil gegen Layout-Änderungen) — erst planen + absprechen, bevor das umgesetzt wird. Nächster Schritt: Screenshot/Text der echten Vertretungstabelle nach Login, damit der Scraper gezielt gebaut werden kann.
 
+## Feature-Ideen (01.10.2026, von mir vorgeschlagen, Leopold möchte alle irgendwann umsetzen)
+
+- [ ] Ferien/Feiertage kennen — die App weiß aktuell nichts von Schulferien/Feiertagen und würde an einem Ferientag trotzdem "kein Schultag"/normale Logik zeigen statt "Ferien". Öffentliche Ferien-/Feiertagsdaten für Bayern einbinden.
+- [ ] Ausgewählte Termine als `.ics` exportieren — eigener Plan existiert: `~/.claude/plans/binary-zooming-curry.md`. Scope bewusst verkleinert: kein Live-Kalender-Abo (hätte einen geheimen Link pro Nutzer gebraucht), sondern manuelle Mehrfachauswahl auf der Tests/Termine-Seite + Export/Teilen als Datei zum einmaligen Import.
+- [ ] Notenverwaltung — zu Tests nachträglich die erzielte Note eintragen können, pro Fach ein (ggf. gewichteter Klausur/mündlich-) Schnitt anzeigen.
+- [ ] Wochenansicht auf Home — Stundenplan + Hausaufgaben + Tests einer ganzen Woche auf einen Blick statt nur der Tagesansicht, zum Durchscrollen.
+
 ## Sonstiges
 
 - Bubble v1 ist gebaut (Hausaufgaben teilen per Code); Verlassen/Account-Löschen räumen auf; QR-Beitritt gebaut; Migration alter Hausaufgaben gebaut.

@@ -5,6 +5,7 @@ import { useTests } from '../lib/useTests'
 import { useSavedToast } from '../lib/useSavedToast'
 import { colorFor } from '../lib/constants'
 import { compressImage } from '../lib/imageCompress'
+import { buildIcs, shareOrDownloadIcs } from '../lib/ics'
 import PageTransition from '../components/PageTransition'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
@@ -29,9 +30,32 @@ export default function Pruefungen() {
   const [viewing, setViewing] = useState(null)
   const [photoBusy, setPhotoBusy] = useState(false)
   const [showSaved, triggerSaved] = useSavedToast()
+  const [selectMode, setSelectMode] = useState(false)
+  const [selected, setSelected] = useState(() => new Set())
 
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
+
+  function toggleSelectMode() {
+    setSelectMode((v) => !v)
+    setSelected(new Set())
+  }
+
+  function toggleSelected(id) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  async function exportSelected() {
+    const toExport = items.filter((i) => selected.has(i.id))
+    if (!toExport.length) return
+    await shareOrDownloadIcs('schultracker-termine.ics', buildIcs(toExport))
+    setSelectMode(false)
+    setSelected(new Set())
+  }
 
   function openAdd() {
     setEditingId(null)
@@ -88,16 +112,39 @@ export default function Pruefungen() {
   return (
     <>
     <PageTransition>
-      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Tests / Termine</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-y-2 pr-28 md:pr-0">
+        <h1 className="font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Tests / Termine</h1>
+        {items.length > 0 && (
+          <button
+            onClick={toggleSelectMode}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+              selectMode ? 'bg-[var(--color-accent)] text-black' : 'bg-[var(--color-surface-2)] text-[var(--color-ink-dim)]'
+            }`}
+          >
+            {selectMode ? 'Fertig' : 'Auswählen'}
+          </button>
+        )}
+      </div>
 
       {items.length === 0 && (
         <EmptyState className="mt-6" text="Keine anstehenden Tests oder Termine. Trag welche ein, sobald sie anstehen." />
       )}
 
-      <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
+      <div className="flex flex-col gap-2.5 pb-20 md:grid md:grid-cols-2 md:gap-3 md:pb-0">
         <AnimatePresence initial={false}>
           {items.map((t) => (
-            <TestRow key={t.id} test={t} subjects={subjects} customColors={customColors} onDelete={() => remove(t)} onEdit={() => openEdit(t)} onPhoto={setViewing} />
+            <TestRow
+              key={t.id}
+              test={t}
+              subjects={subjects}
+              customColors={customColors}
+              onDelete={() => remove(t)}
+              onEdit={() => openEdit(t)}
+              onPhoto={setViewing}
+              selectMode={selectMode}
+              selected={selected.has(t.id)}
+              onToggleSelect={() => toggleSelected(t.id)}
+            />
           ))}
         </AnimatePresence>
       </div>
@@ -105,7 +152,24 @@ export default function Pruefungen() {
 
       <AnimatePresence>{showSaved && <SavedToast text="Gespeichert" />}</AnimatePresence>
 
-      <Fab onClick={openAdd} label="Test/Termin hinzufügen" />
+      <AnimatePresence>
+        {selected.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+            className="fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-40 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 shadow-xl shadow-black/40 md:bottom-5 md:left-auto md:right-5 md:mx-0"
+          >
+            <span className="pl-1 text-sm font-medium text-[var(--color-ink-dim)]">{selected.size} ausgewählt</span>
+            <Button onClick={exportSelected} className="!w-auto !px-4 !py-2 text-sm">
+              In Kalender exportieren
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!selectMode && <Fab onClick={openAdd} label="Test/Termin hinzufügen" />}
 
       <Sheet
         open={open}
@@ -218,21 +282,30 @@ export default function Pruefungen() {
   )
 }
 
-function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto }) {
+function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto, selectMode, selected, onToggleSelect }) {
   const subjMeta = subjects.find((s) => s.name === test.subject)
   const color = subjMeta ? colorFor(subjMeta.color, customColors) : colorFor('orange', customColors)
   const daysLeft = daysUntil(test.date)
   const urgent = daysLeft === 0 || daysLeft === 1
 
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
-    >
-    <SwipeToDelete onDelete={onDelete}>
+  const row = (
     <div className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+      {selectMode && (
+        <button
+          type="button"
+          onClick={onToggleSelect}
+          aria-label={selected ? 'Auswahl entfernen' : 'Auswählen'}
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+            selected ? 'border-[var(--color-accent)] bg-[var(--color-accent)]' : 'border-[var(--color-border)]'
+          }`}
+        >
+          {selected && (
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0a0a0f" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          )}
+        </button>
+      )}
       <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl" style={{ background: color.soft }}>
         <span className="text-[10px] font-semibold uppercase" style={{ color: color.bg }}>
           {monthShort(test.date)}
@@ -241,7 +314,7 @@ function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto }) {
           {dayOfMonth(test.date)}
         </span>
       </div>
-      <button type="button" onClick={onEdit} className="min-w-0 flex-1 text-left">
+      <button type="button" onClick={selectMode ? onToggleSelect : onEdit} className="min-w-0 flex-1 text-left">
         <p className="text-[15px] font-semibold">
           {test.subject || 'Allgemein'}
           {test.kind === 'termin' && <span className="ml-1.5 text-[11px] font-medium text-[var(--color-ink-faint)]">· Termin</span>}
@@ -273,15 +346,26 @@ function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto }) {
         >
           {daysLeft === 0 ? 'Heute' : daysLeft === 1 ? 'Morgen' : daysLeft > 0 ? `in ${daysLeft} Tagen` : 'vorbei'}
         </motion.span>
-        <button onClick={onDelete} aria-label="Löschen" className="text-[var(--color-ink-faint)]">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="6" y1="6" x2="18" y2="18" />
-            <line x1="6" y1="18" x2="18" y2="6" />
-          </svg>
-        </button>
+        {!selectMode && (
+          <button onClick={onDelete} aria-label="Löschen" className="text-[var(--color-ink-faint)]">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="6" y1="6" x2="18" y2="18" />
+              <line x1="6" y1="18" x2="18" y2="6" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
-    </SwipeToDelete>
+  )
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
+    >
+      {selectMode ? row : <SwipeToDelete onDelete={onDelete}>{row}</SwipeToDelete>}
     </motion.div>
   )
 }

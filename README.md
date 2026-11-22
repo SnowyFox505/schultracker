@@ -1,10 +1,47 @@
-# 📚 Schultracker
+<div align="center">
 
-Der Schulalltag in einer App: **Stundenplan, Hausaufgaben, Tests & Termine, Notizen und Projekte** – installierbar als Progressive Web App (PWA) auf iPhone, iPad und Desktop.
+<img src="docs/logo.png" alt="Schultracker logo" width="96">
 
-🔗 **Live:** [schultracker.vercel.app](https://schultracker.vercel.app)
+# Schultracker
 
----
+**Der Schulalltag in einer App.**<br>
+Stundenplan, Hausaufgaben, Tests, Notizen und Projekte, offline-fähig und als App installierbar.
+
+<br>
+
+<a href="https://schultracker.vercel.app"><img src="https://img.shields.io/badge/%E2%96%B6%20Live-schultracker.vercel.app-ff7c3a?style=for-the-badge&labelColor=0b0b10" alt="Live app"></a>
+
+<br>
+
+<img src="https://img.shields.io/badge/React-19-61dafb?style=flat-square&labelColor=0b0b10&logo=react&logoColor=white" alt="React">
+<img src="https://img.shields.io/badge/Vite-a78bfa?style=flat-square&labelColor=0b0b10&logo=vite&logoColor=white" alt="Vite">
+<img src="https://img.shields.io/badge/Tailwind-4-38bdf8?style=flat-square&labelColor=0b0b10&logo=tailwindcss&logoColor=white" alt="Tailwind">
+<img src="https://img.shields.io/badge/Framer%20Motion-ff0055?style=flat-square&labelColor=0b0b10&logo=framer&logoColor=white" alt="Framer%20Motion">
+<img src="https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-ffca28?style=flat-square&labelColor=0b0b10&logo=firebase&logoColor=white" alt="Firebase">
+<img src="https://img.shields.io/badge/Vercel-ffffff?style=flat-square&labelColor=0b0b10&logo=vercel&logoColor=white" alt="Vercel">
+<img src="https://img.shields.io/badge/PWA-offline%20ready-ff7c3a?style=flat-square&labelColor=0b0b10&logo=pwa&logoColor=white" alt="PWA">
+
+<br><br>
+
+<img src="docs/hero.jpg" alt="Schultracker auf fünf Handys" width="100%">
+
+</div>
+
+<br>
+
+Der Schulalltag in einer App: **Stundenplan, Hausaufgaben, Tests & Termine, Notizen und Projekte**, installierbar als Progressive Web App (PWA) auf iPhone, iPad und Desktop.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center" width="20%"><img width="170" src="docs/screenshots/home.jpg" alt="Heute"><br><sub>Heute</sub></td>
+    <td align="center" width="20%"><img width="170" src="docs/screenshots/stundenplan.jpg" alt="Stundenplan"><br><sub>Stundenplan</sub></td>
+    <td align="center" width="20%"><img width="170" src="docs/screenshots/hausaufgaben.jpg" alt="Aufgaben"><br><sub>Aufgaben</sub></td>
+    <td align="center" width="20%"><img width="170" src="docs/screenshots/pruefungen.jpg" alt="Tests & Termine"><br><sub>Tests & Termine</sub></td>
+    <td align="center" width="20%"><img width="170" src="docs/screenshots/projekt.jpg" alt="Projekt"><br><sub>Projekt</sub></td>
+  </tr>
+</table>
 
 ## ✨ Features
 

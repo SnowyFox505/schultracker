@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-28T00:00:00Z",
+  "title": "Design System: Schultracker",
+  "extensions": {
+    "colorMeta": {
+      "mandarine": { "role": "primary", "displayName": "Mandarine", "canonical": "#ff7c3a", "tonalRamp": ["#3a1503", "#5c2306", "#8a3609", "#bf4d10", "#ff7c3a", "#ff9c69", "#ffc2a1", "#ffe6d8"] },
+      "mandarine-hell": { "role": "primary", "displayName": "Helle Mandarine", "canonical": "#ffb347", "tonalRamp": ["#33210a", "#523410", "#7d5016", "#b5761f", "#ffb347", "#ffc671", "#ffdba6", "#fff0da"] },
+      "base": { "role": "neutral", "displayName": "Base", "canonical": "#0a0a0f", "tonalRamp": ["#0a0a0f", "#131318", "#1b1b22", "#26262f", "#4b4a54", "#85838c", "#bcbac2", "#f5f4f2"] },
+      "rose": { "role": "tertiary", "displayName": "Rose", "canonical": "#ff6b81", "tonalRamp": ["#3b0a12", "#5f121f", "#8e1f31", "#c4344b", "#ff6b81", "#ff93a3", "#ffbdc7", "#ffe5e9"] },
+      "sky": { "role": "tertiary", "displayName": "Sky", "canonical": "#60c7ff", "tonalRamp": ["#04202f", "#08354d", "#0f5073", "#1c79ab", "#60c7ff", "#8ed7ff", "#bce7ff", "#e6f6ff"] },
+      "violet": { "role": "tertiary", "displayName": "Violet", "canonical": "#a78bfa", "tonalRamp": ["#170d38", "#271758", "#3d2784", "#5d44bd", "#a78bfa", "#bfaafb", "#d8ccfd", "#f1edfe"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Persönliche Begrüßung." },
+      "headline": { "displayName": "Headline", "purpose": "Seitentitel." },
+      "title": { "displayName": "Title", "purpose": "Sheet-Titel." },
+      "body": { "displayName": "Body", "purpose": "Zeilen, Knöpfe, Navigation." },
+      "label": { "displayName": "Label", "purpose": "Versale Vorzeilen." }
+    },
+    "shadows": [
+      { "name": "primary-action", "value": "0 10px 15px -3px rgba(124,45,18,0.3)", "purpose": "Hauptknopf." },
+      { "name": "floating", "value": "0 20px 25px -5px rgba(124,45,18,0.4)", "purpose": "Plus-Knopf und Schwebendes." },
+      { "name": "glut", "value": "0 0 40px rgba(255,122,48,0.45)", "purpose": "Nur große Animationen." }
+    ],
+    "motion": [
+      { "name": "page", "value": "280ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Seitenwechsel." },
+      { "name": "nav-pill", "value": "spring stiffness 400 damping 32", "purpose": "Gleitende Nav-Pille." },
+      { "name": "pop", "value": "spring stiffness 420 damping 14", "purpose": "Icon-Sprung." },
+      { "name": "sheet", "value": "spring stiffness 320 damping 32", "purpose": "Blatt von unten." }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Hauptknopf",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Die eine Hauptaktion eines Formulars.",
+      "html": "<button class=\"ds-btn\">Hinzufügen</button>",
+      "css": ".ds-btn { border: none; border-radius: 16px; padding: 14px 20px; font: 600 15px Inter, system-ui, sans-serif; color: #000; background: linear-gradient(135deg, #ff7c3a, #ffb347); box-shadow: 0 10px 15px -3px rgba(124,45,18,0.3); transition: transform 0.15s; } .ds-btn:active { transform: scale(0.96); } .ds-btn:focus-visible { outline: 2px solid #ffb347; outline-offset: 2px; }"
+    },
+    {
+      "name": "Sekundärknopf",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Nebenaktionen.",
+      "html": "<button class=\"ds-btn2\">Abbrechen</button>",
+      "css": ".ds-btn2 { border: 1px solid #26262f; border-radius: 16px; padding: 14px 20px; font: 600 15px Inter, system-ui, sans-serif; color: #f5f4f2; background: #1b1b22; transition: transform 0.15s; } .ds-btn2:active { transform: scale(0.96); }"
+    },
+    {
+      "name": "Eingabefeld",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Textfeld mit orangem Fokusrahmen.",
+      "html": "<input class=\"ds-input\" placeholder=\"z.B. S. 42, Nr. 3-5\">",
+      "css": ".ds-input { width: 100%; box-sizing: border-box; border: 1px solid #26262f; border-radius: 12px; padding: 14px 16px; font: 400 16px Inter, system-ui, sans-serif; color: #f5f4f2; background: #1b1b22; outline: none; transition: border-color 0.15s; } .ds-input::placeholder { color: #85838c; } .ds-input:focus { border-color: #ff7c3a; }"
+    },
+    {
+      "name": "Listenzeile",
+      "kind": "card",
+      "refersTo": "list-row",
+      "description": "Eintrag mit Art-Icon und Fälligkeits-Chip.",
+      "html": "<div class=\"ds-row\"><span class=\"ds-row-icon\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 11.5 11 13.5 15.5 9\"/><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"4\"/></svg></span><span class=\"ds-row-text\"><b>S. 42, Nr. 3-5</b><small>Mathe</small></span><span class=\"ds-row-due\">Morgen</span></div>",
+      "css": ".ds-row { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid #26262f; border-radius: 16px; background: #131318; color: #f5f4f2; font-family: Inter, system-ui, sans-serif; } .ds-row-icon { display: flex; width: 36px; height: 36px; align-items: center; justify-content: center; border-radius: 12px; color: #ff7c3a; background: #ff7c3a1a; } .ds-row-text { flex: 1; display: flex; flex-direction: column; font-size: 15px; } .ds-row-text small { font-size: 12px; color: #85838c; } .ds-row-due { border-radius: 9999px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: #ff7c3a; background: #ff7c3a1a; }"
+    },
+    {
+      "name": "Plus-Knopf",
+      "kind": "button",
+      "refersTo": "fab",
+      "description": "Schwebender Knopf zum Eintragen.",
+      "html": "<button class=\"ds-fab\" aria-label=\"Hinzufügen\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"><line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/></svg></button>",
+      "css": ".ds-fab { display: flex; width: 56px; height: 56px; align-items: center; justify-content: center; border: none; border-radius: 9999px; color: #000; background: linear-gradient(135deg, #ff7c3a, #ffb347); box-shadow: 0 20px 25px -5px rgba(124,45,18,0.4); transition: transform 0.15s; } .ds-fab:active { transform: scale(0.86); }"
+    },
+    {
+      "name": "Umschalter",
+      "kind": "chip",
+      "description": "Pillenleiste für zwei Modi.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-on\">Text</button><button>Stift</button></div>",
+      "css": ".ds-seg { display: flex; gap: 4px; padding: 4px; border-radius: 9999px; background: #1b1b22; } .ds-seg button { flex: 1; border: none; border-radius: 9999px; padding: 8px 16px; font: 600 14px Inter, system-ui, sans-serif; color: #85838c; background: transparent; } .ds-seg .ds-on { color: #000; background: #ff7c3a; }"
+    },
+    {
+      "name": "Bottom-Nav-Eintrag",
+      "kind": "nav",
+      "description": "Aktiver Tab mit Pille und orangem Icon.",
+      "html": "<a class=\"ds-nav\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 11.5 12 4l9 7.5\"/><path d=\"M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9\"/></svg><span>Home</span></a>",
+      "css": ".ds-nav { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 18px; border-radius: 16px; background: #1b1b22; color: #ff7c3a; font: 500 11px Inter, system-ui, sans-serif; } .ds-nav span { color: #f5f4f2; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Der Pausen-Blick",
+    "overview": "Alles ist darauf ausgelegt, zwischen zwei Stunden in Sekunden erfasst zu werden: ein Blick, was ansteht, ein Daumentipp, um etwas einzutragen. Dunkle, ruhige Flächen halten den Hintergrund zurück; Mandarine zeigt, wo man handeln kann und wo man gerade ist. Fächerfarben und feste Farben je Eintragsart machen Zeilen erkennbar, bevor man sie liest.\n\nJede Berührung bekommt eine Antwort. Es soll modern wirken, aber nicht zu viel sein: im Alltag kurze, federnde Rückmeldungen, die große Show nur bei seltenen Momenten (Intro, Logout, Konto löschen, Bubble, Update).",
+    "keyCharacteristics": ["Dunkler Grund, Mandarine als Signal.", "Große Rundungen und Pillen.", "Flach im Ruhezustand, Tiefe durch Grauschichten und Rahmen.", "Federnde, kurze Reaktionen; getrennt davon wenige große Momente.", "Deutsch in der Du-Form, vereinzelt Emojis."],
+    "rules": [
+      { "name": "Die Signal-Regel", "body": "Mandarine bedeutet „hier handeln“ oder „hier bist du“.", "section": "colors" },
+      { "name": "Die Fach-Regel", "body": "Fächerfarben kommen immer über colorFor(id, customColors), nie fest eingetragen.", "section": "colors" },
+      { "name": "Die 16px-Regel", "body": "Eingabefelder haben mindestens 16px, sonst zoomt iOS beim Fokus.", "section": "typography" },
+      { "name": "Die Flach-Regel", "body": "Karten und Zeilen werfen keine Schatten. Leuchten gehört der Hauptaktion, Schwebendem und den großen Momenten.", "section": "elevation" }
+    ],
+    "dos": ["Do das Anstehende ohne Suchen sichtbar machen.", "Do jeder Berührung eine kurze, sichtbare Antwort geben.", "Do die vorhandenen Tokens aus src/index.css nutzen.", "Do Mandarine als Haupt-Markenfarbe behalten.", "Do große Animationen behalten und von kleinem Alltags-Feedback trennen."],
+    "donts": ["Don't Alltagsaktionen mit großer Show aufhalten; es darf nicht zu viel sein.", "Don't Karten oder Listenzeilen Schatten geben.", "Don't Eingaben unter 16px setzen.", "Don't Vollbild-Overlays innerhalb von PageTransition rendern."]
+  }
+}

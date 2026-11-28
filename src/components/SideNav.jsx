@@ -12,7 +12,7 @@ export default function SideNav() {
   const settingsActive = location.pathname.startsWith(SETTINGS_ITEM.to)
 
   return (
-    <nav className="safe-top sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]/40 px-4 py-8 md:flex lg:w-72">
+    <nav className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]/40 px-4 pb-8 pt-[calc(env(safe-area-inset-top)+2rem)] md:flex lg:w-72">
       <div className="mb-10 px-2">
         <p className="font-[var(--font-display)] text-xl font-extrabold">Schultracker</p>
         {profile?.name && <p className="mt-0.5 text-sm text-[var(--color-ink-faint)]">Hey, {profile.name.split(' ')[0]}</p>}

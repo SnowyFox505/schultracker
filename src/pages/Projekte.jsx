@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { colorFor, SUBJECT_COLORS } from '../lib/constants'
 import { dueLabel, progress, useProjects } from '../lib/projects'
 import PageTransition from '../components/PageTransition'
+import PageTitle from '../components/PageTitle'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
 import EmptyState from '../components/EmptyState'
@@ -53,7 +54,7 @@ export default function Projekte() {
   return (
     <>
     <PageTransition>
-      <h1 className="mb-6 pr-28 font-[var(--font-display)] text-3xl font-extrabold md:pr-0 md:text-4xl">Projekte</h1>
+      <PageTitle className="mb-6">Projekte</PageTitle>
 
       {!loading && active.length === 0 && <EmptyState className="mt-6" text="Noch kein Projekt. Leg dein erstes an." />}
 

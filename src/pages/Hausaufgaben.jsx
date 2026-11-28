@@ -4,11 +4,14 @@ import { useAuth } from '../context/AuthContext'
 import { useHomework } from '../lib/useHomework'
 import { useSchedule } from '../lib/useSchedule'
 import { useSavedToast } from '../lib/useSavedToast'
-import { PERIOD_NUMBERS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
+import { PERIOD_NUMBERS, JS_DAY_TO_WEEKDAY, colorFor, subjectColor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
+import PageTitle from '../components/PageTitle'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
 import SavedToast from '../components/SavedToast'
+import ActionToast from '../components/ActionToast'
+import { useFeedback } from '../lib/useFeedback'
 import EmptyState from '../components/EmptyState'
 import SwipeToDelete from '../components/SwipeToDelete'
 import Input from '../components/ui/Input'
@@ -17,7 +20,8 @@ import SketchPad, { SketchThumbnail, strokesFromFirestore, strokesToFirestore } 
 
 export default function Hausaufgaben() {
   const { user, profile } = useAuth()
-  const { items, add, update, remove } = useHomework()
+  const { items, add, update, remove, restore } = useHomework()
+  const { toast, guard, removeWithUndo } = useFeedback()
   const { lessons } = useSchedule()
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -66,9 +70,9 @@ export default function Hausaufgaben() {
       dueDate,
     }
     if (editingId) {
-      await update(items.find((i) => i.id === editingId), data)
+      guard(update(items.find((i) => i.id === editingId), data))
     } else {
-      await add({ ...data, done: false })
+      guard(add({ ...data, done: false }))
     }
     setTitle('')
     setSketch([])
@@ -80,6 +84,8 @@ export default function Hausaufgaben() {
     triggerSaved()
   }
 
+  const deleteHomework = (hw) => removeWithUndo('Hausaufgabe gelöscht', () => remove(hw), () => restore(hw))
+
   function fillNextLesson() {
     const next = nextLessonDate(subject, lessons)
     if (next) setDueDate(next)
@@ -88,14 +94,14 @@ export default function Hausaufgaben() {
   return (
     <>
     <PageTransition>
-      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Hausaufgaben</h1>
+      <PageTitle className="mb-6">Hausaufgaben</PageTitle>
 
-      {items.length === 0 && <EmptyState className="mt-6" text="Noch keine Hausaufgaben eingetragen." />}
+      {items.length === 0 && <EmptyState className="mt-6" text="Noch keine Hausaufgaben eingetragen." actionLabel="Hausaufgabe eintragen" onAction={openAdd} />}
 
       <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3">
         <AnimatePresence initial={false}>
           {open_.map((hw) => (
-            <HomeworkRow key={hw.id} hw={hw} uid={user?.uid} onToggle={() => update(hw, { done: true })} onDelete={() => remove(hw)} onEdit={() => openEdit(hw)} />
+            <HomeworkRow key={hw.id} hw={hw} uid={user?.uid} onToggle={() => update(hw, { done: true })} subjectColor={subjectColor(hw.subject, subjects, customColors)} onDelete={() => deleteHomework(hw)} onEdit={() => openEdit(hw)} />
           ))}
         </AnimatePresence>
       </div>
@@ -106,7 +112,7 @@ export default function Hausaufgaben() {
           <div className="flex flex-col gap-2.5 opacity-50 md:grid md:grid-cols-2 md:gap-3">
             <AnimatePresence initial={false}>
               {done.map((hw) => (
-                <HomeworkRow key={hw.id} hw={hw} uid={user?.uid} done onToggle={() => update(hw, { done: false })} onDelete={() => remove(hw)} onEdit={() => openEdit(hw)} />
+                <HomeworkRow key={hw.id} hw={hw} uid={user?.uid} done onToggle={() => update(hw, { done: false })} subjectColor={subjectColor(hw.subject, subjects, customColors)} onDelete={() => deleteHomework(hw)} onEdit={() => openEdit(hw)} />
               ))}
             </AnimatePresence>
           </div>
@@ -115,6 +121,8 @@ export default function Hausaufgaben() {
     </PageTransition>
 
       <AnimatePresence>{showSaved && <SavedToast text="Hausaufgabe gespeichert" />}</AnimatePresence>
+
+      <ActionToast toast={toast} />
 
       <Fab onClick={openAdd} label="Hausaufgabe hinzufügen" />
 
@@ -220,7 +228,7 @@ function CheckSparks() {
   )
 }
 
-function HomeworkRow({ hw, uid, done, onToggle, onDelete, onEdit }) {
+function HomeworkRow({ hw, uid, done, subjectColor, onToggle, onDelete, onEdit }) {
   return (
     <motion.div
       layout
@@ -236,7 +244,7 @@ function HomeworkRow({ hw, uid, done, onToggle, onDelete, onEdit }) {
         whileTap={{ scale: 0.85 }}
         animate={done ? { scale: [1, 1.18, 1] } : { scale: 1 }}
         transition={{ duration: 0.32, ease: 'easeOut' }}
-        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+        className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors before:absolute before:-inset-3 before:content-[''] ${
           done ? 'border-[var(--color-accent)] bg-[var(--color-accent)]' : 'border-[var(--color-border)]'
         }`}
       >
@@ -268,7 +276,7 @@ function HomeworkRow({ hw, uid, done, onToggle, onDelete, onEdit }) {
         </AnimatePresence>
       </motion.button>
       <button type="button" onClick={onEdit} className="min-w-0 flex-1 text-left">
-        {hw.subject && <p className="text-xs font-semibold text-[var(--color-accent)]">{hw.subject}</p>}
+        {hw.subject && <p className="text-xs font-semibold text-[var(--color-accent)]" style={subjectColor && { color: subjectColor.bg }}>{hw.subject}</p>}
         {hw.shared && hw.addedBy !== uid && hw.addedByName && (
           <p className="text-[11px] text-[var(--color-ink-faint)]">von {hw.addedByName}</p>
         )}
@@ -280,7 +288,7 @@ function HomeworkRow({ hw, uid, done, onToggle, onDelete, onEdit }) {
       </button>
       <div className="flex items-center gap-2">
         <span className="text-xs text-[var(--color-ink-faint)]">{formatDate(hw.dueDate)}</span>
-        <button onClick={onDelete} aria-label="Löschen" className="text-[var(--color-ink-faint)]">
+        <button onClick={onDelete} aria-label="Löschen" className="-m-3.5 p-3.5 text-[var(--color-ink-faint)] active:text-[#ff6b81]">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="6" y1="6" x2="18" y2="18" />
             <line x1="6" y1="18" x2="18" y2="6" />

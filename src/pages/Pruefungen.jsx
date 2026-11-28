@@ -7,9 +7,12 @@ import { colorFor } from '../lib/constants'
 import { compressImage } from '../lib/imageCompress'
 import { buildIcs, openIcsImport } from '../lib/ics'
 import PageTransition from '../components/PageTransition'
+import PageTitle from '../components/PageTitle'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
 import SavedToast from '../components/SavedToast'
+import ActionToast from '../components/ActionToast'
+import { useFeedback } from '../lib/useFeedback'
 import EmptyState from '../components/EmptyState'
 import SwipeToDelete from '../components/SwipeToDelete'
 import Input from '../components/ui/Input'
@@ -19,7 +22,8 @@ const MAX_PHOTOS = 4
 
 export default function Pruefungen() {
   const { profile } = useAuth()
-  const { items, add, update, remove } = useTests()
+  const { items, add, update, remove, restore } = useTests()
+  const { toast, guard, removeWithUndo, fail } = useFeedback()
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [kind, setKind] = useState('test')
@@ -81,9 +85,9 @@ export default function Pruefungen() {
     e.preventDefault()
     if (!date) return
     if (editingId) {
-      await update(items.find((i) => i.id === editingId), { kind, subject, topic: topic.trim(), date, photos })
+      guard(update(items.find((i) => i.id === editingId), { kind, subject, topic: topic.trim(), date, photos }))
     } else {
-      await add({ kind, subject, topic: topic.trim(), date, photos })
+      guard(add({ kind, subject, topic: topic.trim(), date, photos }))
     }
     setKind('test')
     setSubject('')
@@ -104,7 +108,7 @@ export default function Pruefungen() {
       const done = await Promise.all(files.map((f) => compressImage(f)))
       setPhotos((p) => [...p, ...done].slice(0, MAX_PHOTOS))
     } catch {
-      // unreadable image — ignore
+      fail('Das Foto konnte nicht gelesen werden.')
     }
     setPhotoBusy(false)
   }
@@ -112,12 +116,12 @@ export default function Pruefungen() {
   return (
     <>
     <PageTransition>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-y-2 pr-28 md:pr-0">
-        <h1 className="font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Tests / Termine</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-y-2">
+        <PageTitle className="w-full md:w-auto">Tests / Termine</PageTitle>
         {items.length > 0 && (
           <button
             onClick={toggleSelectMode}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+            className={`rounded-full px-4 py-3 text-sm font-semibold transition-colors md:py-2 ${
               selectMode ? 'bg-[var(--color-accent)] text-black' : 'bg-[var(--color-surface-2)] text-[var(--color-ink-dim)]'
             }`}
           >
@@ -127,7 +131,7 @@ export default function Pruefungen() {
       </div>
 
       {items.length === 0 && (
-        <EmptyState className="mt-6" text="Keine anstehenden Tests oder Termine. Trag welche ein, sobald sie anstehen." />
+        <EmptyState className="mt-6" text="Keine anstehenden Tests oder Termine. Trag welche ein, sobald sie anstehen." actionLabel="Test oder Termin eintragen" onAction={openAdd} />
       )}
 
       <div className="flex flex-col gap-2.5 pb-20 md:grid md:grid-cols-2 md:gap-3 md:pb-0">
@@ -138,7 +142,7 @@ export default function Pruefungen() {
               test={t}
               subjects={subjects}
               customColors={customColors}
-              onDelete={() => remove(t)}
+              onDelete={() => removeWithUndo(t.kind === 'termin' ? 'Termin gelöscht' : 'Test gelöscht', () => remove(t), () => restore(t))}
               onEdit={() => openEdit(t)}
               onPhoto={setViewing}
               selectMode={selectMode}
@@ -168,6 +172,8 @@ export default function Pruefungen() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ActionToast toast={toast} />
 
       {!selectMode && <Fab onClick={openAdd} label="Test/Termin hinzufügen" />}
 
@@ -295,7 +301,7 @@ function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto, sele
           type="button"
           onClick={onToggleSelect}
           aria-label={selected ? 'Auswahl entfernen' : 'Auswählen'}
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+          className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors before:absolute before:-inset-3 before:content-[''] ${
             selected ? 'border-[var(--color-accent)] bg-[var(--color-accent)]' : 'border-[var(--color-border)]'
           }`}
         >
@@ -347,7 +353,7 @@ function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto, sele
           {daysLeft === 0 ? 'Heute' : daysLeft === 1 ? 'Morgen' : daysLeft > 0 ? `in ${daysLeft} Tagen` : 'vorbei'}
         </motion.span>
         {!selectMode && (
-          <button onClick={onDelete} aria-label="Löschen" className="text-[var(--color-ink-faint)]">
+          <button onClick={onDelete} aria-label="Löschen" className="-m-3.5 p-3.5 text-[var(--color-ink-faint)] active:text-[#ff6b81]">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="6" y1="6" x2="18" y2="18" />
               <line x1="6" y1="18" x2="18" y2="6" />

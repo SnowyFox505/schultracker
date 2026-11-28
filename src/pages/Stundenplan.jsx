@@ -8,14 +8,18 @@ import { DEFAULT_SCHOOL_START } from '../lib/periods'
 import { useSavedToast } from '../lib/useSavedToast'
 import { WEEKDAYS, PERIOD_NUMBERS, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
+import PageTitle from '../components/PageTitle'
+import EmptyState from '../components/EmptyState'
 import Sheet from '../components/Sheet'
 import SavedToast from '../components/SavedToast'
+import ActionToast from '../components/ActionToast'
+import { useFeedback } from '../lib/useFeedback'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 
 export default function Stundenplan() {
   const { profile, updateUserProfile } = useAuth()
-  const { lessons, setLesson, clearLesson } = useSchedule()
+  const { lessons, loading, setLesson, clearLesson } = useSchedule()
   const { breaks, setBreak, clearBreak } = useBreaks()
   const { periods } = usePeriods()
   const [editMode, setEditMode] = useState(false)
@@ -29,6 +33,7 @@ export default function Stundenplan() {
   const [startEditing, setStartEditing] = useState(false)
   const [startTime, setStartTime] = useState('')
   const [showSaved, triggerSaved] = useSavedToast()
+  const { toast, guard } = useFeedback()
 
   const subjects = profile?.subjects || []
   const customColors = profile?.customColors || []
@@ -45,18 +50,18 @@ export default function Stundenplan() {
     setActiveCell({ day, period })
   }
 
-  async function handleSave(e) {
+  function handleSave(e) {
     e.preventDefault()
     if (!activeCell) return
     if (!subject.trim()) {
-      await clearLesson(activeCell.day, activeCell.period)
+      guard(clearLesson(activeCell.day, activeCell.period))
     } else {
       const subjMeta = subjects.find((s) => s.name === subject)
-      await setLesson(activeCell.day, activeCell.period, {
+      guard(setLesson(activeCell.day, activeCell.period, {
         subject: subject.trim(),
         room: room.trim(),
         color: subjMeta?.color || 'orange',
-      })
+      }))
       triggerSaved()
     }
     setActiveCell(null)
@@ -69,22 +74,22 @@ export default function Stundenplan() {
     setActiveBreak(afterPeriod)
   }
 
-  async function handleSaveBreak(e) {
+  function handleSaveBreak(e) {
     e.preventDefault()
     if (!activeBreak) return
     const minutes = parseInt(breakDuration, 10)
     if (!minutes || minutes <= 0) {
-      await clearBreak(activeBreak)
+      guard(clearBreak(activeBreak))
     } else {
-      await setBreak(activeBreak, minutes)
+      guard(setBreak(activeBreak, minutes))
       triggerSaved()
     }
     setActiveBreak(null)
   }
 
-  async function handleRemoveBreak() {
+  function handleRemoveBreak() {
     if (!activeBreak) return
-    await clearBreak(activeBreak)
+    guard(clearBreak(activeBreak))
     setActiveBreak(null)
   }
 
@@ -94,22 +99,22 @@ export default function Stundenplan() {
     setActiveEndDay(day)
   }
 
-  async function handleSaveEnd(e) {
+  function handleSaveEnd(e) {
     e.preventDefault()
     if (!activeEndDay) return
     const next = { ...schoolEnd }
     if (endTime) next[activeEndDay] = endTime
     else delete next[activeEndDay]
-    await updateUserProfile({ schoolEnd: next })
+    guard(updateUserProfile({ schoolEnd: next }))
     triggerSaved()
     setActiveEndDay(null)
   }
 
-  async function handleRemoveEnd() {
+  function handleRemoveEnd() {
     if (!activeEndDay) return
     const next = { ...schoolEnd }
     delete next[activeEndDay]
-    await updateUserProfile({ schoolEnd: next })
+    guard(updateUserProfile({ schoolEnd: next }))
     setActiveEndDay(null)
   }
 
@@ -119,10 +124,10 @@ export default function Stundenplan() {
     setStartEditing(true)
   }
 
-  async function handleSaveStart(e) {
+  function handleSaveStart(e) {
     e.preventDefault()
     if (!startTime) return
-    await updateUserProfile({ schoolStart: startTime })
+    guard(updateUserProfile({ schoolStart: startTime }))
     triggerSaved()
     setStartEditing(false)
   }
@@ -130,17 +135,22 @@ export default function Stundenplan() {
   return (
     <PageTransition>
       <AnimatePresence>{showSaved && <SavedToast text="Gespeichert" />}</AnimatePresence>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-y-2 pr-28 md:pr-0">
-        <h1 className="font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Stundenplan</h1>
+      <ActionToast toast={toast} />
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-y-2">
+        <PageTitle className="w-full md:w-auto">Stundenplan</PageTitle>
         <button
           onClick={() => setEditMode((v) => !v)}
-          className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+          className={`rounded-full px-4 py-3 text-sm font-semibold transition-colors md:py-2 ${
             editMode ? 'bg-[var(--color-accent)] text-black' : 'bg-[var(--color-surface-2)] text-[var(--color-ink-dim)]'
           }`}
         >
           {editMode ? 'Fertig' : 'Bearbeiten'}
         </button>
       </div>
+
+      {!loading && !editMode && Object.keys(lessons).length === 0 && (
+        <EmptyState className="mb-3 !py-2" text="Dein Stundenplan ist noch leer." actionLabel="Stunden eintragen" onAction={() => setEditMode(true)} />
+      )}
 
       <button
         type="button"
@@ -175,7 +185,7 @@ export default function Stundenplan() {
                 <div className="flex flex-col items-center justify-center text-center text-xs font-semibold text-[var(--color-ink-faint)]">
                   <span>{period}</span>
                   {p && (
-                    <span className="text-[9px] font-normal leading-tight text-[var(--color-ink-faint)]/70 md:text-[10px]">
+                    <span className="text-[10px] font-normal leading-tight text-[var(--color-ink-faint)] md:text-[11px]">
                       {p.start}
                       <br />–{p.end}
                     </span>
@@ -236,7 +246,7 @@ export default function Stundenplan() {
                     className={`col-span-6 flex items-center justify-center gap-1.5 rounded-lg py-1 text-[11px] font-medium transition-colors ${
                       brk
                         ? 'text-[var(--color-ink-faint)]'
-                        : 'border border-dashed border-[var(--color-border)] text-[var(--color-ink-faint)]/50'
+                        : 'border border-dashed border-[var(--color-border)] text-[var(--color-ink-faint)]'
                     }`}
                   >
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">

@@ -336,7 +336,7 @@ function Dates({ project, editable, update, color, i }) {
           <span key={d.id} className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium" style={{ background: color.soft, color: color.bg }}>
             {d.title}: {formatDate(d.date)}
             {editable && (
-              <button type="button" onClick={() => save((project.dates || []).filter((x) => x.id !== d.id))} aria-label="Entfernen" className="text-base leading-none opacity-70">
+              <button type="button" onClick={() => save((project.dates || []).filter((x) => x.id !== d.id))} aria-label="Entfernen" className="text-[16px] leading-none opacity-70">
                 ×
               </button>
             )}

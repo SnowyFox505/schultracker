@@ -7,7 +7,7 @@ import { useTests } from '../lib/useTests'
 import { useHomework } from '../lib/useHomework'
 import { usePeriods } from '../lib/usePeriods'
 import { dueLabel, progress, useProjects } from '../lib/projects'
-import { PERIOD_NUMBERS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
+import { PERIOD_NUMBERS, JS_DAY_TO_WEEKDAY, WEEKDAY_LABELS, colorFor, subjectColor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Card from '../components/ui/Card'
 import { TaskIcon, ClockIcon, GridIcon } from '../components/navIcons'
@@ -37,6 +37,7 @@ function useNow() {
 export default function Home() {
   const { profile } = useAuth()
   const customColors = profile?.customColors || []
+  const subjects = profile?.subjects || []
   const { lessons, loading: scheduleLoading } = useSchedule()
   const { periods } = usePeriods()
   const periodRange = (period) => periods.find((p) => p.period === period)
@@ -84,21 +85,19 @@ export default function Home() {
   const todayEnd = todayKeyRaw && schoolEnd[todayKeyRaw]
   const dayOverByEnd = todayEnd ? nowMin >= toMin(todayEnd) : null
   const doneForToday = dayOverByEnd !== null ? dayOverByEnd : !nextTodayLesson && !currentLesson
-  const showTomorrow = doneForToday
-  const displayDate = showTomorrow ? new Date(now.getTime() + 86400000) : now
-  const heuteLabel = showTomorrow ? 'Morgen' : 'Heute'
-  const heuteKey = JS_DAY_TO_WEEKDAY[displayDate.getDay()]
-  const heuteLessons = heuteKey ? PERIOD_NUMBERS.map((period) => lessons[`${heuteKey}-${period}`]).filter(Boolean) : []
+  // Once today is over (or free), look ahead to the next day that has lessons — over the weekend
+  // that is Monday, which is exactly what you want to know then.
+  const nextSchoolDay = doneForToday ? findNextSchoolDay(now, lessons) : null
 
   const hero = nextTodayLesson
     ? { kind: 'next', lesson: nextTodayLesson }
     : currentLesson && !doneForToday
       ? { kind: 'current', lesson: currentLesson }
-      : showTomorrow && heuteLessons[0]
-        ? { kind: 'day', lesson: heuteLessons[0] }
+      : nextSchoolDay
+        ? { kind: 'day', lesson: nextSchoolDay.lesson, dayLabel: nextSchoolDay.label }
         : null
   // Nothing entered for the rest of today, but a Schulschluss override says we're not done yet.
-  const notOverYet = !hero && !showTomorrow && todayEnd
+  const notOverYet = !hero && !doneForToday && todayEnd
 
   const openHomework = homework.filter((h) => !h.done)
   const upcoming = [
@@ -107,6 +106,7 @@ export default function Home() {
       kind: 'homework',
       title: h.sketch?.length > 0 ? '✍️ Skizze' : h.title,
       subject: h.subject,
+      subjectName: h.subject,
       date: h.dueDate,
     })),
     ...tests.map((t) => ({
@@ -114,6 +114,7 @@ export default function Home() {
       kind: (t.kind || 'test') === 'termin' ? 'termin' : 'test',
       title: t.subject || 'Allgemein',
       subject: t.topic,
+      subjectName: t.subject,
       date: t.date,
     })),
     ...projects
@@ -122,14 +123,16 @@ export default function Home() {
   ]
     .filter((i) => daysUntil(i.date) >= 0 && daysUntil(i.date) <= 13) // nur die nächsten 2 Wochen
     .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 8)
 
+  // Counted before the feed is cut to 8 rows.
   const weekCount = upcoming.filter((i) => daysUntil(i.date) <= 6).length
+  // Past tests stay in the list, so skip them here.
+  const nextTest = realTests.find((t) => daysUntil(t.date) >= 0)
 
   return (
     <PageTransition>
-      <p className="text-base font-semibold text-[var(--color-ink-dim)] md:text-lg">{greeting()}</p>
-      <h1 className="mb-6 font-[var(--font-display)] text-4xl font-extrabold leading-tight md:mb-8 md:text-5xl">
+      <p className="pr-24 text-[16px] font-semibold text-[var(--color-ink-dim)] md:pr-0 md:text-lg">{greeting()}</p>
+      <h1 className="mb-6 break-words pr-24 font-[var(--font-display)] md:pr-0 text-4xl font-extrabold leading-tight md:mb-8 md:text-5xl">
         {profile?.name?.split(' ')[0] || 'Hey'}
       </h1>
 
@@ -137,8 +140,8 @@ export default function Home() {
         <div>
           <HeroCard
             hero={hero}
-            heuteLabel={heuteLabel}
-            weekend={!heuteKey}
+            periodRange={periodRange}
+            hasPlan={Object.keys(lessons).length > 0}
             notOverYet={notOverYet}
             todayEnd={todayEnd}
             customColors={customColors}
@@ -150,30 +153,41 @@ export default function Home() {
             <StatChip
               to="/pruefungen"
               i={1}
-              label="Nächster Test in"
-              value={realTests.length === 0 ? '—' : daysUntil(realTests[0]?.date) === 0 ? 'Heute' : `${daysUntil(realTests[0]?.date)}T`}
+              label="Nächster Test"
+              value={nextTest ? shortDue(daysUntil(nextTest.date)) : '—'}
             />
             <StatChip i={2} label="Fällig diese Woche" value={String(weekCount)} />
           </div>
         </div>
 
+        <div>
         <Section title="Steht an">
           {upcoming.length === 0 ? (
             <EmptyNote text="Nichts Dringendes in Sicht." />
           ) : (
             <div className="flex flex-col gap-2">
-              {upcoming.map((item, i) => (
-                <UpcomingRow key={item.id} item={item} i={i} />
+              {upcoming.slice(0, 8).map((item, i) => (
+                <UpcomingRow key={item.id} item={item} i={i} color={subjectColor(item.subjectName, subjects, customColors)} />
               ))}
             </div>
           )}
         </Section>
+
+        {/* mobile has no Projekte tab, so this is the way in */}
+        <Link
+          to="/projekte"
+          className="mt-4 flex items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3.5 text-[15px] font-semibold md:hidden"
+        >
+          Projekte
+          <span aria-hidden="true" className="text-[var(--color-ink-faint)]">›</span>
+        </Link>
+        </div>
       </div>
     </PageTransition>
   )
 }
 
-function HeroCard({ hero, heuteLabel, weekend, notOverYet, todayEnd, customColors, loading }) {
+function HeroCard({ hero, periodRange, hasPlan, notOverYet, todayEnd, customColors, loading }) {
   if (loading) {
     // The schedule hasn't arrived from Firestore yet (common for a moment right after opening the
     // app) — showing "kein Schultag"/"nichts mehr heute" here would be actively wrong whenever
@@ -194,40 +208,40 @@ function HeroCard({ hero, heuteLabel, weekend, notOverYet, todayEnd, customColor
     )
   }
   if (!hero) {
+    const empty = !hasPlan && !notOverYet
     const title = notOverYet
       ? 'Keine weiteren Stunden heute eingetragen'
-      : weekend
-        ? heuteLabel === 'Heute'
-          ? 'Kein Schultag heute'
-          : 'Kein Schultag morgen'
-        : heuteLabel === 'Heute'
-          ? 'Für heute nichts mehr'
-          : 'Noch keine Stunden für morgen'
+      : empty
+        ? 'Dein Stundenplan ist noch leer'
+        : 'Gerade steht nichts an'
     const sub = notOverYet
       ? `Laut deiner Einstellung hast du noch bis ${todayEnd} Uhr Schule.`
-      : weekend
-        ? 'Genieß die freie Zeit.'
-        : heuteLabel === 'Heute'
-          ? 'Der Unterricht ist für heute vorbei.'
-          : 'Im Stundenplan noch nichts eingetragen.'
+      : empty
+        ? 'Trag deine Stunden ein, dann siehst du hier die nächste.'
+        : 'Genieß die freie Zeit.'
+    const card = (
+      <Card className="!p-5">
+        <div className="flex items-center gap-2.5">
+          <span className="text-2xl">{notOverYet ? '⏳' : empty ? '🗓️' : '🎉'}</span>
+          <div>
+            <p className="text-[15px] font-semibold">{title}</p>
+            <p className="text-xs text-[var(--color-ink-faint)]">{sub}</p>
+            {empty && <p className="mt-2 text-sm font-semibold text-[var(--color-accent)]">Stundenplan eintragen</p>}
+          </div>
+        </div>
+      </Card>
+    )
     return (
       <motion.div {...flyIn(0)} className="mb-5">
-        <Card className="!p-5">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl">{notOverYet ? '⏳' : weekend ? '🎉' : '📭'}</span>
-            <div>
-              <p className="text-[15px] font-semibold">{title}</p>
-              <p className="text-xs text-[var(--color-ink-faint)]">{sub}</p>
-            </div>
-          </div>
-        </Card>
+        {empty ? <Link to="/stundenplan" className="block">{card}</Link> : card}
       </motion.div>
     )
   }
   const { kind, lesson } = hero
   const color = colorFor(lesson.color, customColors)
-  const label = kind === 'next' ? 'Nächste Stunde' : kind === 'current' ? 'Läuft gerade' : `${heuteLabel} als Erstes`
-  const sub = `${lesson.period}. Stunde${lesson.room ? ` · ${lesson.room}` : ''}`
+  const label = kind === 'next' ? 'Nächste Stunde' : kind === 'current' ? 'Läuft gerade' : `${hero.dayLabel} als Erstes`
+  const start = periodRange(lesson.period)?.start
+  const sub = [`${lesson.period}. Stunde`, start && `${start} Uhr`, lesson.room].filter(Boolean).join(' · ')
 
   return (
     <motion.div {...flyIn(0)} className="mb-5">
@@ -282,8 +296,9 @@ const KIND_META = {
   project: { icon: GridIcon, label: 'Projekt', bg: '#a78bfa', soft: '#a78bfa26' },
 }
 
-function UpcomingRow({ item, i }) {
-  const meta = KIND_META[item.kind]
+// Icon and label say what kind of entry it is, the colour says which subject.
+function UpcomingRow({ item, i, color }) {
+  const meta = { ...KIND_META[item.kind], ...(color && { bg: color.bg, soft: color.soft }) }
   const Icon = meta.icon
   const d = daysUntil(item.date)
   return (
@@ -300,7 +315,7 @@ function UpcomingRow({ item, i }) {
           {item.subject && <p className="truncate text-xs text-[var(--color-ink-faint)]">{item.subject}</p>}
         </div>
         <span className="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold" style={{ background: meta.soft, color: meta.bg }}>
-          {d === 0 ? 'Heute' : d === 1 ? 'Morgen' : `in ${d}T`}
+          {d > 1 ? `in ${d} Tagen` : shortDue(d)}
         </span>
       </Link>
     </motion.div>
@@ -329,6 +344,21 @@ function EmptyNote({ text }) {
       </div>
     </Card>
   )
+}
+
+function shortDue(days) {
+  return days === 0 ? 'Heute' : days === 1 ? 'Morgen' : `${days} Tage`
+}
+
+function findNextSchoolDay(now, lessons) {
+  for (let offset = 1; offset <= 7; offset++) {
+    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset)
+    const key = JS_DAY_TO_WEEKDAY[date.getDay()]
+    if (!key) continue
+    const period = PERIOD_NUMBERS.find((p) => lessons[`${key}-${p}`])
+    if (period) return { lesson: lessons[`${key}-${period}`], label: offset === 1 ? 'Morgen' : WEEKDAY_LABELS[key] }
+  }
+  return null
 }
 
 function greeting() {

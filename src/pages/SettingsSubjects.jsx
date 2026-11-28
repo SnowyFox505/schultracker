@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useSchedule } from '../lib/useSchedule'
@@ -8,11 +8,16 @@ import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import ColorPicker from '../components/ColorPicker'
+import ActionToast from '../components/ActionToast'
+import { useFeedback } from '../lib/useFeedback'
 
 export default function SettingsSubjects() {
   const { profile, updateUserProfile, addCustomColor, removeCustomColor, hidePresetColor } = useAuth()
   const { lessons, setLesson } = useSchedule()
   const subjects = profile?.subjects || []
+  const subjectsRef = useRef(subjects)
+  subjectsRef.current = subjects
+  const { toast, removeWithUndo } = useFeedback()
   const customColors = profile?.customColors || []
   const hiddenColors = profile?.hiddenColors || []
 
@@ -35,8 +40,15 @@ export default function SettingsSubjects() {
     setNewColor(nextColor.id)
   }
 
-  async function removeSubject(id) {
-    await updateUserProfile({ subjects: subjects.filter((s) => s.id !== id) })
+  function removeSubject(id) {
+    const index = subjects.findIndex((s) => s.id === id)
+    const removed = subjects[index]
+    removeWithUndo(
+      `${removed.name} gelöscht`,
+      () => updateUserProfile({ subjects: subjects.filter((s) => s.id !== id) }),
+      // re-insert into whatever the list looks like by then
+      () => updateUserProfile({ subjects: subjectsRef.current.toSpliced(index, 0, removed) })
+    )
   }
 
   function lessonsForSubject(name) {
@@ -72,6 +84,7 @@ export default function SettingsSubjects() {
 
   return (
     <SubPage title="Fächer und Farben">
+      <ActionToast toast={toast} />
       <Card className="!p-4">
           <div className="flex flex-col gap-2">
             <AnimatePresence initial={false}>
@@ -117,7 +130,7 @@ export default function SettingsSubjects() {
                           {s.name}
                         </button>
                       )}
-                      <button onClick={() => removeSubject(s.id)} className="text-[var(--color-ink-faint)]" aria-label="Löschen">
+                      <button onClick={() => removeSubject(s.id)} className="-m-3 p-3.5 text-[var(--color-ink-faint)] active:text-[#ff6b81]" aria-label="Löschen">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                           <line x1="6" y1="6" x2="18" y2="18" />
                           <line x1="6" y1="18" x2="18" y2="6" />

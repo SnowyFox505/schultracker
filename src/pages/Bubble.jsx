@@ -7,6 +7,7 @@ import { createBubble, joinBubble, leaveBubble, migrateHomework } from '../lib/b
 import { useCollection } from '../lib/useCollection'
 import { useAuth } from '../context/AuthContext'
 import PageTransition from '../components/PageTransition'
+import PageTitle from '../components/PageTitle'
 import Sheet from '../components/Sheet'
 import QrScanner from '../components/QrScanner'
 import BubbleOrb from '../components/BubbleOrb'
@@ -107,7 +108,7 @@ export default function Bubble() {
         )}
       </AnimatePresence>
     <PageTransition>
-      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Bubble</h1>
+      <PageTitle className="mb-6">Bubble</PageTitle>
 
       {bubbleId && bubble?.memberNames && <BubbleOrb names={Object.values(bubble.memberNames)} />}
 

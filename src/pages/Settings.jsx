@@ -4,6 +4,7 @@ import Shine, { flyIn } from '../components/Shine'
 import { ProjectIcon } from '../components/navIcons'
 import { useAuth } from '../context/AuthContext'
 import PageTransition from '../components/PageTransition'
+import PageTitle from '../components/PageTitle'
 import { BubbleIcon } from '../components/navIcons'
 
 const svg = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }
@@ -50,7 +51,7 @@ export default function Settings() {
 
   return (
     <PageTransition>
-      <h1 className="mb-6 pr-28 font-[var(--font-display)] text-3xl font-extrabold md:pr-0 md:text-4xl">Einstellungen</h1>
+      <PageTitle className="mb-6">Einstellungen</PageTitle>
 
       <motion.div
         {...flyIn(0)}

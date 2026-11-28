@@ -56,7 +56,7 @@ export default function AppLayout() {
         <BubbleIcon />
       </Link>
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto md:overflow-visible">
-        <div className="safe-top mx-auto w-full max-w-md px-5 pb-6 pt-6 md:max-w-3xl md:px-10 md:pb-16 md:pt-12 lg:max-w-5xl xl:max-w-6xl">
+        <div className="mx-auto w-full max-w-md px-5 pb-6 pt-[calc(env(safe-area-inset-top)+1.5rem)] md:max-w-3xl md:px-10 md:pb-16 md:pt-[calc(env(safe-area-inset-top)+3rem)] lg:max-w-5xl xl:max-w-6xl">
           <AnimatePresence mode="wait">
             <div key={location.pathname}>
               <Outlet />

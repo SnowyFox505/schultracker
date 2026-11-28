@@ -5,9 +5,12 @@ import { useCollection } from '../lib/useCollection'
 import { useSavedToast } from '../lib/useSavedToast'
 import { colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
+import PageTitle from '../components/PageTitle'
 import Fab from '../components/Fab'
 import Sheet from '../components/Sheet'
 import SavedToast from '../components/SavedToast'
+import ActionToast from '../components/ActionToast'
+import { useFeedback } from '../lib/useFeedback'
 import EmptyState from '../components/EmptyState'
 import SwipeToDelete from '../components/SwipeToDelete'
 import Button from '../components/ui/Button'
@@ -15,7 +18,8 @@ import SketchPad, { SketchThumbnail, strokesFromFirestore, strokesToFirestore } 
 
 export default function Notizen() {
   const { profile } = useAuth()
-  const { items, add, update, remove } = useCollection('notes', { order: 'createdAt', direction: 'desc' })
+  const { items, add, update, remove, restore } = useCollection('notes', { order: 'createdAt', direction: 'desc' })
+  const { toast, guard, removeWithUndo } = useFeedback()
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [text, setText] = useState('')
@@ -56,9 +60,9 @@ export default function Notizen() {
       subject: subject || null,
     }
     if (editingId) {
-      await update(editingId, data)
+      guard(update(editingId, data))
     } else {
-      await add(data)
+      guard(add(data))
     }
     setText('')
     setSketch([])
@@ -69,12 +73,14 @@ export default function Notizen() {
     triggerSaved()
   }
 
+  const deleteNote = (n) => removeWithUndo('Notiz gelöscht', () => remove(n.id), () => restore(n))
+
   return (
     <>
     <PageTransition>
-      <h1 className="mb-6 font-[var(--font-display)] text-3xl font-extrabold md:text-4xl">Notizen</h1>
+      <PageTitle className="mb-6">Notizen</PageTitle>
 
-      {items.length === 0 && <EmptyState className="mt-6" text="Noch keine Notizen. Leg direkt los." />}
+      {items.length === 0 && <EmptyState className="mt-6" text="Noch keine Notizen. Leg direkt los." actionLabel="Notiz schreiben" onAction={openAdd} />}
 
       <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-3 lg:grid-cols-4">
         <AnimatePresence initial={false}>
@@ -90,7 +96,7 @@ export default function Notizen() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 22, delay: i * 0.03 }}
               >
-              <SwipeToDelete onDelete={() => remove(n.id)}>
+              <SwipeToDelete onDelete={() => deleteNote(n)}>
                 <div
                   className="flex min-h-[110px] flex-col justify-between rounded-2xl border border-[var(--color-border)] p-4"
                   style={{ background: color ? color.soft : 'var(--color-surface)' }}
@@ -107,7 +113,7 @@ export default function Notizen() {
                       <p className="whitespace-pre-wrap text-sm">{n.text}</p>
                     )}
                   </button>
-                  <button onClick={() => remove(n.id)} className="mt-2 self-end text-[var(--color-ink-faint)]" aria-label="Löschen">
+                  <button onClick={() => deleteNote(n)} className="-mb-3.5 -mr-3.5 self-end p-[15px] text-[var(--color-ink-faint)] active:text-[#ff6b81]" aria-label="Löschen">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                       <line x1="6" y1="6" x2="18" y2="18" />
                       <line x1="6" y1="18" x2="18" y2="6" />
@@ -123,6 +129,8 @@ export default function Notizen() {
     </PageTransition>
 
       <AnimatePresence>{showSaved && <SavedToast text="Notiz gespeichert" />}</AnimatePresence>
+
+      <ActionToast toast={toast} />
 
       <Fab onClick={openAdd} label="Notiz hinzufügen" />
 

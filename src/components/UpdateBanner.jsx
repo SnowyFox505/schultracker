@@ -11,6 +11,13 @@ function seen(version) {
     return true // storage unavailable — better to stay quiet than nag every load
   }
 }
+function neverSeen() {
+  try {
+    return localStorage.getItem('seenRolloutVersion') === null
+  } catch {
+    return false
+  }
+}
 function markSeen(version) {
   try {
     localStorage.setItem('seenRolloutVersion', version)
@@ -28,7 +35,11 @@ export default function UpdateBanner() {
   const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
-    if (rollout?.version) setDismissed(seen(rollout.version))
+    if (!rollout?.version) return
+    // A device that has never recorded a release (new account, fresh install) has nothing to be told
+    // about an update it didn't experience.
+    if (rollout.version === __APP_VERSION__ && neverSeen()) markSeen(rollout.version)
+    setDismissed(seen(rollout.version))
   }, [rollout?.version])
 
   if (!rollout?.version || dismissed) return null

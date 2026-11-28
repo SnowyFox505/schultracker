@@ -103,5 +103,13 @@ export function useSharedList(name, { order, shareEnabled = true, viewEnabled = 
     return deleteDoc(doc(colFor(false), item.id))
   }
 
-  return { items, add, update, remove }
+  // Undo for remove(): shared entries were only hidden, private ones are written back under the same id.
+  async function restore(item) {
+    if (!user) return
+    if (item.shared) return setDoc(stateRef(item), { hidden: false }, { merge: true })
+    const { id, shared: _shared, ...data } = item
+    return setDoc(doc(colFor(false), id), { ...data, createdAt: data.createdAt ?? serverTimestamp() })
+  }
+
+  return { items, add, update, remove, restore }
 }

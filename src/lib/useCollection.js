@@ -8,6 +8,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
   updateDoc,
 } from 'firebase/firestore'
 import { db } from './firebase'
@@ -47,5 +48,11 @@ export function useCollection(name, { order = 'createdAt', direction = 'asc' } =
     return deleteDoc(doc(db, 'users', user.uid, name, id))
   }
 
-  return { items, loading, add, update, remove }
+  async function restore(item) {
+    if (!user) return
+    const { id, ...data } = item
+    return setDoc(doc(db, 'users', user.uid, name, id), { ...data, createdAt: data.createdAt ?? serverTimestamp() })
+  }
+
+  return { items, loading, add, update, remove, restore }
 }

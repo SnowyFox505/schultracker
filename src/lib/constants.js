@@ -29,6 +29,12 @@ export function colorFor(colorId, customColors = []) {
   )
 }
 
+// Colour of the user's subject with this name, or null ("Allgemein", deleted or unknown subject).
+export function subjectColor(name, subjects = [], customColors = []) {
+  const subject = subjects.find((s) => s.name === name)
+  return subject ? colorFor(subject.color, customColors) : null
+}
+
 export function makeCustomColor(hex) {
   const id = `custom-${hex.replace('#', '').toLowerCase()}`
   return { id, bg: hex, soft: `${hex}26` }

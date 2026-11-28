@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 
-export default function EmptyState({ text, className = '' }) {
+export default function EmptyState({ text, actionLabel, onAction, className = '' }) {
   return (
     <div className={`flex flex-col items-center gap-3 py-4 ${className}`}>
       <motion.div
@@ -9,6 +9,11 @@ export default function EmptyState({ text, className = '' }) {
         transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
       />
       <p className="text-center text-[var(--color-ink-faint)]">{text}</p>
+      {onAction && (
+        <button type="button" onClick={onAction} className="min-h-11 rounded-full bg-[var(--color-accent-soft)] px-5 text-sm font-semibold text-[var(--color-accent)] active:scale-95">
+          {actionLabel}
+        </button>
+      )}
     </div>
   )
 }

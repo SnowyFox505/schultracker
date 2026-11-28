@@ -1,6 +1,18 @@
 // Newest first. Add an entry (and bump package.json's version) with every production deploy.
 export const CHANGELOG = [
   {
+    version: '4.12.0',
+    date: '28.11.2026',
+    title: 'Design-Update',
+    items: [
+      'Jedes Fach hat jetzt auch auf Home und bei den Hausaufgaben seine eigene Farbe',
+      'Home zeigt die nächste Stunde auch übers Wochenende ("Montag als Erstes"), und "Nächster Test" zählt keine vergangenen Tests mehr mit',
+      'Versehentlich gelöscht? Jetzt gibt es "Rückgängig" — und die Lösch-Kreuze und Haken sind leichter zu treffen',
+      'Eingabe-Fenster lassen sich auch auf kleinen Displays scrollen und haben ein Schließen-Kreuz; Speichern hängt ohne Netz nicht mehr',
+      'Begrüßung wieder sichtbar, Überschriften aufgeräumt, und leere Seiten haben einen Knopf zum direkt Eintragen',
+    ],
+  },
+  {
     version: '4.11.1',
     date: '01.10.2026',
     title: 'Kalender-Export-Fix + wichtiger Hintergrund-Fix',

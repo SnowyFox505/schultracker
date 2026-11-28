@@ -135,7 +135,7 @@ Warmes Orange auf fast schwarzem, leicht bläulichem Grau.
 
 ### Fach- und Artfarben
 - `rose`, `violet`, `sky`, `mint`, `yellow`, `slate` sind zusammen mit den beiden Mandarinen die wählbaren Fächerfarben (`src/lib/constants.js`); Nutzer können eigene ergänzen. Die weiche Variante ist die Farbe mit angehängtem `26`.
-- `sky` kennzeichnet auf Home Tests und Termine, `violet` Projekte, Mandarine Hausaufgaben.
+- Einträge mit Fach tragen überall die Fachfarbe (Home, Hausaufgaben, Tests, Notizen); Icon und Wort sagen die Art. Ohne Fach gilt auf Home: Mandarine für Hausaufgaben, `sky` für Tests und Termine, `violet` für Projekte.
 - `rose` dient außerdem für Fehler, Löschen und „Gefahrenzone“.
 
 ### Named Rules
@@ -212,7 +212,10 @@ Es gibt immer eine Reaktion, modern, aber nie zu viel.
 - Icons: eigene Linien-SVGs, 22px, 2px Strich, runde Enden.
 
 ### Sheet
-Formulare kommen als Blatt von unten (Feder: damping 32, stiffness 320), schließbar über Hintergrund oder Ziehen am Griff.
+Formulare kommen als Blatt von unten (Feder: damping 32, stiffness 320), schließbar über Kreuz, Escape, Hintergrund oder Ziehen am Griff. Es ist nie höher als der Bildschirm; der Kopf bleibt stehen, der Inhalt scrollt.
+
+### Seitentitel und Rückmeldungen
+Seitentitel nutzen `PageTitle` (mobil Platz für die zwei runden Knöpfe, schrumpft auf kleinen Displays). Löschen zeigt `ActionToast` mit „Rückgängig“ (6s), Schreibfehler erscheinen dort ebenfalls. Tippflächen sind 44px, auch wenn das Zeichen kleiner ist.
 
 ### Bewegung
 - Alltag: Seitenwechsel 0.28s `cubic-bezier(0.22, 1, 0.36, 1)`; Federn für Pillen, Icons, gestaffeltes Einfliegen von Zeilen; Haken zeichnet sich mit Funken.

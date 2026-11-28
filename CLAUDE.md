@@ -84,6 +84,8 @@ Related, separate fix: the Stundenplan grid cells (inside a horizontally-scrolla
 
 ### Shared UI conventions
 
+- Writes from the UI are not awaited (a Firestore promise only resolves on server ack, so it hangs offline): pass them to `guard()` from `useFeedback()` and render `<ActionToast toast={toast} />`. Deletes go through `removeWithUndo()` with the list hook's `restore()`.
+- Page headings use `PageTitle`, which keeps clear of the floating mobile buttons. Don't use the `text-base` class: because of the `--color-base` token it also sets the text to the background colour.
 - `PageTransition` wraps each route's content for the fade/slide-in transition; pages compose it plus their own `Fab`/`Sheet`/toast as siblings (see any page in `src/pages/`).
 - `Sheet` is the bottom-sheet modal used for all "add X" forms. Besides tapping the backdrop, it can also be dismissed by dragging its top grab handle down (Framer Motion `dragControls` scoped to just that handle strip via `dragListener={false}` + `onPointerDown` → `dragControls.start(e)`, not the whole sheet, so it doesn't fight with scrolling or drawing inside the form) — closes past ~120px of drag or with enough release velocity, otherwise snaps back (`dragSnapToOrigin`).
 - `useSavedToast()` (`src/lib/useSavedToast.js`) + `<SavedToast />` is the standard "✓ gespeichert" confirmation after a write; call `trigger()` right after the Firestore write resolves. Used in Stundenplan/Hausaufgaben/Pruefungen/Notizen.

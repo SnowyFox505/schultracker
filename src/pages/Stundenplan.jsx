@@ -183,9 +183,10 @@ export default function Stundenplan() {
         )}
       </button>
 
-      <div ref={scroller} className="touch-pan-x touch-pan-y overflow-x-auto overscroll-x-contain pb-2">
+      <div className="rounded-3xl border border-white/[0.07] bg-[var(--color-surface)] p-2">
+      <div ref={scroller} className="touch-pan-x touch-pan-y overflow-x-auto overscroll-x-contain">
         <div className="relative grid min-w-[560px] grid-cols-[44px_repeat(5,1fr)] gap-1.5 md:min-w-0 md:grid-cols-[64px_repeat(5,1fr)] md:gap-2.5">
-          <div className="sticky left-0 z-10 rounded-xl bg-[var(--color-base)]" />
+          <div className="sticky left-0 z-10 bg-[var(--color-surface)] shadow-[0_0_0_4px_var(--color-surface)]" />
           {WEEKDAYS.map((d) => (
             <div
               key={d}
@@ -206,7 +207,7 @@ export default function Stundenplan() {
             return (
               <Fragment key={`p-${period}`}>
                 <div
-                  className={`sticky left-0 z-10 flex flex-col items-center justify-center rounded-xl bg-[var(--color-base)] text-center text-xs font-semibold ${
+                  className={`sticky left-0 z-10 flex flex-col items-center justify-center bg-[var(--color-surface)] shadow-[0_0_0_4px_var(--color-surface)] text-center text-xs font-semibold ${
                     today && isRunning(p) ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'
                   }`}
                 >
@@ -228,7 +229,7 @@ export default function Stundenplan() {
                       key={`${day}-${period}`}
                       onClick={() => openCell(day, period)}
                       whileTap={editMode ? { scale: 0.95 } : {}}
-                      animate={{ background: color ? color.soft : 'var(--color-surface)' }}
+                      animate={{ background: color ? color.soft : 'var(--color-surface-2)' }}
                       transition={{ duration: 0.35, ease: 'easeOut' }}
                       className={`touch-manipulation flex min-h-[56px] flex-col items-center justify-center rounded-2xl border p-1 text-center md:min-h-[72px] ${
                         editMode
@@ -296,6 +297,7 @@ export default function Stundenplan() {
             )
           })}
         </div>
+      </div>
       </div>
 
       {editMode && (

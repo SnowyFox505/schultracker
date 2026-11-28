@@ -10,10 +10,15 @@ import { dueLabel, progress, useProjects } from '../lib/projects'
 import { PERIOD_NUMBERS, JS_DAY_TO_WEEKDAY, WEEKDAY_LABELS, colorFor, subjectColor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import Card from '../components/ui/Card'
-import { TaskIcon, ClockIcon, GridIcon } from '../components/navIcons'
+import { TaskIcon, ClockIcon, GridIcon, ProjectIcon } from '../components/navIcons'
 import { flyIn } from '../components/Shine'
 
 const toMin = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
+
+// One look for every tile: lighter at the top, a hairline edge, gives way when pressed.
+const TILE =
+  'rounded-3xl border border-white/[0.07] bg-gradient-to-b from-[var(--color-surface-2)] to-[var(--color-surface)] shadow-[0_10px_24px_-16px_#000]'
+const PRESS = 'transition-transform duration-150 active:scale-[0.97]'
 
 // A `Date` that updates itself once a minute (aligned to the next minute boundary, then every 60s)
 // so time-dependent UI re-renders on its own instead of only when something else changes.
@@ -149,14 +154,15 @@ export default function Home() {
           />
 
           <div className="mb-7 grid grid-cols-3 gap-2.5 md:mb-0">
-            <StatChip to="/hausaufgaben" i={0} label="Hausaufgaben" value={String(openHomework.length)} />
+            <StatChip to="/hausaufgaben" i={0} icon={TaskIcon} label="Hausaufgaben" value={String(openHomework.length)} />
             <StatChip
               to="/pruefungen"
               i={1}
+              icon={ClockIcon}
               label="Nächster Test"
               value={nextTest ? shortDue(daysUntil(nextTest.date)) : '—'}
             />
-            <StatChip i={2} label="Fällig diese Woche" value={String(weekCount)} />
+            <StatChip i={2} icon={GridIcon} label="Diese Woche" value={String(weekCount)} />
           </div>
         </div>
 
@@ -165,9 +171,16 @@ export default function Home() {
           {upcoming.length === 0 ? (
             <EmptyNote text="Nichts Dringendes in Sicht." />
           ) : (
-            <div className="flex flex-col gap-2">
-              {upcoming.slice(0, 8).map((item, i) => (
-                <UpcomingRow key={item.id} item={item} i={i} color={subjectColor(item.subjectName, subjects, customColors)} />
+            <div className="grid grid-cols-2 gap-2.5">
+              {upcoming.slice(0, 8).map((item, i, shown) => (
+                <UpcomingTile
+                  key={item.id}
+                  item={item}
+                  i={i}
+                  // the most urgent one is wide; a leftover single tile fills its row too
+                  wide={i === 0 || (i === shown.length - 1 && shown.length % 2 === 0)}
+                  color={subjectColor(item.subjectName, subjects, customColors)}
+                />
               ))}
             </div>
           )}
@@ -176,9 +189,12 @@ export default function Home() {
         {/* mobile has no Projekte tab, so this is the way in */}
         <Link
           to="/projekte"
-          className="mt-4 flex items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3.5 text-[15px] font-semibold md:hidden"
+          className={`mt-2.5 flex items-center gap-3 p-3.5 text-[15px] font-semibold md:hidden ${TILE} ${PRESS}`}
         >
-          Projekte
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#a78bfa26] text-[#a78bfa]">
+            <ProjectIcon />
+          </span>
+          <span className="flex-1">Projekte</span>
           <span aria-hidden="true" className="text-[var(--color-ink-faint)]">›</span>
         </Link>
         </div>
@@ -240,25 +256,31 @@ function HeroCard({ hero, periodRange, hasPlan, notOverYet, todayEnd, customColo
   const { kind, lesson } = hero
   const color = colorFor(lesson.color, customColors)
   const label = kind === 'next' ? 'Nächste Stunde' : kind === 'current' ? 'Läuft gerade' : `${hero.dayLabel} als Erstes`
-  const start = periodRange(lesson.period)?.start
-  const sub = [`${lesson.period}. Stunde`, start && `${start} Uhr`, lesson.room].filter(Boolean).join(' · ')
+  const range = periodRange(lesson.period)
+  const facts = [range && `${range.start} – ${range.end}`, `${lesson.period}. Stunde`, lesson.room].filter(Boolean)
 
   return (
-    <motion.div {...flyIn(0)} className="mb-5">
-      <Link to="/stundenplan" className="block">
+    <motion.div {...flyIn(0)} className="mb-2.5">
+      <Link to="/stundenplan" className={`block ${PRESS}`}>
         <div
-          className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] p-5"
-          style={{ background: `linear-gradient(135deg, ${color.soft}, var(--color-surface))` }}
+          className="rounded-[28px] border border-white/[0.09] p-5 shadow-[0_16px_32px_-20px_#000]"
+          style={{ background: `linear-gradient(145deg, ${color.bg}40, ${color.bg}12 55%, var(--color-surface))` }}
         >
-          <p className="mb-2.5 text-xs font-semibold uppercase tracking-widest" style={{ color: color.bg }}>
-            {label}
-          </p>
-          <div className="flex items-center gap-3.5">
-            <span className="h-11 w-1.5 shrink-0 rounded-full" style={{ background: color.bg }} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-2xl font-extrabold leading-tight">{lesson.subject}</p>
-              <p className="mt-0.5 text-sm text-[var(--color-ink-faint)]">{sub}</p>
-            </div>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-semibold" style={{ color: color.bg }}>
+              {label}
+            </p>
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: color.bg, color: '#0a0a0f' }}>
+              <GridIcon />
+            </span>
+          </div>
+          <p className="mt-3 truncate text-[34px] font-extrabold leading-tight tracking-tight">{lesson.subject}</p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {facts.map((fact) => (
+              <span key={fact} className="rounded-full bg-black/30 px-3 py-1 text-[13px] font-medium tabular-nums text-[var(--color-ink-dim)]">
+                {fact}
+              </span>
+            ))}
           </div>
         </div>
       </Link>
@@ -266,23 +288,25 @@ function HeroCard({ hero, periodRange, hasPlan, notOverYet, todayEnd, customColo
   )
 }
 
-function StatChip({ to, label, value, i }) {
+function StatChip({ to, label, value, icon: Icon, i }) {
+  const box = `flex h-full flex-col p-2.5 min-[360px]:p-3 ${TILE}`
   const inner = (
     <>
-      <span className="font-[var(--font-display)] text-xl font-extrabold text-[var(--color-accent)]">{value}</span>
-      <span className="text-[11px] leading-tight text-[var(--color-ink-faint)]">{label}</span>
+      <span className="text-[var(--color-ink-faint)]">
+        <Icon />
+      </span>
+      <span className="mt-3 whitespace-nowrap text-[18px] min-[360px]:text-[22px] font-extrabold leading-none tabular-nums text-[var(--color-accent)]">{value}</span>
+      <span className="mt-1.5 text-[11px] leading-tight text-[var(--color-ink-faint)]">{label}</span>
     </>
   )
   return (
     <motion.div {...flyIn(i, 0.15)}>
       {to ? (
-        <Link to={to} className="flex flex-col items-center gap-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-3.5 text-center">
+        <Link to={to} className={`${box} ${PRESS}`}>
           {inner}
         </Link>
       ) : (
-        <div className="flex flex-col items-center gap-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-3.5 text-center">
-          {inner}
-        </div>
+        <div className={box}>{inner}</div>
       )}
     </motion.div>
   )
@@ -297,26 +321,26 @@ const KIND_META = {
 }
 
 // Icon and label say what kind of entry it is, the colour says which subject.
-function UpcomingRow({ item, i, color }) {
+function UpcomingTile({ item, i, wide, color }) {
   const meta = { ...KIND_META[item.kind], ...(color && { bg: color.bg, soft: color.soft }) }
   const Icon = meta.icon
   const d = daysUntil(item.date)
   return (
-    <motion.div {...flyIn(i, 0.3)}>
-      <Link to={item.to || meta.to} className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: meta.soft, color: meta.bg }}>
-          <Icon />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: meta.bg }}>
-            {meta.label}
-          </p>
-          <p className="truncate text-[15px] font-semibold leading-tight">{item.title}</p>
-          {item.subject && <p className="truncate text-xs text-[var(--color-ink-faint)]">{item.subject}</p>}
+    <motion.div {...flyIn(i, 0.3)} className={wide ? 'col-span-2 min-w-0' : 'min-w-0'}>
+      <Link to={item.to || meta.to} className={`flex h-full flex-col p-3.5 ${TILE} ${PRESS}`}>
+        <div className="flex items-start justify-between gap-2">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: meta.soft, color: meta.bg }}>
+            <Icon />
+          </span>
+          <span className="whitespace-nowrap rounded-full px-2 py-1 text-xs font-semibold" style={{ background: meta.soft, color: meta.bg }}>
+            {d > 1 && wide ? `in ${d} Tagen` : shortDue(d)}
+          </span>
         </div>
-        <span className="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold" style={{ background: meta.soft, color: meta.bg }}>
-          {d > 1 ? `in ${d} Tagen` : shortDue(d)}
-        </span>
+        <p lang="de" className={`mt-3 line-clamp-2 hyphens-auto break-words font-semibold leading-snug ${wide ? 'text-[17px]' : 'text-[15px]'}`}>{item.title}</p>
+        {item.subject && <p className="mt-0.5 truncate text-xs text-[var(--color-ink-faint)]">{item.subject}</p>}
+        <p className="mt-auto pt-2 text-[11px] font-semibold" style={{ color: meta.bg }}>
+          {meta.label}
+        </p>
       </Link>
     </motion.div>
   )

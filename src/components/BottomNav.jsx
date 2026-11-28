@@ -14,7 +14,7 @@ export default function BottomNav() {
                   {isActive && (
                     <motion.div
                       layoutId="nav-pill-mobile"
-                      className="absolute inset-x-2 -top-1 bottom-0 rounded-2xl bg-[var(--color-surface-2)]"
+                      className="absolute inset-x-2 -top-1 bottom-0 rounded-2xl bg-[var(--color-accent-soft)]"
                       transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                     />
                   )}
@@ -29,7 +29,7 @@ export default function BottomNav() {
                   </motion.span>
                   <span
                     className={`relative z-10 text-center text-[11px] font-medium leading-tight ${
-                      isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-faint)]'
+                      isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'
                     }`}
                   >
                     {label}

@@ -47,7 +47,7 @@ export default function SettingsAccount() {
 
         <div className="mt-8">
         <h2 className="mb-3 text-lg font-bold text-[#ff6b81]">Gefahrenzone</h2>
-        <Card className="!p-4 border-[#ff6b8140]">
+        <Card className="!p-4 !border-[#ff6b8140]">
           <p className="mb-4 text-sm text-[var(--color-ink-dim)]">
             Löscht deinen Account und alle Daten (Stundenplan, Hausaufgaben, Notizen, Tests) unwiderruflich.
           </p>

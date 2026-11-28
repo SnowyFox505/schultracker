@@ -43,7 +43,7 @@ export default function Sheet({ open, onClose, title, children }) {
             aria-modal="true"
             aria-label={title}
             // Never taller than the screen: the header stays put, only the body scrolls.
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[calc(var(--app-height,100dvh)-env(safe-area-inset-top)-0.75rem)] max-w-md flex-col rounded-t-[28px] border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+            className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[calc(var(--app-height,100dvh)-env(safe-area-inset-top)-0.75rem)] max-w-md flex-col rounded-t-[32px] border-t border-white/[0.09] bg-[var(--color-surface)] bg-gradient-to-b from-[var(--color-surface-2)] to-[var(--color-surface)] to-40%"
           >
             <div
               onPointerDown={(e) => dragControls.start(e)}

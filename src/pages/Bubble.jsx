@@ -16,6 +16,7 @@ import BubbleFx from '../components/BubbleFx'
 import { AnimatePresence, motion } from 'framer-motion'
 import Shine, { flyIn } from '../components/Shine'
 import Card from '../components/ui/Card'
+import { TILE } from '../lib/tile'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 
@@ -114,7 +115,7 @@ export default function Bubble() {
 
       {bubbleId ? (
         <section>
-          <motion.div {...flyIn(0)} className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center">
+          <motion.div {...flyIn(0)} className={`relative overflow-hidden p-5 text-center ${TILE}`}>
             <Shine delay={0.8} />
             <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">Dein Bubble-Code</p>
             <p className="my-2 font-[var(--font-display)] text-4xl font-extrabold tracking-[0.3em] text-[var(--color-accent)]">{bubbleId}</p>
@@ -133,7 +134,7 @@ export default function Bubble() {
             <button
               type="button"
               onClick={() => setAskMigrate(true)}
-              className="mt-3 flex w-full items-center gap-3.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 text-left transition-transform active:scale-[0.985]"
+              className={`mt-3 flex w-full items-center gap-3.5 p-3.5 text-left transition-transform active:scale-[0.985] ${TILE}`}
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-soft)] text-lg">📚</span>
               <span className="min-w-0 flex-1">

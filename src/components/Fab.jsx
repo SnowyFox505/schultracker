@@ -18,7 +18,7 @@ export default function Fab({ onClick, label = 'Hinzufügen' }) {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       aria-label={label}
-      className="fixed bottom-24 right-5 z-30 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-2)] text-black shadow-xl shadow-orange-900/40"
+      className="fixed bottom-24 right-5 z-30 flex h-14 w-14 items-center justify-center overflow-hidden rounded-[20px] bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-2)] text-black shadow-xl shadow-orange-900/40"
     >
       <AnimatePresence>
         {ripples.map((id) => (

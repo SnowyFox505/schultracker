@@ -12,6 +12,7 @@ import EmptyState from '../components/EmptyState'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 import { flyIn } from '../components/Shine'
+import { TILE, PRESS } from '../lib/tile'
 
 export const EMOJIS = ['🎬', '📊', '📚', '🧪', '🎨', '💻', '🌍', '✏️', '🎵', '🏃']
 
@@ -132,14 +133,15 @@ function ProjectCard({ p, i, uid, customColors }) {
     <motion.div {...flyIn(i)}>
       <Link
         to={`/projekte/${p.id}`}
-        className="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-transform active:scale-[0.985]"
+        className={`block p-4 ${TILE} ${PRESS}`}
+        style={{ backgroundImage: `linear-gradient(145deg, ${color.bg}2e, transparent 60%), linear-gradient(var(--color-surface), var(--color-surface))` }}
       >
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-2xl" style={{ background: color.soft }}>
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-3xl" style={{ background: color.soft }}>
             {p.emoji || '📁'}
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[15px] font-semibold">{p.name}</span>
+            <span className="block truncate text-[17px] font-bold">{p.name}</span>
             <span className="block truncate text-xs text-[var(--color-ink-faint)]">
               {p.archived ? `Archiv, von ${p.archivedFrom || 'jemandem'}` : dueLabel(p.dueDate)}
               {!p.archived && p.shared && (foreign ? ` · von ${p.ownerName}` : ' · geteilt')}
@@ -148,7 +150,7 @@ function ProjectCard({ p, i, uid, customColors }) {
         </div>
         {total > 0 && (
           <>
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--color-surface-2)]">
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/40">
               <motion.div
                 className="h-full rounded-full"
                 style={{ background: color.bg }}

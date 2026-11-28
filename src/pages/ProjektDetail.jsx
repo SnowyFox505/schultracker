@@ -11,6 +11,7 @@ import PageTransition from '../components/PageTransition'
 import Sheet from '../components/Sheet'
 import Button from '../components/ui/Button'
 import { flyIn } from '../components/Shine'
+import { TILE } from '../lib/tile'
 
 const newId = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()))
 
@@ -89,12 +90,16 @@ export default function ProjektDetail() {
     <PageTransition>
       <BackLink />
 
-      <motion.div {...flyIn(0)} className="mb-5 flex items-start gap-3.5 pr-24 md:pr-0">
+      <motion.div
+        {...flyIn(0)}
+        className="mt-2 mb-4 flex items-center gap-3.5 rounded-[28px] border border-white/[0.09] p-5"
+        style={{ background: `linear-gradient(145deg, ${color.bg}40, ${color.bg}12 55%, var(--color-surface))` }}
+      >
         <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-3xl" style={{ background: color.soft }}>
           {project.emoji || '📁'}
         </span>
         <div className="min-w-0 flex-1">
-          <h1 className="font-[var(--font-display)] text-2xl font-extrabold leading-tight md:text-3xl">{project.name}</h1>
+          <h1 className="break-words text-2xl font-extrabold leading-tight md:text-3xl">{project.name}</h1>
           <p className="mt-0.5 text-sm text-[var(--color-ink-faint)]">
             {project.archived ? `Archiv, von ${project.archivedFrom || 'jemandem'}, nur lesen` : dueLabel(project.dueDate)}
             {!project.archived && project.shared && !isOwner && ` · von ${project.ownerName}`}
@@ -241,7 +246,7 @@ function BackLink() {
 
 function Block({ title, i = 0, children }) {
   return (
-    <motion.section {...flyIn(i)} className="mb-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+    <motion.section {...flyIn(i)} className={`mb-3 p-4 ${TILE}`}>
       <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">{title}</h2>
       {children}
     </motion.section>

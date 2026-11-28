@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useHomework } from '../lib/useHomework'
 import { useSchedule } from '../lib/useSchedule'
 import { useSavedToast } from '../lib/useSavedToast'
+import { TILE } from '../lib/tile'
 import { PERIOD_NUMBERS, JS_DAY_TO_WEEKDAY, colorFor, subjectColor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import PageTitle from '../components/PageTitle'
@@ -236,16 +237,16 @@ function HomeworkRow({ hw, uid, done, subjectColor, onToggle, onDelete, onEdit }
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
     >
-    <SwipeToDelete onDelete={onDelete}>
-    <div className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+    <SwipeToDelete onDelete={onDelete} className="!rounded-3xl h-full">
+    <div className={`flex h-full items-center gap-3.5 p-4 ${TILE}`}>
       <motion.button
         onClick={onToggle}
         aria-label="Erledigt umschalten"
         whileTap={{ scale: 0.85 }}
         animate={done ? { scale: [1, 1.18, 1] } : { scale: 1 }}
         transition={{ duration: 0.32, ease: 'easeOut' }}
-        className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors before:absolute before:-inset-3 before:content-[''] ${
-          done ? 'border-[var(--color-accent)] bg-[var(--color-accent)]' : 'border-[var(--color-border)]'
+        className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-colors before:absolute before:-inset-3 before:content-[''] ${
+          done ? 'border-[var(--color-accent)] bg-[var(--color-accent)]' : 'border-[var(--color-ink-faint)]'
         }`}
       >
         <AnimatePresence>
@@ -276,18 +277,27 @@ function HomeworkRow({ hw, uid, done, subjectColor, onToggle, onDelete, onEdit }
         </AnimatePresence>
       </motion.button>
       <button type="button" onClick={onEdit} className="min-w-0 flex-1 text-left">
-        {hw.subject && <p className="text-xs font-semibold text-[var(--color-accent)]" style={subjectColor && { color: subjectColor.bg }}>{hw.subject}</p>}
+        {hw.subject && (
+          <span
+            className="mb-1.5 inline-block max-w-full truncate rounded-full bg-[var(--color-accent-soft)] px-2.5 py-0.5 text-xs font-semibold text-[var(--color-accent)]"
+            style={subjectColor && { background: subjectColor.soft, color: subjectColor.bg }}
+          >
+            {hw.subject}
+          </span>
+        )}
         {hw.shared && hw.addedBy !== uid && hw.addedByName && (
           <p className="text-[11px] text-[var(--color-ink-faint)]">von {hw.addedByName}</p>
         )}
         {hw.sketch && hw.sketch.length > 0 ? (
           <SketchThumbnail strokes={strokesFromFirestore(hw.sketch)} className={`h-8 w-24 ${done ? 'opacity-50' : ''}`} />
         ) : (
-          <p className={`truncate text-[15px] ${done ? 'line-through text-[var(--color-ink-faint)]' : ''}`}>{hw.title}</p>
+          <p lang="de" className={`line-clamp-2 hyphens-auto break-words text-[16px] font-semibold leading-snug ${done ? 'line-through text-[var(--color-ink-faint)]' : ''}`}>{hw.title}</p>
         )}
       </button>
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-[var(--color-ink-faint)]">{formatDate(hw.dueDate)}</span>
+      <div className="flex shrink-0 flex-col items-end justify-between gap-3 self-stretch">
+        <span className="whitespace-nowrap rounded-full bg-black/30 px-2.5 py-1 text-xs font-semibold tabular-nums text-[var(--color-ink-dim)]">
+          {formatDate(hw.dueDate)}
+        </span>
         <button onClick={onDelete} aria-label="Löschen" className="-m-3.5 p-3.5 text-[var(--color-ink-faint)] active:text-[#ff6b81]">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="6" y1="6" x2="18" y2="18" />

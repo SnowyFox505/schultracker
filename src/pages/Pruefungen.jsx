@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useTests } from '../lib/useTests'
 import { useSavedToast } from '../lib/useSavedToast'
 import { colorFor } from '../lib/constants'
+import { TILE } from '../lib/tile'
 import { compressImage } from '../lib/imageCompress'
 import { buildIcs, openIcsImport } from '../lib/ics'
 import PageTransition from '../components/PageTransition'
@@ -295,7 +296,10 @@ function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto, sele
   const urgent = daysLeft === 0 || daysLeft === 1
 
   const row = (
-    <div className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+    <div
+      className={`flex h-full items-center gap-3.5 p-4 ${TILE}`}
+      style={{ backgroundImage: `linear-gradient(145deg, ${color.bg}26, transparent 60%), linear-gradient(var(--color-surface), var(--color-surface))` }}
+    >
       {selectMode && (
         <button
           type="button"
@@ -312,20 +316,20 @@ function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto, sele
           )}
         </button>
       )}
-      <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl" style={{ background: color.soft }}>
-        <span className="text-[10px] font-semibold uppercase" style={{ color: color.bg }}>
+      <div className="flex h-16 w-14 shrink-0 flex-col items-center justify-center rounded-2xl" style={{ background: color.bg, color: '#0a0a0f' }}>
+        <span className="text-[11px] font-bold uppercase">
           {monthShort(test.date)}
         </span>
-        <span className="text-base font-bold" style={{ color: color.bg }}>
+        <span className="text-2xl font-extrabold leading-none tabular-nums">
           {dayOfMonth(test.date)}
         </span>
       </div>
       <button type="button" onClick={selectMode ? onToggleSelect : onEdit} className="min-w-0 flex-1 text-left">
-        <p className="text-[15px] font-semibold">
+        <p className="text-[17px] font-bold leading-snug">
           {test.subject || 'Allgemein'}
           {test.kind === 'termin' && <span className="ml-1.5 text-[11px] font-medium text-[var(--color-ink-faint)]">· Termin</span>}
         </p>
-        {test.topic && <p className="truncate text-sm text-[var(--color-ink-dim)]">{test.topic}</p>}
+        {test.topic && <p lang="de" className="line-clamp-2 hyphens-auto break-words text-sm leading-snug text-[var(--color-ink-dim)]">{test.topic}</p>}
         {test.photos?.length > 0 && (
           <div className="mt-1.5 flex gap-1.5" onClick={(e) => e.stopPropagation()}>
             {test.photos.map((src, i) => (
@@ -371,7 +375,7 @@ function TestRow({ test, subjects, customColors, onDelete, onEdit, onPhoto, sele
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
     >
-      {selectMode ? row : <SwipeToDelete onDelete={onDelete}>{row}</SwipeToDelete>}
+      {selectMode ? row : <SwipeToDelete onDelete={onDelete} className="!rounded-3xl h-full">{row}</SwipeToDelete>}
     </motion.div>
   )
 }

@@ -15,6 +15,10 @@ import { useSpinNavigate } from '../lib/useSpinNavigate'
 
 export default function AppLayout() {
   const location = useLocation()
+  // Remembering *which* page is scrolled resets this by itself on navigation.
+  const [scrolledPath, setScrolledPath] = useState(null)
+  const scrolled = scrolledPath === location.pathname
+  const floating = `transition-all duration-200 ${scrolled ? 'invisible -translate-y-3 opacity-0' : ''}`
   const { profile, justOnboarded, clearJustOnboarded, logoutFlow, cancelLogout, beginLogout, logout } = useAuth()
   const { spinning, trigger } = useSpinNavigate('/einstellungen')
   const [justUpdated, setJustUpdated] = useState(() => {
@@ -40,14 +44,14 @@ export default function AppLayout() {
         href="/einstellungen"
         onClick={trigger}
         aria-label="Einstellungen"
-        className="fixed right-5 top-[calc(env(safe-area-inset-top)+1.25rem)] z-30 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface)]/80 text-[var(--color-ink-dim)] backdrop-blur-xl md:hidden"
+        className={`fixed right-5 top-[calc(env(safe-area-inset-top)+1.25rem)] z-30 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface)]/80 text-[var(--color-ink-dim)] backdrop-blur-xl md:hidden ${floating}`}
       >
         <SettingsIcon spinning={spinning} />
       </a>
       <Link
         to="/bubble"
         aria-label="Bubble"
-        className={`fixed right-[4.5rem] top-[calc(env(safe-area-inset-top)+1.25rem)] z-30 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-xl md:hidden ${
+        className={`fixed right-[4.5rem] top-[calc(env(safe-area-inset-top)+1.25rem)] z-30 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-xl md:hidden ${floating} ${
           location.pathname === '/bubble'
             ? 'bg-[var(--color-accent)] text-black'
             : 'bg-[var(--color-surface)]/80 text-[var(--color-ink-dim)]'
@@ -55,7 +59,10 @@ export default function AppLayout() {
       >
         <BubbleIcon />
       </Link>
-      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto md:overflow-visible">
+      <div
+        onScroll={(e) => setScrolledPath(e.currentTarget.scrollTop > 24 ? location.pathname : null)}
+        className="flex min-w-0 flex-1 flex-col overflow-y-auto md:overflow-visible"
+      >
         <div className="mx-auto w-full max-w-md px-5 pb-6 pt-[calc(env(safe-area-inset-top)+1.5rem)] md:max-w-3xl md:px-10 md:pb-16 md:pt-[calc(env(safe-area-inset-top)+3rem)] lg:max-w-5xl xl:max-w-6xl">
           <AnimatePresence mode="wait">
             <div key={location.pathname}>

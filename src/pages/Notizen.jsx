@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useCollection } from '../lib/useCollection'
 import { useSavedToast } from '../lib/useSavedToast'
 import { colorFor } from '../lib/constants'
+import { TILE } from '../lib/tile'
 import PageTransition from '../components/PageTransition'
 import PageTitle from '../components/PageTitle'
 import Fab from '../components/Fab'
@@ -96,21 +97,21 @@ export default function Notizen() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 22, delay: i * 0.03 }}
               >
-              <SwipeToDelete onDelete={() => deleteNote(n)}>
+              <SwipeToDelete onDelete={() => deleteNote(n)} className="!rounded-3xl h-full">
                 <div
-                  className="flex min-h-[110px] flex-col justify-between rounded-2xl border border-[var(--color-border)] p-4"
-                  style={{ background: color ? color.soft : 'var(--color-surface)' }}
+                  className={`flex h-full min-h-[130px] flex-col justify-between p-4 ${TILE}`}
+                  style={color && { backgroundImage: `linear-gradient(145deg, ${color.bg}38, ${color.bg}0d 70%), linear-gradient(var(--color-surface), var(--color-surface))` }}
                 >
                   <button type="button" onClick={() => openEdit(n)} className="text-left">
                     {n.subject && (
-                      <p className="mb-1 text-xs font-semibold" style={{ color: color?.bg }}>
+                      <p className="mb-2 inline-block max-w-full truncate rounded-full bg-black/30 px-2.5 py-0.5 text-xs font-semibold" style={{ color: color?.bg }}>
                         {n.subject}
                       </p>
                     )}
                     {n.sketch && n.sketch.length > 0 ? (
                       <SketchThumbnail strokes={strokesFromFirestore(n.sketch)} className="h-14 w-full text-[var(--color-ink)]" />
                     ) : (
-                      <p className="whitespace-pre-wrap text-sm">{n.text}</p>
+                      <p className="whitespace-pre-wrap break-words text-[15px] leading-snug">{n.text}</p>
                     )}
                   </button>
                   <button onClick={() => deleteNote(n)} className="-mb-3.5 -mr-3.5 self-end p-[15px] text-[var(--color-ink-faint)] active:text-[#ff6b81]" aria-label="Löschen">

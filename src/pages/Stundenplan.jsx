@@ -1,4 +1,6 @@
-import { Fragment, useState } from 'react'
+import { TILE } from '../lib/tile'
+import { Fragment, useEffect, useRef, useState } from 'react'
+import { useNow } from '../lib/useNow'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { useSchedule } from '../lib/useSchedule'
@@ -6,7 +8,7 @@ import { useBreaks } from '../lib/useBreaks'
 import { usePeriods } from '../lib/usePeriods'
 import { DEFAULT_SCHOOL_START } from '../lib/periods'
 import { useSavedToast } from '../lib/useSavedToast'
-import { WEEKDAYS, PERIOD_NUMBERS, colorFor } from '../lib/constants'
+import { WEEKDAYS, PERIOD_NUMBERS, JS_DAY_TO_WEEKDAY, colorFor } from '../lib/constants'
 import PageTransition from '../components/PageTransition'
 import PageTitle from '../components/PageTitle'
 import EmptyState from '../components/EmptyState'
@@ -40,6 +42,20 @@ export default function Stundenplan() {
   const schoolEnd = profile?.schoolEnd || {}
   const schoolStart = profile?.schoolStart || DEFAULT_SCHOOL_START
   const periodByNum = Object.fromEntries(periods.map((p) => [p.period, p]))
+
+  // Today's column is marked, the running lesson too; on weekends nothing is.
+  const now = useNow()
+  const today = JS_DAY_TO_WEEKDAY[now.getDay()]
+  const nowMin = now.getHours() * 60 + now.getMinutes()
+  const isRunning = (p) => p && nowMin >= p.startMin && nowMin < p.endMin
+  // On a phone the week is wider than the screen: start with today in view.
+  const scroller = useRef(null)
+  const todayHead = useRef(null)
+  useEffect(() => {
+    if (loading || !scroller.current || !todayHead.current) return
+    // 50px = the period column that stays pinned on the left
+    scroller.current.scrollLeft = todayHead.current.offsetLeft - 50
+  }, [loading])
 
   function openCell(day, period) {
     if (!editMode) return
@@ -156,7 +172,7 @@ export default function Stundenplan() {
         type="button"
         onClick={openStartEdit}
         disabled={!editMode}
-        className="mb-4 flex w-full items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left"
+        className={`mb-4 flex w-full items-center justify-between px-4 py-3 text-left ${TILE}`}
       >
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--color-ink-faint)]">Schulstart</p>
@@ -167,11 +183,18 @@ export default function Stundenplan() {
         )}
       </button>
 
-      <div className="touch-pan-x touch-pan-y overflow-x-auto overscroll-x-contain pb-2">
-        <div className="grid min-w-[560px] grid-cols-[44px_repeat(5,1fr)] gap-1.5 md:min-w-0 md:grid-cols-[64px_repeat(5,1fr)] md:gap-2.5">
-          <div />
+      <div ref={scroller} className="touch-pan-x touch-pan-y overflow-x-auto overscroll-x-contain pb-2">
+        <div className="relative grid min-w-[560px] grid-cols-[44px_repeat(5,1fr)] gap-1.5 md:min-w-0 md:grid-cols-[64px_repeat(5,1fr)] md:gap-2.5">
+          <div className="sticky left-0 z-10 rounded-xl bg-[var(--color-base)]" />
           {WEEKDAYS.map((d) => (
-            <div key={d} className="pb-1 text-center text-xs font-semibold text-[var(--color-ink-faint)] md:text-sm">
+            <div
+              key={d}
+              ref={d === today ? todayHead : null}
+              aria-current={d === today ? 'date' : undefined}
+              className={`rounded-full py-1 text-center text-xs font-bold md:text-sm ${
+                d === today ? 'bg-[var(--color-accent)] text-black' : 'text-[var(--color-ink-faint)]'
+              }`}
+            >
               {d}
             </div>
           ))}
@@ -182,7 +205,11 @@ export default function Stundenplan() {
             const p = periodByNum[period]
             return (
               <Fragment key={`p-${period}`}>
-                <div className="flex flex-col items-center justify-center text-center text-xs font-semibold text-[var(--color-ink-faint)]">
+                <div
+                  className={`sticky left-0 z-10 flex flex-col items-center justify-center rounded-xl bg-[var(--color-base)] text-center text-xs font-semibold ${
+                    today && isRunning(p) ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'
+                  }`}
+                >
                   <span>{period}</span>
                   {p && (
                     <span className="text-[10px] font-normal leading-tight text-[var(--color-ink-faint)] md:text-[11px]">
@@ -194,6 +221,8 @@ export default function Stundenplan() {
                 {WEEKDAYS.map((day) => {
                   const lesson = lessons[`${day}-${period}`]
                   const color = lesson ? colorFor(lesson.color, customColors) : null
+                  const isToday = day === today
+                  const running = isToday && lesson && isRunning(p)
                   return (
                     <motion.button
                       key={`${day}-${period}`}
@@ -201,9 +230,15 @@ export default function Stundenplan() {
                       whileTap={editMode ? { scale: 0.95 } : {}}
                       animate={{ background: color ? color.soft : 'var(--color-surface)' }}
                       transition={{ duration: 0.35, ease: 'easeOut' }}
-                      className={`touch-manipulation flex min-h-[56px] flex-col items-center justify-center rounded-xl border p-1 text-center md:min-h-[72px] md:rounded-2xl ${
-                        editMode ? 'border-dashed border-[var(--color-border)]' : 'border-transparent'
-                      }`}
+                      className={`touch-manipulation flex min-h-[56px] flex-col items-center justify-center rounded-2xl border p-1 text-center md:min-h-[72px] ${
+                        editMode
+                          ? 'border-dashed border-[var(--color-border)]'
+                          : isToday
+                            ? 'border-[var(--color-accent)]/35'
+                            : lesson
+                              ? 'border-white/[0.09]'
+                              : 'border-white/[0.04]'
+                      } ${running ? '!border-2 !border-[var(--color-accent)]' : ''}`}
                     >
                       <AnimatePresence mode="wait" initial={false}>
                         {lesson ? (
@@ -222,6 +257,7 @@ export default function Stundenplan() {
                               {lesson.subject}
                             </span>
                             {lesson.room && <span className="text-[10px] text-[var(--color-ink-faint)] md:text-xs">{lesson.room}</span>}
+                            {running && <span className="mt-0.5 rounded-full bg-[var(--color-accent)] px-1.5 text-[10px] font-bold text-black">Jetzt</span>}
                           </motion.div>
                         ) : editMode ? (
                           <motion.span
@@ -280,7 +316,7 @@ export default function Stundenplan() {
                   type="button"
                   onClick={() => openEndEdit(day)}
                   disabled={!editMode}
-                  className={`flex flex-col items-center gap-0.5 rounded-xl border p-2 text-center ${
+                  className={`flex flex-col items-center gap-0.5 rounded-2xl border p-2 text-center ${
                     time ? 'border-transparent bg-[var(--color-accent-soft)]' : 'border-dashed border-[var(--color-border)]'
                   }`}
                 >

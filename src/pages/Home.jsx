@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useNow } from '../lib/useNow'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -12,32 +12,9 @@ import PageTransition from '../components/PageTransition'
 import Card from '../components/ui/Card'
 import { TaskIcon, ClockIcon, GridIcon, ProjectIcon } from '../components/navIcons'
 import { flyIn } from '../components/Shine'
+import { TILE, PRESS } from '../lib/tile'
 
 const toMin = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5))
-
-// One look for every tile: lighter at the top, a hairline edge, gives way when pressed.
-const TILE =
-  'rounded-3xl border border-white/[0.07] bg-gradient-to-b from-[var(--color-surface-2)] to-[var(--color-surface)] shadow-[0_10px_24px_-16px_#000]'
-const PRESS = 'transition-transform duration-150 active:scale-[0.97]'
-
-// A `Date` that updates itself once a minute (aligned to the next minute boundary, then every 60s)
-// so time-dependent UI re-renders on its own instead of only when something else changes.
-function useNow() {
-  const [now, setNow] = useState(() => new Date())
-  useEffect(() => {
-    let interval
-    const msToNextMinute = 60000 - (Date.now() % 60000)
-    const align = setTimeout(() => {
-      setNow(new Date())
-      interval = setInterval(() => setNow(new Date()), 60000)
-    }, msToNextMinute)
-    return () => {
-      clearTimeout(align)
-      clearInterval(interval)
-    }
-  }, [])
-  return now
-}
 
 export default function Home() {
   const { profile } = useAuth()

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { TILE } from '../lib/tile'
 import { useAuth } from '../context/AuthContext'
 import { importSchedule, migrateTests, shareSchedule, unshareSchedule } from '../lib/bubble'
 import { useBubbleSchedules } from '../lib/useBubbleSchedules'
@@ -141,7 +142,7 @@ export default function BubbleShare({ bubbleId }) {
           </Button>
         )}
         {otherSchedules.map((sc) => (
-          <div key={sc.uid} className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
+          <div key={sc.uid} className={`flex items-center justify-between gap-3 px-4 py-3 ${TILE}`}>
             <span className="min-w-0 truncate text-[15px] font-medium">Stundenplan von {sc.ownerName}</span>
             <Button variant="secondary" onClick={() => setImportTarget(sc)} className="shrink-0 px-4">
               Importieren
@@ -203,7 +204,7 @@ function ToggleRow({ icon, label, hint, on, onClick, disabled, i = 0 }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex w-full items-center gap-3.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 text-left transition-transform active:scale-[0.985] disabled:opacity-60"
+      className={`flex w-full items-center gap-3.5 p-3.5 text-left transition-transform active:scale-[0.985] disabled:opacity-60 ${TILE}`}
     >
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-soft)] text-lg">{icon}</span>
       <span className="min-w-0 flex-1">

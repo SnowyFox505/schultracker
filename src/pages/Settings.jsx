@@ -5,6 +5,7 @@ import { ProjectIcon } from '../components/navIcons'
 import { useAuth } from '../context/AuthContext'
 import PageTransition from '../components/PageTransition'
 import PageTitle from '../components/PageTitle'
+import { TILE, PRESS } from '../lib/tile'
 import { BubbleIcon } from '../components/navIcons'
 
 const svg = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }
@@ -55,7 +56,7 @@ export default function Settings() {
 
       <motion.div
         {...flyIn(0)}
-        className="relative mb-6 flex items-center gap-3.5 overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+        className={`relative mb-2.5 flex items-center gap-3.5 overflow-hidden p-4 ${TILE}`}
       >
         <Shine />
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-2)] text-lg font-extrabold text-black">
@@ -67,14 +68,14 @@ export default function Settings() {
         </div>
       </motion.div>
 
-      <div className="flex flex-col gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3">
         <Row i={0} to="/einstellungen/faecher" icon={<PaletteIcon />} title="Fächer und Farben" hint={`${subjectCount} ${subjectCount === 1 ? 'Fach' : 'Fächer'}`} />
-        <Row i={1} to="/einstellungen/benachrichtigungen" icon={<BellIcon />} title="Benachrichtigungen" hint={pushLabel} />
+        <Row i={1} to="/einstellungen/benachrichtigungen" icon={<BellIcon />} title={'Benach­richtigungen'} hint={pushLabel} />
         <Row i={2} to="/projekte" icon={<ProjectIcon />} title="Projekte" hint="Eigener Bereich pro Schulprojekt" />
         <Row i={3} to="/bubble" icon={<BubbleIcon />} title="Bubble" hint={bubbleLabel} />
         <Row i={4} to="/einstellungen/app" icon={<RefreshIcon />} title="App aktualisieren" hint="Neueste Version holen" />
         <Row i={5} to="/einstellungen/neuigkeiten" icon={<SparkIcon />} title="Was ist neu" hint={`Version ${__APP_VERSION__}`} />
-        <Row i={6} to="/einstellungen/account" icon={<UserIcon />} title="Account" hint="Abmelden, Konto löschen" />
+        <Row wide i={6} to="/einstellungen/account" icon={<UserIcon />} title="Account" hint="Abmelden, Konto löschen" />
       </div>
 
       <p className="mt-10 text-center text-xs text-[var(--color-ink-faint)]">Developer: Leopold N.</p>
@@ -83,23 +84,25 @@ export default function Settings() {
   )
 }
 
-function Row({ to, icon, title, hint, i = 0 }) {
+function Row({ to, icon, title, hint, wide, i = 0 }) {
   return (
-    <motion.div {...flyIn(i + 1)}>
+    <motion.div {...flyIn(i + 1)} className={wide ? 'col-span-2 min-w-0 md:col-span-3' : 'min-w-0'}>
     <Link
       to={to}
-      className="flex items-center gap-3.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3.5 transition-transform active:scale-[0.985]"
+      className={`flex h-full p-3.5 ${wide ? 'items-center gap-3.5' : 'flex-col'} ${TILE} ${PRESS}`}
     >
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
         {icon}
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[15px] font-semibold">{title}</span>
-        <span className="block truncate text-xs text-[var(--color-ink-faint)]">{hint}</span>
+      <span lang="de" className={`min-w-0 ${wide ? 'flex-1' : 'mt-3'}`}>
+        <span className="block hyphens-auto break-words text-[15px] font-semibold leading-tight">{title}</span>
+        <span className="mt-1 block text-xs leading-snug text-[var(--color-ink-faint)]">{hint}</span>
       </span>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[var(--color-ink-faint)]">
-        <polyline points="9,5 16,12 9,19" />
-      </svg>
+      {wide && (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[var(--color-ink-faint)]">
+          <polyline points="9,5 16,12 9,19" />
+        </svg>
+      )}
     </Link>
     </motion.div>
   )

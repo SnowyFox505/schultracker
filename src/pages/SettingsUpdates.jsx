@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import SubPage from '../components/SubPage'
 import Button from '../components/ui/Button'
+import { TILE } from '../lib/tile'
 import { useAuth } from '../context/AuthContext'
 import { ADMIN_EMAIL, announceRelease, useRollout } from '../lib/rollout'
 import { CHANGELOG } from '../lib/changelog'
@@ -46,7 +47,7 @@ export default function SettingsUpdates() {
         {CHANGELOG.map((entry, i) => (
           <motion.div
             key={entry.version}
-            className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+            className={`relative overflow-hidden p-4 ${TILE}`}
             initial={{ opacity: 0, y: 34, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ type: 'spring', stiffness: 220, damping: 20, delay: Math.min(i, 5) * 0.09 }}
@@ -55,7 +56,7 @@ export default function SettingsUpdates() {
               <>
                 {/* the newest entry glows once, and a shine sweeps across it */}
                 <motion.span
-                  className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-[var(--color-accent)]"
+                  className="pointer-events-none absolute inset-0 rounded-3xl border-2 border-[var(--color-accent)]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: [0, 1, 0.5, 0] }}
                   transition={{ duration: 2.4, delay: 0.5, times: [0, 0.2, 0.6, 1] }}

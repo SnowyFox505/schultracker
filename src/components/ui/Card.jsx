@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion'
+import { TILE } from '../../lib/tile'
 
 export default function Card({ children, className = '', ...props }) {
   return (
     <motion.div
       layout
-      className={`rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 ${className}`}
+      className={`p-5 ${TILE} ${className}`}
       {...props}
     >
       {children}

@@ -1,5 +1,5 @@
 import { TILE } from '../lib/tile'
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useNow } from '../lib/useNow'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -48,14 +48,6 @@ export default function Stundenplan() {
   const today = JS_DAY_TO_WEEKDAY[now.getDay()]
   const nowMin = now.getHours() * 60 + now.getMinutes()
   const isRunning = (p) => p && nowMin >= p.startMin && nowMin < p.endMin
-  // On a phone the week is wider than the screen: start with today in view.
-  const scroller = useRef(null)
-  const todayHead = useRef(null)
-  useEffect(() => {
-    if (loading || !scroller.current || !todayHead.current) return
-    // 50px = the period column that stays pinned on the left
-    scroller.current.scrollLeft = todayHead.current.offsetLeft - 50
-  }, [loading])
 
   function openCell(day, period) {
     if (!editMode) return
@@ -183,14 +175,12 @@ export default function Stundenplan() {
         )}
       </button>
 
-      <div className="rounded-3xl border border-white/[0.07] bg-[var(--color-surface)] p-2">
-      <div ref={scroller} className="touch-pan-x touch-pan-y overflow-x-auto overscroll-x-contain">
-        <div className="relative grid min-w-[560px] grid-cols-[44px_repeat(5,1fr)] gap-1.5 md:min-w-0 md:grid-cols-[64px_repeat(5,1fr)] md:gap-2.5">
-          <div className="sticky left-0 z-10 bg-[var(--color-surface)] shadow-[0_0_0_4px_var(--color-surface)]" />
+      <div className="touch-pan-x touch-pan-y overflow-x-auto overscroll-x-contain pb-2">
+        <div className="grid min-w-[560px] grid-cols-[44px_repeat(5,1fr)] gap-1.5 md:min-w-0 md:grid-cols-[64px_repeat(5,1fr)] md:gap-2.5">
+          <div />
           {WEEKDAYS.map((d) => (
             <div
               key={d}
-              ref={d === today ? todayHead : null}
               aria-current={d === today ? 'date' : undefined}
               className={`rounded-full py-1 text-center text-xs font-bold md:text-sm ${
                 d === today ? 'bg-[var(--color-accent)] text-black' : 'text-[var(--color-ink-faint)]'
@@ -207,7 +197,7 @@ export default function Stundenplan() {
             return (
               <Fragment key={`p-${period}`}>
                 <div
-                  className={`sticky left-0 z-10 flex flex-col items-center justify-center bg-[var(--color-surface)] shadow-[0_0_0_4px_var(--color-surface)] text-center text-xs font-semibold ${
+                  className={`flex flex-col items-center justify-center text-center text-xs font-semibold ${
                     today && isRunning(p) ? 'text-[var(--color-accent)]' : 'text-[var(--color-ink-faint)]'
                   }`}
                 >
@@ -229,7 +219,7 @@ export default function Stundenplan() {
                       key={`${day}-${period}`}
                       onClick={() => openCell(day, period)}
                       whileTap={editMode ? { scale: 0.95 } : {}}
-                      animate={{ background: color ? color.soft : 'var(--color-surface-2)' }}
+                      animate={{ background: color ? color.soft : 'var(--color-surface)' }}
                       transition={{ duration: 0.35, ease: 'easeOut' }}
                       className={`touch-manipulation flex min-h-[56px] flex-col items-center justify-center rounded-2xl border p-1 text-center md:min-h-[72px] ${
                         editMode
@@ -297,7 +287,6 @@ export default function Stundenplan() {
             )
           })}
         </div>
-      </div>
       </div>
 
       {editMode && (

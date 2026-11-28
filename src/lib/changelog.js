@@ -11,7 +11,7 @@ export const CHANGELOG = [
       'Eingabe-Fenster lassen sich auch auf kleinen Displays scrollen und haben ein Schließen-Kreuz; Speichern hängt ohne Netz nicht mehr',
       'Begrüßung wieder sichtbar, Überschriften aufgeräumt, und leere Seiten haben einen Knopf zum direkt Eintragen',
       'Alle Seiten im neuen Kachel-Look',
-      'Stundenplan: der heutige Tag und die laufende Stunde sind markiert, und er startet direkt bei heute',
+      'Stundenplan: der heutige Tag und die laufende Stunde sind markiert',
       'Die runden Knöpfe oben verschwinden beim Scrollen; untere Leiste und Eingabe-Fenster aufgefrischt',
     ],
   },
